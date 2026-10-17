@@ -1,0 +1,9 @@
+# CGA Connect — tâches planifiées (à copier dans /etc/cron.d/cga-connect, propriétaire root).
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Planificateur Laravel, chaque minute : il lance les tâches du 02-TRD §11 à leurs horaires.
+* * * * * ${APP_USER} cd ${APP_DIR}/current/backend && ${PHP_BIN} artisan schedule:run >> /dev/null 2>&1
+
+# Sauvegarde de nuit (02-TRD §12.3), en attendant la tâche backup:run du planificateur (Lot 9).
+${BACKUP_CRON} root INFRA_ENV=/etc/cga-connect/infra.env ${APP_DIR}/current/infra/scripts/backup.sh >> ${LOG_DIR}/backup.log 2>&1

@@ -38,4 +38,37 @@ Pour viser une autre API en développement : variable `VITE_API_ORIGIN` (ex. `VI
 
 ## Démarrer le backend
 
-Les instructions arrivent avec les étapes 0.2 et 0.3 du plan.
+Poste local sans Docker (02-TRD §12.1), avec Laragon ou une installation directe :
+
+| Outil | Version | Remarque |
+|---|---|---|
+| PHP | 8.3 | Extensions `pdo_pgsql`, `pgsql`, `mbstring`, `intl`, `zip`, `gd`, `bcmath`, `fileinfo`, `openssl`, `curl` ; **PCOV** pour la couverture des tests |
+| PostgreSQL | 16 ou plus | Extensions `pg_trgm`, `unaccent`, `citext`, fournies avec PostgreSQL |
+| LibreOffice | 7.6 ou plus | Conversion PDF ; sous Windows, `LIBREOFFICE_BIN` vise `soffice.com` (programme console), pas `soffice.exe` |
+| Composer | 2 | |
+
+Créer les bases une fois, en tant que `postgres` :
+
+```sql
+ALTER ROLE cga_user CREATEDB;   -- ou CREATE ROLE cga_user LOGIN PASSWORD '…' CREATEDB;
+CREATE DATABASE cga_plateforme OWNER cga_user;
+CREATE DATABASE cga_plateforme_test OWNER cga_user;
+```
+
+```bash
+cd backend
+composer install
+cp .env.example .env        # renseigner DB_PASSWORD et LIBREOFFICE_BIN
+php artisan key:generate
+php artisan migrate
+php artisan serve           # http://localhost:8000 ; composer dev lance aussi un worker des files
+```
+
+Contrôle : `curl http://localhost:8000/api/health` répond 200 et `"status": "ok"` quand la base, les files d'attente, le disque de stockage et LibreOffice sont bons. Sinon, il répond 503 et nomme le contrôle en défaut avec un code (`unavailable`, `not_writable`, `low_space`) ; le détail technique n'est que dans `storage/logs/laravel.log`. Le disque est en défaut au-delà du paramètre `files.disk_alert_percent` (80 % d'occupation par défaut, `config/cga.php`).
+
+| Commande | Rôle |
+|---|---|
+| `composer test` | Tests sur PostgreSQL (base `cga_plateforme_test`) avec couverture ; échoue sous 80 % des lignes |
+| `vendor/bin/pint` | Mise en forme du code PHP |
+
+Le serveur de recette (Nginx, PHP-FPM, Supervisor, cron, déploiement, sauvegardes) : [`infra/README.md`](infra/README.md).

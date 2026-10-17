@@ -1,0 +1,10 @@
+# Passage d'une requête à Laravel (inclus par cga-connect.conf, à placer dans /etc/nginx/snippets/).
+# $realpath_root résout le lien current : après un déploiement, PHP charge la nouvelle version.
+root ${APP_DIR}/current/backend/public;
+include fastcgi_params;
+fastcgi_param SCRIPT_FILENAME $realpath_root/index.php;
+fastcgi_param DOCUMENT_ROOT $realpath_root;
+fastcgi_param SCRIPT_NAME /index.php;
+fastcgi_pass unix:${PHP_FPM_SOCK};
+fastcgi_read_timeout ${REQUEST_TIMEOUT_SECONDS}s;
+fastcgi_hide_header X-Powered-By;

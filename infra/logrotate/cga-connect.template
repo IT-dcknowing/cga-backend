@@ -1,0 +1,9 @@
+# CGA Connect — rotation des journaux des sauvegardes (à copier dans /etc/logrotate.d/cga-connect).
+# Les journaux des workers tournent par Supervisor ; ceux de Laravel par son canal « daily ».
+${LOG_DIR}/backup.log {
+    weekly
+    rotate ${BACKUP_LOG_ROTATE_WEEKS}
+    compress
+    missingok
+    notifempty
+}

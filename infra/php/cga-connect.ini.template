@@ -1,0 +1,11 @@
+; CGA Connect — réglages PHP communs à PHP-FPM et à la ligne de commande
+; (à placer dans /etc/php/8.3/fpm/conf.d/90-cga-connect.ini et /etc/php/8.3/cli/conf.d/90-cga-connect.ini).
+; Le fuseau horaire est celui de l'application (config/app.php), pas celui de PHP.
+expose_php = Off
+
+; Le code ne change qu'au déploiement, qui recharge PHP-FPM : pas de contrôle des dates de fichiers.
+opcache.enable = 1
+opcache.enable_cli = 0
+opcache.memory_consumption = ${OPCACHE_MEMORY_MB}
+opcache.max_accelerated_files = ${OPCACHE_MAX_FILES}
+opcache.validate_timestamps = 0
