@@ -44,7 +44,7 @@ Poste local sans Docker (02-TRD §12.1), avec Laragon ou une installation direct
 |---|---|---|
 | PHP | 8.3 | Extensions `pdo_pgsql`, `pgsql`, `mbstring`, `intl`, `zip`, `gd`, `bcmath`, `fileinfo`, `openssl`, `curl` ; **PCOV** pour la couverture des tests |
 | PostgreSQL | 16 ou plus | Extensions `pg_trgm`, `unaccent`, `citext`, fournies avec PostgreSQL |
-| LibreOffice | 7.6 ou plus | Conversion PDF ; sous Windows, `LIBREOFFICE_BIN` vise `soffice.com` (programme console), pas `soffice.exe` |
+| LibreOffice | 7.6 ou plus | Conversion PDF ; sous Windows, `LIBREOFFICE_BIN` vise `soffice.com` (programme console), pas `soffice.exe`. Sans droits administrateur, extraire l'MSI officiel : `msiexec /a LibreOffice_<version>_Win_x86-64.msi /qn TARGETDIR="%LOCALAPPDATA%\Programs\LibreOffice"` |
 | Composer | 2 | |
 
 Créer les bases une fois, en tant que `postgres` :

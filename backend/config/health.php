@@ -24,7 +24,9 @@ return [
         LibreOfficeCheck::class,
     ],
 
-    // Délai maximal de « soffice --version » ; le premier lancement de LibreOffice est lent.
+    // Délai maximal de « soffice --version » ; le premier lancement de LibreOffice est lent. Il doit
+    // rester nettement sous la limite d'une requête PHP (max_execution_time, request_terminate_timeout),
+    // sinon c'est la requête entière qui est interrompue (500) au lieu d'un contrôle en défaut.
     'libreoffice_timeout_seconds' => (int) env('HEALTH_LIBREOFFICE_TIMEOUT_SECONDS', 15),
 
 ];
