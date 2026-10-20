@@ -138,7 +138,7 @@ return [
     */
 
     'partitions' => [
-        'tables' => ['audit_logs'],
+        'tables' => ['audit_logs', 'activity_logs'],
         'months_ahead' => (int) env('DB_PARTITION_MONTHS_AHEAD', 3),
     ],
 

@@ -2,15 +2,29 @@
 
 /*
 |--------------------------------------------------------------------------
-| Messages des erreurs métier (409) et des refus de l'API (02-TRD §4.3)
+| Messages des erreurs renvoyées par l'API (02-TRD §4.3, §4.4)
 |--------------------------------------------------------------------------
 |
-| Une ligne par code d'erreur renvoyé au client (champ « code »).
+| Une ligne par code d'erreur renvoyé au client (champ « code »). Jamais de
+| détail technique : celui-ci ne va qu'au journal d'erreurs.
 |
 */
 
 return [
 
+    // Refus et erreurs génériques
+    'unauthenticated' => 'Connectez-vous pour continuer.',
+    'forbidden' => 'Vous n\'avez pas le droit de faire cette action.',
+    'not_found' => 'Élément introuvable.',
+    'method_not_allowed' => 'Cette action n\'est pas disponible à cette adresse.',
+    'csrf_mismatch' => 'Votre session a expiré. Rechargez la page et recommencez.',
+    'throttled' => 'Trop de tentatives. Patientez avant de réessayer.',
+    'external_service_unavailable' => 'Service externe indisponible, réessayez.',
+    'service_unavailable' => 'Service momentanément indisponible, réessayez.',
+    'http_error' => 'La demande n\'a pas pu être traitée.',
+    'server_error' => 'Une erreur est survenue (réf. :reference).',
+
+    // Règles métier (409)
     'space_required' => 'Choisissez d\'abord un espace de travail.',
     'locked_permission' => 'Ce droit est verrouillé : il ne peut pas être modifié.',
     'unknown_permission' => 'Ce droit n\'existe pas.',

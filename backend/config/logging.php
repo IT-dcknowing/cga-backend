@@ -1,5 +1,6 @@
 <?php
 
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -56,6 +57,14 @@ return [
             'driver' => 'stack',
             'channels' => explode(',', (string) env('LOG_STACK', 'single')),
             'ignore_exceptions' => false,
+        ],
+
+        // Journal de secours de activity_logs (02-TRD §6.5) : une ligne JSON par écriture échouée.
+        'activity_fallback' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/activity-fallback.log'),
+            'level' => 'debug',
+            'formatter' => JsonFormatter::class,
         ],
 
         'single' => [
