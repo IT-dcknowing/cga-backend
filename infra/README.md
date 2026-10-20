@@ -132,6 +132,9 @@ SANCTUM_STATEFUL_DOMAINS=      # vide : le SPA est sur le domaine de APP_URL
 CORS_ALLOWED_ORIGINS=          # vide : aucune origine étrangère
 SENTRY_LARAVEL_DSN=…           # projet Sentry de la recette ; vide = désactivé
 SENTRY_ENVIRONMENT=recette
+SEED_DEMO=true                 # recette : comptes fictifs de démonstration (jamais en production)
+SEED_PLATFORM_ADMIN_PHONE=+225…  # premier administrateur de la plateforme
+SEED_PLATFORM_ADMIN_EMAIL=…
 ```
 
 La documentation de l'API (`/docs/api`) n'est ouverte qu'en environnement `local` ; elle n'est pas servie par Nginx.
@@ -157,6 +160,13 @@ curl -s https://recette.cgaconnect.ci/api/health                                
 ```
 
 Le point de santé est à surveiller chaque minute par un service externe (02-TRD §12.3) : une réponse autre que 200 doit alerter. Il est limité à `HEALTH_RATE_LIMIT` requêtes par IP.
+
+Données de base, puis lien d'activation du premier administrateur de la plateforme, à lui transmettre (valable `invitation.validity_days` jours ; relancer la commande en émet un nouveau et annule le précédent) :
+
+```bash
+sudo -u cga php8.3 /var/www/cga-connect/current/backend/artisan db:seed --force
+sudo -u cga php8.3 /var/www/cga-connect/current/backend/artisan platform:invite-admin
+```
 
 ## 8. Retour arrière
 

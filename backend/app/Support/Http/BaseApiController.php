@@ -2,8 +2,11 @@
 
 namespace App\Support\Http;
 
+use App\Domain\Users\Models\User;
 use App\Http\Controllers\Controller;
 use App\Support\Logging\LogActivity;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -33,5 +36,34 @@ abstract class BaseApiController extends Controller
 
             return app(ApiErrorMapper::class)->render($exception, $request);
         }
+    }
+
+    /**
+     * Objet visé par l'action dans le journal d'activité, quand ce n'est pas un paramètre de la route.
+     * Noté sur la requête d'origine : une FormRequest n'en est qu'une copie.
+     */
+    protected function logSubject(Model $subject): void
+    {
+        request()->attributes->set(LogActivity::SUBJECT, $subject);
+    }
+
+    /**
+     * Utilisateur de l'action dans le journal d'activité, quand la session ne le dira plus (déconnexion).
+     */
+    protected function logUser(User $user): void
+    {
+        request()->attributes->set(LogActivity::USER_ID, $user->id);
+    }
+
+    /**
+     * Utilisateur connecté (routes protégées par le middleware « auth »).
+     *
+     * @throws AuthenticationException sans session
+     */
+    protected function currentUser(): User
+    {
+        $user = request()->user();
+
+        return $user instanceof User ? $user : throw new AuthenticationException;
     }
 }

@@ -4,11 +4,15 @@ namespace App\Domain\Users\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Permissions\PermissionResolver;
+use Carbon\CarbonInterface;
 use Database\Factories\MembershipFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +29,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $member_id
  * @property Role $role
  * @property MembershipStatus $status
+ * @property CarbonInterface|null $activated_at
+ * @property-read User $user
+ * @property-read Organization $organization
  */
 class Membership extends Model
 {
@@ -60,6 +67,21 @@ class Membership extends Model
     {
         static::saved(static fn () => app(PermissionResolver::class)->flush());
         static::deleted(static fn () => app(PermissionResolver::class)->flush());
+    }
+
+    /**
+     * Rattachements qui ouvrent un espace : actifs, ou en consultation seule (adhérent radié,
+     * RG-ADH-12), dans une organisation non résiliée (02-TRD §6.2).
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function usable(Builder $query): void
+    {
+        $query->whereIn('status', [MembershipStatus::Active, MembershipStatus::ReadOnly])
+            ->whereHas('organization', static function (Builder $organization): void {
+                $organization->where('status', '!=', OrganizationStatus::Terminated);
+            });
     }
 
     /**

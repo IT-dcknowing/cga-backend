@@ -39,6 +39,7 @@ return [
     'confirmed' => 'La confirmation du champ :attribute ne correspond pas.',
     'contains' => 'Il manque une valeur obligatoire dans le champ :attribute.',
     'current_password' => 'Le mot de passe est incorrect.',
+    'common_password' => 'Ce mot de passe est trop courant. Choisissez-en un autre.',
     'date' => 'Le champ :attribute doit être une date valide.',
     'date_equals' => 'Le champ :attribute doit être une date égale au :date.',
     'date_format' => 'Le champ :attribute doit respecter le format :format.',
@@ -167,6 +168,8 @@ return [
     'uppercase' => 'Le champ :attribute doit être en majuscules.',
     'url' => 'Le champ :attribute doit être une URL valide.',
     'ulid' => 'Le champ :attribute doit être un ULID valide.',
+    'phone' => 'Le numéro de téléphone n\'est pas valide.',
+    'phone_taken' => 'Ce numéro est déjà associé à un autre compte.',
     'uuid' => 'Le champ :attribute doit être un UUID valide.',
 
     /*
@@ -190,6 +193,21 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'identifier' => 'téléphone ou e-mail',
+        'password' => 'mot de passe',
+        'current_password' => 'mot de passe actuel',
+        'code' => 'code',
+        'membership_id' => 'espace',
+        'accepted_terms' => 'conditions d\'utilisation',
+        'sms_opt_in' => 'SMS d\'information',
+        'whatsapp_opt_in' => 'WhatsApp d\'information',
+        'first_name' => 'prénom',
+        'last_name' => 'nom',
+        'email' => 'e-mail',
+        'phone' => 'téléphone',
+        'sms' => 'SMS',
+        'whatsapp' => 'WhatsApp',
+    ],
 
 ];

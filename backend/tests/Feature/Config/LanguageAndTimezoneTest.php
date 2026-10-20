@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 /*
@@ -11,6 +13,13 @@ it('vit au fuseau Africa/Abidjan', function () {
     expect(config('app.timezone'))->toBe('Africa/Abidjan')
         ->and(now()->getTimezone()->getName())->toBe('Africa/Abidjan')
         ->and(date_default_timezone_get())->toBe('Africa/Abidjan');
+});
+
+it('lit et écrit les horodatages de PostgreSQL dans le même fuseau, quel que soit le serveur', function () {
+    expect(DB::selectOne('SHOW TIME ZONE')->TimeZone)->toBe('Africa/Abidjan');
+
+    $row = DB::selectOne('SELECT ?::timestamptz AS at', [now()->format('Y-m-d H:i:s')]);
+    expect(Carbon::parse($row->at)->equalTo(now()->startOfSecond()))->toBeTrue();
 });
 
 it('parle français', function () {

@@ -85,6 +85,9 @@ return [
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'fr_FR'),
 
+    // Pays des numéros saisis sans indicatif, normalisés au format E.164 (+225…, RG-ACC-01).
+    'phone_country' => env('APP_PHONE_COUNTRY', 'CI'),
+
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

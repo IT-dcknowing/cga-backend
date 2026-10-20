@@ -2,8 +2,6 @@
 
 namespace App\Support\Tenancy;
 
-use App\Domain\Organizations\Enums\OrganizationStatus;
-use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\Membership;
 use App\Support\Http\Exceptions\BusinessRuleException;
@@ -31,7 +29,7 @@ class ResolveTenant
                 ->with('organization')
                 ->whereKey($membershipId)
                 ->where('user_id', $user->getAuthIdentifier())
-                ->whereIn('status', [MembershipStatus::Active, MembershipStatus::ReadOnly])
+                ->usable()
                 ->first()
             : null;
 
@@ -52,8 +50,6 @@ class ResolveTenant
     private function usable(?Membership $membership): bool
     {
         return $membership !== null
-            && $membership->organization !== null
-            && $membership->organization->status !== OrganizationStatus::Terminated
             && $membership->user()->where('status', UserStatus::Active)->exists();
     }
 }

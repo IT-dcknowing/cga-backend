@@ -5,12 +5,12 @@ namespace App\Support\Http;
 use App\Domain\Audit\Enums\ActivityResult;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use App\Support\Http\Exceptions\ExternalServiceException;
+use App\Support\Http\Exceptions\TooManyAttemptsException;
+use App\Support\Logging\AlertCounter;
 use App\Support\Logging\LogActivity;
 use App\Support\Logging\RequestContext;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
-use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Contracts\Config\Repository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\RecordsNotFoundException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
@@ -30,12 +30,13 @@ use Throwable;
  */
 class ApiErrorMapper
 {
-    public const DENIED_ALERTS_KEY = 'alerts:denied:';
+    public const DENIED_ALERT = 'denied';
+
+    public const DENIED_ALERTS_KEY = AlertCounter::PREFIX.self::DENIED_ALERT.':';
 
     public function __construct(
-        private readonly Cache $cache,
+        private readonly AlertCounter $alerts,
         private readonly RequestContext $requestContext,
-        private readonly Repository $config,
     ) {}
 
     public function render(Throwable $exception, Request $request): JsonResponse
@@ -46,7 +47,7 @@ class ApiErrorMapper
         $request->attributes->set(LogActivity::ERROR_CODE, $body['code'] ?? null);
 
         if ($result === ActivityResult::Denied && $status === 403) {
-            $this->countDenied();
+            $this->alerts->increment(self::DENIED_ALERT);
         }
 
         return new JsonResponse($body, $status, $headers);
@@ -70,6 +71,12 @@ class ApiErrorMapper
             $exception instanceof ModelNotFoundException,
             $exception instanceof RecordsNotFoundException,
             $exception instanceof NotFoundHttpException => $this->error(404, 'not_found', ActivityResult::NotFound),
+            $exception instanceof TooManyAttemptsException => [
+                429,
+                ['message' => $exception->getMessage(), 'code' => $exception->errorCode, 'details' => (object) $exception->details],
+                ActivityResult::Throttled,
+                ['Retry-After' => (string) $exception->retryAfterSeconds],
+            ],
             $exception instanceof BusinessRuleException => [
                 $exception->status,
                 ['message' => $exception->getMessage(), 'code' => $exception->errorCode, 'details' => (object) $exception->details],
@@ -114,18 +121,5 @@ class ApiErrorMapper
     private function error(int $status, string $code, ActivityResult $result, array $headers = [], array $replace = []): array
     {
         return [$status, ['message' => __("errors.{$code}", $replace), 'code' => $code], $result, $headers];
-    }
-
-    private function countDenied(): void
-    {
-        $key = self::DENIED_ALERTS_KEY.now()->toDateString();
-
-        try {
-            // Le cache sur la base n'incrémente pas une clé absente : elle est créée d'abord.
-            $this->cache->add($key, 0, now()->addHours($this->config->integer('activity.alerts_ttl_hours')));
-            $this->cache->increment($key);
-        } catch (Throwable $exception) {
-            report($exception);
-        }
     }
 }

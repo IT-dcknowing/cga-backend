@@ -24,6 +24,16 @@ class LogActivity
 
     public const ERROR_CODE = 'activity.error_code';
 
+    /**
+     * Utilisateur de l'action quand la session ne le dit plus (déconnexion).
+     */
+    public const USER_ID = 'activity.user_id';
+
+    /**
+     * Objet visé quand il n'est pas un paramètre de la route (espace choisi, invitation acceptée).
+     */
+    public const SUBJECT = 'activity.subject';
+
     private const STARTED_AT = 'activity.started_at';
 
     public function __construct(
@@ -49,6 +59,7 @@ class LogActivity
         $uri = is_object($route) ? $route->uri() : ltrim($request->path(), '/');
         $subject = $this->subject($request);
         $result = $request->attributes->get(self::RESULT);
+        $userId = $request->attributes->get(self::USER_ID);
 
         $this->logger->record(
             (string) ($request->attributes->get(self::ACTION) ?? $routeName ?? "{$request->method()} /{$uri}"),
@@ -62,6 +73,7 @@ class LogActivity
                 'http_status' => $response->getStatusCode(),
                 'duration_ms' => $this->durationMs($request),
                 'error_code' => $request->attributes->get(self::ERROR_CODE),
+                ...(is_string($userId) ? ['user_id' => $userId] : []),
             ],
         );
     }
@@ -76,10 +88,15 @@ class LogActivity
     }
 
     /**
-     * Premier modèle lié par la route (l'objet visé par l'action).
+     * Objet désigné par l'action, sinon premier modèle lié par la route.
      */
     private function subject(Request $request): ?Model
     {
+        $explicit = $request->attributes->get(self::SUBJECT);
+        if ($explicit instanceof Model) {
+            return $explicit;
+        }
+
         $route = $request->route();
         if (! is_object($route)) {
             return null;

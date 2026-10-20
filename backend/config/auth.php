@@ -114,4 +114,29 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Règles de CGA Connect (02-TRD §6.1)
+    |--------------------------------------------------------------------------
+    |
+    | Mot de passe : longueur minimale et liste des mots de passe les plus
+    | courants, refusés. Codes envoyés par SMS ou e-mail : nombre de chiffres.
+    | Jetons d'invitation : octets aléatoires (random_bytes), dont seule
+    | l'empreinte SHA-256 est gardée. Les durées et limites d'essais sont des
+    | paramètres de la plateforme (config/cga.php : otp.*, rate_limit.*).
+    |
+    */
+
+    'password_min_length' => (int) env('AUTH_PASSWORD_MIN_LENGTH', 8),
+
+    'common_passwords_file' => resource_path('security/common-passwords.txt'),
+
+    'code_digits' => 6,
+
+    'invitation_token_bytes' => 32,
+
+    // Recopie du code ou du lien envoyé dans la réponse, pour les essais sans téléphone : seulement en
+    // environnement local, avec le pilote d'envoi « log » (aucun message ne part).
+    'echo_dev_messages' => (bool) env('AUTH_ECHO_DEV_MESSAGES', false),
+
 ];

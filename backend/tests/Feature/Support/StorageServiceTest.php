@@ -96,6 +96,12 @@ it('refuse un lien expiré ou modifié', function () {
     $this->get($url)->assertForbidden();
 });
 
+it('vérifie la signature avant de chercher le fichier : un lien forgé ne dit pas s\'il existe', function () {
+    $this->getJson(route(StorageService::DOWNLOAD_ROUTE, ['file' => strtolower((string) Str::ulid())]))
+        ->assertForbidden()
+        ->assertJsonPath('code', 'forbidden');
+});
+
 it('répond 404 pour un fichier inconnu, même avec une signature valide', function () {
     $url = URL::temporarySignedRoute(StorageService::DOWNLOAD_ROUTE, now()->addMinutes(5), ['file' => strtolower((string) Str::ulid())]);
 

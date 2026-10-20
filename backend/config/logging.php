@@ -67,6 +67,14 @@ return [
             'formatter' => JsonFormatter::class,
         ],
 
+        // Boîte d'envoi du pilote SMS « log » (02-TRD §10) : les SMS qui seraient partis, en
+        // développement et en recette. Jamais utilisé avec un vrai fournisseur.
+        'sms' => [
+            'driver' => 'single',
+            'path' => env('SMS_LOG_PATH', storage_path('logs/sms.log')),
+            'level' => 'debug',
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),

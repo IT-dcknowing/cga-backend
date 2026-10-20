@@ -1,0 +1,51 @@
+<?php
+
+use App\Domain\Auth\Models\Invitation;
+use App\Domain\Organizations\Models\Organization;
+use App\Domain\Users\Models\Membership;
+use App\Domain\Users\Models\User;
+use App\Support\Config\SettingsService;
+use Database\Seeders\DatabaseSeeder;
+use Tests\Support\Spa;
+
+/*
+ * Jeu de démonstration (SEED_DEMO=true) : comptes fictifs du SPA et de la collection Postman.
+ */
+
+beforeEach(function () {
+    config(['cga.seed.demo.enabled' => true]);
+});
+
+it('crée les CGA et les comptes de démonstration, rejouable sans doublon', function () {
+    $this->seed(DatabaseSeeder::class);
+    $this->seed(DatabaseSeeder::class);
+
+    expect(Organization::query()->whereIn('numbering_abbreviation', ['DCK', 'DEMOB'])->count())->toBe(2)
+        ->and(User::query()->where('phone', 'like', '+22507000000%')->count())->toBe(9)
+        ->and(Membership::query()->whereHas('user', fn ($q) => $q->where('phone', '+2250700000003'))->count())->toBe(3)
+        ->and(Invitation::query()->count())->toBe(2)
+        ->and(Invitation::query()->whereNotNull('revoked_at')->count())->toBe(1)
+        ->and(app(SettingsService::class)->get('rate_limit.otp'))->toBe(['max_attempts' => 3, 'decay_minutes' => 1]);
+});
+
+it('ouvre la session des comptes de démonstration, et refuse le compte désactivé', function () {
+    $this->seed(DatabaseSeeder::class);
+    $password = config('cga.seed.demo.password');
+
+    $this->withHeaders(Spa::headers())->postJson('/api/v1/auth/login', ['identifier' => '0700000003', 'password' => $password])
+        ->assertOk()->assertJsonCount(3, 'data.memberships')->assertJsonPath('data.active_membership_id', null);
+    $this->withHeaders(Spa::headers())->postJson('/api/v1/auth/login', ['identifier' => '0700000005', 'password' => $password])
+        ->assertForbidden();
+    $this->withHeaders(Spa::headers())->getJson('/api/v1/auth/invitations/'.config('cga.seed.demo.invitation_token'))
+        ->assertOk()->assertJsonPath('data.first_name', 'Fatou');
+    $this->withHeaders(Spa::headers())->getJson('/api/v1/auth/invitations/'.config('cga.seed.demo.revoked_invitation_token'))
+        ->assertOk()->assertJsonPath('data.status', 'invalid');
+});
+
+it('n\'est pas chargé sans SEED_DEMO', function () {
+    config(['cga.seed.demo.enabled' => false]);
+
+    $this->seed(DatabaseSeeder::class);
+
+    expect(User::query()->count())->toBe(0);
+});

@@ -97,6 +97,9 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Les dates sans fuseau envoyées par Laravel sont lues dans celui de l'application, quel que
+            // soit le réglage du serveur PostgreSQL (02-TRD §7.2 : timestamptz).
+            'timezone' => env('DB_TIMEZONE', env('APP_TIMEZONE', 'Africa/Abidjan')),
         ],
 
         'sqlsrv' => [

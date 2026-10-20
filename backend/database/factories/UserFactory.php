@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * @extends Factory<User>
@@ -28,7 +29,7 @@ class UserFactory extends Factory
             'last_name' => fake()->lastName(),
             'phone' => '+22507'.fake()->unique()->numerify('########'),
             'email' => fake()->unique()->safeEmail(),
-            'password' => static::$password ??= bcrypt('password'),
+            'password' => static::$password ??= Hash::make('password'),
             'status' => UserStatus::Active,
         ];
     }

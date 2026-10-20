@@ -57,6 +57,11 @@ return [
         'phone_change' => 'Changement de téléphone',
     ],
 
+    'preference_channel' => [
+        'sms' => 'SMS',
+        'whatsapp' => 'WhatsApp',
+    ],
+
     'organization_type' => [
         'platform' => 'Plateforme',
         'cncga' => 'CNCGA',

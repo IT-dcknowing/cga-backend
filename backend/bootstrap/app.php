@@ -1,14 +1,18 @@
 <?php
 
+use App\Domain\Auth\Http\Middleware\ExpireSessions;
 use App\Support\Http\ApiErrorMapper;
 use App\Support\Logging\LogActivity;
 use App\Support\Logging\RequestContext;
 use App\Support\Tenancy\ResolveTenant;
 use App\Support\Tenancy\TenantContext;
+use Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ValidateSignature;
 use Sentry\Laravel\Integration;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -22,6 +26,18 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Le SPA s'authentifie par le cookie de session de Sanctum, avec le jeton CSRF (02-TRD §6.1).
         $middleware->statefulApi();
+
+        // Déconnexion après inactivité (30 / 60 min selon l'espace) ou compte désactivé (02-TRD §6.1),
+        // avant tout contrôle d'authentification.
+        $middleware->api(append: [ExpireSessions::class]);
+        $middleware->prependToPriorityList(before: AuthenticatesRequests::class, prepend: ExpireSessions::class);
+
+        // Lien signé (02-TRD §6.4) : la signature est vérifiée avant de chercher l'objet, pour qu'un lien
+        // forgé ne dise pas si l'identifiant existe.
+        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: ValidateSignature::class);
+
+        // API seule (02-TRD §3) : un appel sans session reçoit 401 en JSON, jamais une redirection.
+        $middleware->redirectGuestsTo(static fn (): ?string => null);
 
         // Routes métier : espace actif obligatoire, chargé dans TenantContext (02-TRD §6.2).
         $middleware->alias(['tenant' => ResolveTenant::class]);

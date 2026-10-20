@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Auth\Http\Middleware\ExpireSessions;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\UserStatus;
@@ -72,12 +73,27 @@ it('refuse l\'espace d\'une organisation résiliée', function () {
     spaRequest($membership, $membership->id)->assertStatus(409);
 });
 
-it('refuse l\'espace d\'un compte désactivé', function () {
+it('ferme la session d\'un compte désactivé avant tout espace (02-TRD §6.1)', function () {
     $membership = Membership::factory()->create();
     $membership->user->status = UserStatus::Disabled;
     $membership->user->save();
 
-    spaRequest($membership, $membership->id)->assertStatus(409);
+    spaRequest($membership, $membership->id)->assertUnauthorized();
+    $this->assertGuest();
+});
+
+it('refuse aussi l\'espace d\'un compte désactivé quand la session n\'a pas été fermée', function () {
+    Route::middleware(['api', 'auth', 'tenant'])->withoutMiddleware(ExpireSessions::class)
+        ->get('api/v1/essai-espace-seul', fn (TenantContext $context) => ['role' => $context->role()->value]);
+    $membership = Membership::factory()->create();
+    $membership->user->status = UserStatus::Disabled;
+    $membership->user->save();
+
+    test()->actingAs($membership->user)->withHeaders(['Origin' => 'http://localhost:5173', 'Referer' => 'http://localhost:5173/'])
+        ->withSession([TenantContext::SESSION_KEY => $membership->id])
+        ->getJson('/api/v1/essai-espace-seul')
+        ->assertStatus(409)
+        ->assertJsonPath('code', 'space_required');
 });
 
 it('exige une connexion', function () {

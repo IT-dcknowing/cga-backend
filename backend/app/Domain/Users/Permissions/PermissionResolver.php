@@ -134,7 +134,7 @@ class PermissionResolver
     private function rolePermissions(Membership $membership, Collection $roles): array
     {
         $membership->loadMissing('organization');
-        $cgaRoles = $membership->organization?->type === OrganizationType::Cga
+        $cgaRoles = $membership->organization->type === OrganizationType::Cga
             ? $roles->filter(fn (Role $role): bool => $this->cgaMayOverride($role))->map->value->all()
             : [];
 

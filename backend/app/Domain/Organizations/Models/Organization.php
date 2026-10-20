@@ -30,6 +30,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property AgreementStatus $agreement_status
  * @property SubscriptionStatus $subscription_status
  * @property DataStatus $data_status
+ * @property string $phone_1
+ * @property string|null $email
+ * @property bool $banking_enabled
  */
 class Organization extends Model
 {

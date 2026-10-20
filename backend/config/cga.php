@@ -149,6 +149,11 @@ return [
                 'type' => 'integer', 'level' => 'platform', 'default' => 10, 'permission' => $platform,
                 'rules' => ['' => ['integer', 'min:1', 'max:60']],
             ],
+            // Essais de saisie d'un code (02-TRD §6.1) ; la base en admet 3 au plus (otp_codes.attempts).
+            'max_attempts' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 3, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:3']],
+            ],
         ],
 
         'queue' => [
@@ -205,6 +210,17 @@ return [
             'last_name' => env('SEED_PLATFORM_ADMIN_LAST_NAME', 'Plateforme'),
             'phone' => env('SEED_PLATFORM_ADMIN_PHONE'),
             'email' => env('SEED_PLATFORM_ADMIN_EMAIL'),
+        ],
+        // Jeu de démonstration (DemoSeeder) : comptes fictifs du poste de développement et de la
+        // recette, jamais en production. Les essais de code s'y renouvellent chaque minute, pour
+        // rejouer la collection Postman sans attendre une heure.
+        'demo' => [
+            'enabled' => (bool) env('SEED_DEMO', false),
+            'password' => env('SEED_DEMO_PASSWORD', 'Demo-Cga-2026'),
+            'invitation_token' => env('SEED_DEMO_INVITATION_TOKEN', 'demo-invitation-cga-connect-0123456789abcdef'),
+            // Lien renvoyé depuis : l'ancien jeton est révoqué (« Ce lien n'est plus valide »).
+            'revoked_invitation_token' => env('SEED_DEMO_REVOKED_INVITATION_TOKEN', 'demo-invitation-revoquee-0123456789abcdefgh'),
+            'otp_decay_minutes' => (int) env('SEED_DEMO_OTP_DECAY_MINUTES', 1),
         ],
     ],
 

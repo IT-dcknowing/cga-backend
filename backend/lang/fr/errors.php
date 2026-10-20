@@ -30,4 +30,12 @@ return [
     'unknown_permission' => 'Ce droit n\'existe pas.',
     'setting_not_editable' => 'Ce paramètre ne peut pas être modifié à ce niveau.',
 
+    // Authentification (F-AUTH-01 à 05, 03-APPFLOW §2)
+    'too_many_attempts' => 'Trop de tentatives, réessayez dans :minutes minutes.',
+    'inactive_account' => 'Votre accès n\'est pas actif. Contactez votre CGA.',
+    'wrong_code' => 'Code incorrect (:attempts_left essai(s) restant(s)).',
+    'code_expired' => 'Ce code n\'est plus valide. Demandez un nouveau code.',
+    'invitation_invalid' => 'Ce lien n\'est plus valide.',
+    'phone_taken' => 'Ce numéro est déjà associé à un autre compte.',
+
 ];

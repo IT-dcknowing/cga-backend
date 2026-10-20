@@ -45,6 +45,11 @@ final class CrossTenantObjects
      */
     public static function nonTenantParameters(): array
     {
-        return [];
+        $invitationToken = 'Jeton secret du lien d\'invitation (route publique, F-AUTH-02) : il désigne l\'invitation sans identifiant ; un jeton inconnu répond 404.';
+
+        return [
+            'auth.invitations.show:invitationToken' => $invitationToken,
+            'auth.invitations.accept:invitationToken' => $invitationToken,
+        ];
     }
 }
