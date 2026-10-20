@@ -127,7 +127,16 @@ DB_PASSWORD=…
 LIBREOFFICE_BIN=soffice
 MAIL_MAILER=log                # recette : aucun envoi réel (02-TRD §12.1)
 LOG_CHANNEL=daily
+SESSION_SECURE_COOKIE=true     # cookie de session en HTTPS seulement
+SANCTUM_STATEFUL_DOMAINS=      # vide : le SPA est sur le domaine de APP_URL
+CORS_ALLOWED_ORIGINS=          # vide : aucune origine étrangère
+SENTRY_LARAVEL_DSN=…           # projet Sentry de la recette ; vide = désactivé
+SENTRY_ENVIRONMENT=recette
 ```
+
+La documentation de l'API (`/docs/api`) n'est ouverte qu'en environnement `local` ; elle n'est pas servie par Nginx.
+
+Bascule vers Redis (plus tard, sans changer le code, 02-TRD T-12) : `sudo apt install -y redis-server php8.3-redis`, puis `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis`, `SESSION_DRIVER=redis` et `REDIS_HOST` / `REDIS_PASSWORD` dans ce `.env`. Horizon ne s'installe qu'à ce moment-là, et les workers Supervisor restent valables.
 
 Les identifiants SMS, WhatsApp, e-mail, FNE et Compta Flow ne vont jamais dans `.env` : ils se saisissent dans les écrans de l'application (AGENTS.md).
 

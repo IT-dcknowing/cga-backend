@@ -1,5 +1,18 @@
 <?php
 
+/*
+ * Disque du serveur, hors de la racine web (02-TRD §6.4, T-11) : documents, pièces, exports.
+ * Jamais servi directement ; tout accès passe par un contrôleur qui vérifie les droits.
+ */
+$privateDisk = [
+    'driver' => 'local',
+    'root' => env('FILES_ROOT', storage_path('app/private')),
+    'visibility' => 'private',
+    'serve' => false,
+    'throw' => true,
+    'report' => false,
+];
+
 return [
 
     /*
@@ -13,7 +26,7 @@ return [
     |
     */
 
-    'default' => env('FILESYSTEM_DISK', 'local'),
+    'default' => env('FILESYSTEM_DISK', 'private'),
 
     /*
     |--------------------------------------------------------------------------
@@ -30,24 +43,12 @@ return [
 
     'disks' => [
 
-        'local' => [
-            'driver' => 'local',
-            'root' => storage_path('app/private'),
-            // Jamais servi directement : un fichier sort par un contrôleur qui contrôle les droits et
-            // journalise l'accès (02-TRD §6.4).
-            'serve' => false,
-            'throw' => false,
-            'report' => false,
-        ],
+        'private' => $privateDisk,
 
-        'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
-            'visibility' => 'public',
-            'throw' => false,
-            'report' => false,
-        ],
+        // Laravel ajoute ses propres disques « local » (servi sur /storage) et « public » à ceux
+        // déclarés ici : ils sont redéfinis sur le disque privé pour ne jamais exposer de fichier.
+        'local' => $privateDisk,
+        'public' => $privateDisk,
 
         's3' => [
             'driver' => 's3',
@@ -58,7 +59,7 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
-            'throw' => false,
+            'throw' => true,
             'report' => false,
         ],
 
@@ -75,8 +76,7 @@ return [
     |
     */
 
-    'links' => [
-        public_path('storage') => storage_path('app/public'),
-    ],
+    // Aucun lien public/storage : aucun fichier n'est servi par le web (02-TRD §6.4).
+    'links' => [],
 
 ];

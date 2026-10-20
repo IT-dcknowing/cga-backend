@@ -20,7 +20,9 @@ class HealthReportResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            /** @var 'ok'|'failed' */
             'status' => $this->resource->status()->value,
+            /** @var array<string, array{status: 'ok'|'failed', error?: 'unavailable'|'not_writable'|'low_space'}> */
             'checks' => array_map($this->check(...), $this->resource->results),
         ];
     }

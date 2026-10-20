@@ -68,7 +68,17 @@ Contrôle : `curl http://localhost:8000/api/health` répond 200 et `"status": "o
 
 | Commande | Rôle |
 |---|---|
-| `composer test` | Tests sur PostgreSQL (base `cga_plateforme_test`) avec couverture ; échoue sous 80 % des lignes |
-| `vendor/bin/pint` | Mise en forme du code PHP |
+| `composer test` | Tests Pest en parallèle sur PostgreSQL (une base `cga_plateforme_test_*` par processus) avec couverture ; échoue sous 80 % des lignes |
+| `composer analyse` | Analyse statique Larastan, niveau 6 (`env()` refusé hors de `config/`) |
+| `composer lint` | Contrôle de la mise en forme (Pint) ; `vendor/bin/pint` la corrige |
+
+Choix du socle (02-TRD §2, §4.2, §6) :
+
+- **Connexion du SPA** : Sanctum en mode SPA, par le cookie de session `HttpOnly`, `Secure` (sauf sur le poste local en http) et `SameSite=Lax`, avec le jeton CSRF ; aucun jeton d'API. Le SPA demande d'abord `GET /sanctum/csrf-cookie`. Sur le poste local, `SANCTUM_STATEFUL_DOMAINS` et `CORS_ALLOWED_ORIGINS` nomment le serveur Vite ; en recette et en production, le SPA est sur le même domaine et ces variables restent vides.
+- **Documentation de l'API** : `http://localhost:8000/docs/api` (Scramble), et le schéma OpenAPI sur `/docs/api.json`, dont `npm run gen:api` tire les types du frontend. Fermée (403) hors de l'environnement `local`.
+- **Fuseau et langue** : `Africa/Abidjan`, français (`lang/fr`), y compris les messages de validation.
+- **Fichiers** : disque `private` (`storage/app/private`, ou `FILES_ROOT`), jamais servi par le web ; les disques `local` et `public` de Laravel y sont redirigés.
+- **Files, cache, sessions** : sur la base (`database`) ; la bascule vers Redis se fait par `QUEUE_CONNECTION`, `CACHE_STORE` et `SESSION_DRIVER` (extension PHP `redis` et serveur Redis 7 requis). La suite est rejouée sur Redis par la CI.
+- **Erreurs** : envoyées à Sentry quand `SENTRY_LARAVEL_DSN` est renseigné, sans aucune donnée personnelle.
 
 Le serveur de recette (Nginx, PHP-FPM, Supervisor, cron, déploiement, sauvegardes) : [`infra/README.md`](infra/README.md).

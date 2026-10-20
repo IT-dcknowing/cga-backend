@@ -1,31 +1,20 @@
 <?php
 
-namespace Tests\Feature\Support\Health\Checks;
-
 use App\Support\Health\Checks\QueueCheck;
 use App\Support\Health\HealthStatus;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-use RuntimeException;
-use Tests\TestCase;
 
-class QueueCheckTest extends TestCase
-{
-    use LazilyRefreshDatabase;
+uses(LazilyRefreshDatabase::class);
 
-    public function test_database_queue_answers(): void
-    {
-        config(['queue.default' => 'database']);
+it('constate que la file sur la base de données répond', function () {
+    config(['queue.default' => 'database']);
 
-        $this->assertSame(HealthStatus::Ok, (new QueueCheck)->run()->status());
-    }
+    expect((new QueueCheck)->run()->status())->toBe(HealthStatus::Ok);
+});
 
-    public function test_an_unreachable_queue_raises_an_exception(): void
-    {
-        Queue::shouldReceive('connection')->once()->andThrow(new RuntimeException('Redis injoignable'));
+it('lève une exception quand la file ne répond pas', function () {
+    Queue::shouldReceive('connection')->once()->andThrow(new RuntimeException('Redis injoignable'));
 
-        $this->expectException(RuntimeException::class);
-
-        (new QueueCheck)->run();
-    }
-}
+    (new QueueCheck)->run();
+})->throws(RuntimeException::class);

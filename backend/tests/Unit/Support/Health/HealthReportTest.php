@@ -1,48 +1,38 @@
 <?php
 
-namespace Tests\Unit\Support\Health;
-
 use App\Support\Health\HealthCheckError;
 use App\Support\Health\HealthCheckResult;
 use App\Support\Health\HealthReport;
 use App\Support\Health\HealthStatus;
-use PHPUnit\Framework\TestCase;
 
-class HealthReportTest extends TestCase
-{
-    public function test_report_is_ok_when_every_check_is_ok(): void
-    {
-        $report = new HealthReport(['database' => HealthCheckResult::ok(), 'queue' => HealthCheckResult::ok()]);
+it('est bon quand tous les contrôles sont bons', function () {
+    $report = new HealthReport(['database' => HealthCheckResult::ok(), 'queue' => HealthCheckResult::ok()]);
 
-        $this->assertSame(HealthStatus::Ok, $report->status());
-    }
+    expect($report->status())->toBe(HealthStatus::Ok);
+});
 
-    public function test_report_fails_as_soon_as_one_check_fails(): void
-    {
-        $report = new HealthReport([
-            'database' => HealthCheckResult::ok(),
-            'storage' => HealthCheckResult::failed(HealthCheckError::LowSpace),
-            'queue' => HealthCheckResult::ok(),
-        ]);
+it('est en défaut dès qu\'un contrôle l\'est', function () {
+    $report = new HealthReport([
+        'database' => HealthCheckResult::ok(),
+        'storage' => HealthCheckResult::failed(HealthCheckError::LowSpace),
+        'queue' => HealthCheckResult::ok(),
+    ]);
 
-        $this->assertSame(HealthStatus::Failed, $report->status());
-    }
+    expect($report->status())->toBe(HealthStatus::Failed);
+});
 
-    public function test_failed_result_keeps_its_error_and_log_context(): void
-    {
-        $result = HealthCheckResult::failed(HealthCheckError::NotWritable, ['disk' => 'local']);
+it('garde le code et le contexte de journal d\'un contrôle en défaut', function () {
+    $result = HealthCheckResult::failed(HealthCheckError::NotWritable, ['disk' => 'private']);
 
-        $this->assertSame(HealthStatus::Failed, $result->status());
-        $this->assertSame(HealthCheckError::NotWritable, $result->error);
-        $this->assertSame(['disk' => 'local'], $result->context);
-    }
+    expect($result->status())->toBe(HealthStatus::Failed)
+        ->and($result->error)->toBe(HealthCheckError::NotWritable)
+        ->and($result->context)->toBe(['disk' => 'private']);
+});
 
-    public function test_ok_result_has_neither_error_nor_context(): void
-    {
-        $result = HealthCheckResult::ok();
+it('n\'a ni code ni contexte pour un contrôle bon', function () {
+    $result = HealthCheckResult::ok();
 
-        $this->assertSame(HealthStatus::Ok, $result->status());
-        $this->assertNull($result->error);
-        $this->assertSame([], $result->context);
-    }
-}
+    expect($result->status())->toBe(HealthStatus::Ok)
+        ->and($result->error)->toBeNull()
+        ->and($result->context)->toBe([]);
+});
