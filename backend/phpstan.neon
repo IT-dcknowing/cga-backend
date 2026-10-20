@@ -12,3 +12,8 @@ parameters:
         - database
         - routes
     noEnvCallsOutsideOfConfig: true
+
+# Règles de sécurité du projet (02-TRD §6.7) : données de requête non validées, SQL brut non constant.
+rules:
+    - Tools\PHPStan\Rules\NoUnvalidatedRequestDataRule
+    - Tools\PHPStan\Rules\NoRawSqlWithVariableRule

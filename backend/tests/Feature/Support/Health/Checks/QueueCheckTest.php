@@ -2,10 +2,7 @@
 
 use App\Support\Health\Checks\QueueCheck;
 use App\Support\Health\HealthStatus;
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Queue;
-
-uses(LazilyRefreshDatabase::class);
 
 it('constate que la file sur la base de données répond', function () {
     config(['queue.default' => 'database']);

@@ -1,7 +1,6 @@
 <?php
 
 use App\Support\Health\HealthCheckResult;
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
@@ -11,7 +10,7 @@ use Tests\Concerns\FakesHealthChecks;
  * GET /api/health (06-IMPLEMENTATION-PLAN étape 0.2, 02-TRD §12.3) : base, files, disque et LibreOffice.
  */
 
-uses(FakesHealthChecks::class, LazilyRefreshDatabase::class);
+uses(FakesHealthChecks::class);
 
 beforeEach(function () {
     config(['queue.default' => 'database', 'cga.settings.files.disk_alert_percent.default' => 100]);

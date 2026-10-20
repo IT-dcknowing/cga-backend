@@ -1,0 +1,81 @@
+# Bascule de configuration (02-TRD §13, T-12) : la suite complète est rejouée chaque semaine avec les
+# files, le cache et les sessions sur Redis 7, pour garantir que le passage à Redis se fait sans code.
+name: Suite sur Redis (hebdomadaire)
+
+on:
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-redis:
+    name: Backend avec Redis
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cga
+          POSTGRES_PASSWORD: cga
+          POSTGRES_DB: cga_plateforme_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cga"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_DATABASE: cga_plateforme_test
+      DB_USERNAME: cga
+      DB_PASSWORD: cga
+      QUEUE_CONNECTION: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      REDIS_CLIENT: phpredis
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: '6379'
+      LIBREOFFICE_BIN: soffice
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_pgsql, pgsql, intl, zip, gd, bcmath, mbstring, redis
+          coverage: none
+          tools: composer:v2
+
+      - name: LibreOffice
+        working-directory: .
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libreoffice-writer-nogui libreoffice-calc-nogui
+
+      - name: Dépendances et environnement
+        run: |
+          composer install --no-interaction --no-progress --prefer-dist
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+
+      - name: Redis est bien utilisé
+        run: php artisan tinker --execute 'cache()->put("ci:redis", "ok", 60); echo cache()->getStore()::class, PHP_EOL;' | grep RedisStore
+
+      - name: Suite complète sur Redis
+        run: php vendor/bin/pest --parallel

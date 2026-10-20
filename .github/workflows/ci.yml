@@ -1,0 +1,195 @@
+# Intégration et déploiement continus (02-TRD §12.2, 06-IMPLEMENTATION-PLAN étape 0.5).
+# Une demande de fusion n'est acceptée que si tous les contrôles sont verts : règle de protection de
+# la branche main, « Require status checks to pass » sur les tâches backend et frontend.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PHP_VERSION: '8.3'
+  NODE_VERSION: '22'
+  # Seuils de couverture (02-TRD §13) : global, Actions et Policies, fichiers modifiés.
+  COVERAGE_MIN: '80'
+  COVERAGE_CRITICAL_MIN: '90'
+  COVERAGE_CHANGED_MIN: '85'
+
+jobs:
+  backend:
+    name: Backend (Pint, Larastan, Pest, couverture, audit)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: cga
+          POSTGRES_PASSWORD: cga
+          POSTGRES_DB: cga_plateforme_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cga"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+      DB_DATABASE: cga_plateforme_test
+      DB_USERNAME: cga
+      DB_PASSWORD: cga
+      # La suite passe avec les files, le cache et les sessions sur la base (02-TRD §13).
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      LIBREOFFICE_BIN: soffice
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_pgsql, pgsql, intl, zip, gd, bcmath, mbstring
+          coverage: pcov
+          tools: composer:v2
+
+      - name: LibreOffice (génération réelle des documents en CI, 02-TRD §13)
+        working-directory: .
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends libreoffice-writer-nogui libreoffice-calc-nogui
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ hashFiles('backend/composer.lock') }}
+          restore-keys: composer-
+
+      - name: Dépendances
+        run: composer install --no-interaction --no-progress --prefer-dist
+
+      - name: Environnement
+        run: |
+          cp .env.example .env
+          php artisan key:generate --no-interaction
+
+      - name: Audit des dépendances (bloquant, A03)
+        run: composer audit
+
+      - name: Mise en forme (Pint)
+        run: composer lint
+
+      - name: Analyse statique (Larastan niveau 6, règles de sécurité)
+        run: composer analyse
+
+      - name: Tests et couverture globale (Pest, PostgreSQL réel)
+        run: composer test -- --coverage-clover=build/logs/clover.xml
+
+      - name: Fichiers PHP modifiés par la demande de fusion
+        if: github.event_name == 'pull_request'
+        run: |
+          git diff --name-only --diff-filter=AM "origin/${{ github.base_ref }}...HEAD" -- app \
+            | sed 's#^backend/##' > build/changed-files.txt || true
+          cat build/changed-files.txt
+
+      - name: Couverture des Actions, des Policies et des fichiers modifiés
+        run: |
+          php tools/coverage-gate.php build/logs/clover.xml \
+            --critical-min="$COVERAGE_CRITICAL_MIN" \
+            --changed-min="$COVERAGE_CHANGED_MIN" \
+            --changed=build/changed-files.txt
+
+  frontend:
+    name: Frontend (ESLint, tsc, Vitest, build, audit)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Dépendances
+        run: npm ci --no-audit --no-fund
+
+      - name: Audit des dépendances (bloquant, A03)
+        run: npm audit --audit-level=high
+
+      - name: ESLint (dont dangerouslySetInnerHTML interdit)
+        run: npm run lint
+
+      - name: Mise en forme (Prettier)
+        run: npm run format:check
+
+      - name: Types (tsc)
+        run: npm run typecheck
+
+      - name: Tests et couverture (Vitest, seuils dans vitest.config.ts)
+        run: npm run test:ci
+
+      - name: Build du SPA
+        run: npm run build
+
+  deploy-recette:
+    name: Déploiement en recette
+    # Fusion sur main → recette (02-TRD §12.2). Activé par la variable de dépôt RECETTE_DEPLOY=true,
+    # une fois le serveur installé (infra/README.md).
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.RECETTE_DEPLOY == 'true'
+    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    environment: recette
+    steps:
+      - name: deploy.sh sur le serveur de recette
+        env:
+          SSH_KEY: ${{ secrets.RECETTE_SSH_KEY }}
+          SSH_HOST: ${{ secrets.RECETTE_HOST }}
+          SSH_USER: ${{ secrets.RECETTE_USER }}
+          SSH_KNOWN_HOSTS: ${{ secrets.RECETTE_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_deploy "$SSH_USER@$SSH_HOST" \
+            "INFRA_ENV=/etc/cga-connect/infra.env /var/www/cga-connect/current/infra/scripts/deploy.sh '${{ github.sha }}'"
+
+  deploy-production:
+    name: Déploiement en production
+    # Étiquette vX.Y.Z → production, avec le même script (02-TRD §12.2). L'environnement GitHub
+    # « production » exige une approbation ; activé par la variable PRODUCTION_DEPLOY=true.
+    if: startsWith(github.ref, 'refs/tags/v') && vars.PRODUCTION_DEPLOY == 'true'
+    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - name: deploy.sh sur le serveur de production
+        env:
+          SSH_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+          SSH_HOST: ${{ secrets.PRODUCTION_HOST }}
+          SSH_USER: ${{ secrets.PRODUCTION_USER }}
+          SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_deploy && chmod 600 ~/.ssh/id_deploy
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/id_deploy "$SSH_USER@$SSH_HOST" \
+            "INFRA_ENV=/etc/cga-connect/infra.env /var/www/cga-connect/current/infra/scripts/deploy.sh '${{ github.ref_name }}'"

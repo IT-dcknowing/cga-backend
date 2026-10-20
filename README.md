@@ -82,3 +82,22 @@ Choix du socle (02-TRD §2, §4.2, §6) :
 - **Erreurs** : envoyées à Sentry quand `SENTRY_LARAVEL_DSN` est renseigné, sans aucune donnée personnelle.
 
 Le serveur de recette (Nginx, PHP-FPM, Supervisor, cron, déploiement, sauvegardes) : [`infra/README.md`](infra/README.md).
+
+## Intégration continue
+
+Le pipeline GitHub Actions (`.github/workflows/ci.yml`, 02-TRD §12.2) tourne à chaque demande de fusion et à chaque fusion sur `main` :
+
+| Tâche | Contrôles, tous bloquants |
+|---|---|
+| `backend` | `composer audit` ; Pint ; Larastan niveau 6 avec les règles de sécurité du projet (`$request->all()` et données non validées, SQL brut non constant, `env()` hors `config/`) ; Pest en parallèle sur PostgreSQL 16, files, cache et sessions sur la base ; couverture globale ≥ 80 %, Actions et Policies ≥ 90 %, chaque fichier modifié ≥ 85 % (`tools/coverage-gate.php`) |
+| `frontend` | `npm audit --audit-level=high` ; ESLint ; Prettier ; `tsc` ; Vitest avec seuil de couverture ; build du SPA |
+| `deploy-recette` | Fusion sur `main` : `infra/scripts/deploy.sh` sur le serveur de recette |
+| `deploy-production` | Étiquette `vX.Y.Z` : même script sur la production, après approbation |
+
+Chaque semaine (`.github/workflows/redis-weekly.yml`), la suite complète est rejouée avec les files, le cache et les sessions sur Redis 7 (02-TRD §13, T-12).
+
+À régler sur GitHub une fois le dépôt créé :
+
+- **Protection de `main`** : demandes de fusion obligatoires, statuts requis « Backend » et « Frontend », revue croisée BE ↔ FE (06-IMPLEMENTATION-PLAN §2).
+- **Déploiement en recette** : variable de dépôt `RECETTE_DEPLOY=true` ; secrets de l'environnement `recette` : `RECETTE_HOST`, `RECETTE_USER` (l'utilisateur `cga`), `RECETTE_SSH_KEY` (clé privée dédiée, sa clé publique dans `~cga/.ssh/authorized_keys`), `RECETTE_KNOWN_HOSTS` (`ssh-keyscan` du serveur).
+- **Production** : variable `PRODUCTION_DEPLOY=true`, secrets `PRODUCTION_*` équivalents, et une approbation obligatoire sur l'environnement `production`.

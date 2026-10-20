@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Testing\TestResponse;
@@ -10,8 +9,6 @@ use Symfony\Component\HttpFoundation\Cookie;
  * Sanctum en mode SPA (06-IMPLEMENTATION-PLAN étape 0.3, 02-TRD §6.1, T-01) : session dans un
  * cookie HttpOnly, jeton CSRF obligatoire pour toute écriture, aucun jeton d'API.
  */
-
-uses(LazilyRefreshDatabase::class);
 
 const SPA_ORIGIN = 'http://localhost:5173';
 
