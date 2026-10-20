@@ -97,6 +97,9 @@ jobs:
       - name: Analyse statique (Larastan niveau 6, règles de sécurité)
         run: composer analyse
 
+      - name: Test de cloisonnement (bloquant, 02-TRD §6.3)
+        run: php vendor/bin/pest tests/Feature/Security
+
       - name: Tests et couverture globale (Pest, PostgreSQL réel)
         run: composer test -- --coverage-clover=build/logs/clover.xml
 
