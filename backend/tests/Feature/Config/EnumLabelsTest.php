@@ -1,0 +1,31 @@
+<?php
+
+use App\Domain\Auth\Enums\InvitationChannel;
+use App\Domain\Auth\Enums\OtpPurpose;
+use App\Domain\Organizations\Enums\AgreementStatus;
+use App\Domain\Organizations\Enums\OrganizationStatus;
+use App\Domain\Organizations\Enums\OrganizationType;
+use App\Domain\Organizations\Enums\SubscriptionStatus;
+use App\Domain\Referentials\Enums\DataStatus;
+use App\Domain\Users\Enums\MembershipStatus;
+use App\Domain\Users\Enums\Role;
+use App\Domain\Users\Enums\UserStatus;
+
+/*
+ * Chaque valeur des listes a son libellé français dans lang/fr/enums.php (02-TRD §7.6).
+ */
+
+it('donne un libellé français à chaque valeur', function (string $enum) {
+    foreach ($enum::cases() as $case) {
+        expect($case->label())->not->toStartWith('enums.');
+    }
+})->with([
+    Role::class, MembershipStatus::class, UserStatus::class, InvitationChannel::class, OtpPurpose::class,
+    OrganizationType::class, OrganizationStatus::class, AgreementStatus::class, SubscriptionStatus::class, DataStatus::class,
+]);
+
+it('nomme les rôles comme le PRD', function () {
+    expect(Role::CgaManager->label())->toBe('Gérant')
+        ->and(Role::PlatformAdmin->label())->toBe('Administrateur de la plateforme')
+        ->and(Role::values())->toHaveCount(16);
+});

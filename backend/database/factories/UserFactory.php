@@ -2,44 +2,47 @@
 
 namespace Database\Factories;
 
-use App\Models\User;
+use App\Domain\Users\Enums\UserStatus;
+use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
-    protected static ?string $password;
+    protected $model = User::class;
 
     /**
-     * Define the model's default state.
-     *
+     * Mot de passe commun des comptes de test, haché une seule fois.
+     */
+    protected static ?string $password = null;
+
+    /**
      * @return array<string, mixed>
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'phone' => '+22507'.fake()->unique()->numerify('########'),
             'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
-            'remember_token' => Str::random(10),
+            'password' => static::$password ??= bcrypt('password'),
+            'status' => UserStatus::Active,
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Compte invité qui n'a pas encore choisi son mot de passe.
      */
-    public function unverified(): static
+    public function invited(): static
     {
-        return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
-        ]);
+        return $this->state(fn (): array => ['status' => UserStatus::Invited, 'password' => null]);
+    }
+
+    public function disabled(): static
+    {
+        return $this->state(fn (): array => ['status' => UserStatus::Disabled, 'disabled_at' => now()]);
     }
 }

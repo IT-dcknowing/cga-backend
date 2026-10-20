@@ -127,6 +127,21 @@ return [
     |
     */
 
+    /*
+    |--------------------------------------------------------------------------
+    | Tables partitionnées par mois (05-BACKEND-SCHEMA §16)
+    |--------------------------------------------------------------------------
+    |
+    | Journaux partitionnés sur created_at. La commande logs:partitions, chaque
+    | jour, prépare le mois en cours et les mois suivants.
+    |
+    */
+
+    'partitions' => [
+        'tables' => ['audit_logs'],
+        'months_ahead' => (int) env('DB_PARTITION_MONTHS_AHEAD', 3),
+    ],
+
     'migrations' => [
         'table' => 'migrations',
         'update_date_on_publish' => true,

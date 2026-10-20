@@ -1,0 +1,90 @@
+<?php
+
+namespace App\Domain\Users\Models;
+
+use App\Domain\Auth\Models\Invitation;
+use App\Domain\Organizations\Models\Organization;
+use App\Domain\Users\Enums\MembershipStatus;
+use App\Domain\Users\Enums\Role;
+use Database\Factories\MembershipFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+/**
+ * Rattachement d'un utilisateur à un espace : une organisation, un rôle, et l'adhérent pour un accès
+ * adhérent (RG-ACC-02). Un utilisateur peut cumuler plusieurs rôles dans une organisation.
+ *
+ * @property string $id
+ * @property string $user_id
+ * @property string $organization_id
+ * @property string|null $member_id
+ * @property Role $role
+ * @property MembershipStatus $status
+ */
+class Membership extends Model
+{
+    /** @use HasFactory<MembershipFactory> */
+    use HasFactory, HasUlids;
+
+    /**
+     * Organisation, rôle, adhérent et statut sont fixés par les Actions (02-TRD §6.7) : aucun champ
+     * n'est remplissable en masse.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'role' => Role::class,
+            'status' => MembershipStatus::class,
+            'read_only_until' => 'immutable_date',
+            'activated_at' => 'immutable_datetime',
+            'disabled_at' => 'immutable_datetime',
+        ];
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<Organization, $this>
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function inviter(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'invited_by');
+    }
+
+    /**
+     * @return HasMany<Invitation, $this>
+     */
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(Invitation::class);
+    }
+
+    protected static function newFactory(): MembershipFactory
+    {
+        return MembershipFactory::new();
+    }
+}

@@ -23,6 +23,39 @@ class SettingsService
     }
 
     /**
+     * Toutes les clés déclarées, à plat (« files.disk_alert_percent » => définition).
+     *
+     * @return array<string, array{type: string, level: string, default: mixed}>
+     */
+    public function definitions(): array
+    {
+        return $this->flatten((array) $this->config->get('cga.settings', []));
+    }
+
+    /**
+     * @param  array<string, mixed>  $node
+     * @return array<string, array{type: string, level: string, default: mixed}>
+     */
+    private function flatten(array $node, string $prefix = ''): array
+    {
+        $definitions = [];
+        foreach ($node as $name => $child) {
+            if (! is_array($child)) {
+                continue;
+            }
+
+            if (array_key_exists('default', $child)) {
+                /** @var array{type: string, level: string, default: mixed} $child */
+                $definitions[$prefix.$name] = $child;
+            } else {
+                $definitions += $this->flatten($child, "{$prefix}{$name}.");
+            }
+        }
+
+        return $definitions;
+    }
+
+    /**
      * @return array{type: string, level: string, default: mixed}
      */
     private function definition(string $key): array

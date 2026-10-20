@@ -22,10 +22,12 @@ final class NoRawSqlWithVariableRuleTest extends ProjectRuleTestCase
         $message = fn (string $method): string => "SQL brut avec une valeur non constante dans {$method}() : utiliser des paramètres liés (02-TRD §6.7, A05).";
 
         $this->analyse([__DIR__.'/data/raw-sql.php'], [
-            [$message('whereRaw'), 16],
-            [$message('orderByRaw'), 17],
-            [$message('raw'), 18],
-            [$message('statement'), 19],
+            [$message('whereRaw'), 17],
+            [$message('orderByRaw'), 18],
+            [$message('raw'), 19],
+            [$message('statement'), 20],
+            [$message('whereRaw'), 21],
+            [$message('statement'), 22],
         ]);
     }
 }
