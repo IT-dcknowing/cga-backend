@@ -2,6 +2,7 @@
 
 namespace App\Domain\Users\Models;
 
+use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Users\Enums\UserStatus;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -25,7 +26,7 @@ use Illuminate\Notifications\Notifiable;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, HasUlids, Notifiable;
+    use Auditable, HasFactory, HasUlids, Notifiable;
 
     /**
      * Le statut, le mot de passe et les dates de connexion sont fixés par les Actions, jamais par

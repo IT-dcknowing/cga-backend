@@ -1,6 +1,8 @@
 <?php
 
+use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Platform\Http\Controllers\HealthController;
+use App\Support\Files\StorageService;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -13,3 +15,10 @@ use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 Route::get('health', HealthController::class)
     ->withoutMiddleware(EnsureFrontendRequestsAreStateful::class)
     ->name('health');
+
+Route::prefix('v1')->group(function (): void {
+    // Téléchargement par lien temporaire signé, délivré après le contrôle des droits (02-TRD §6.4).
+    Route::get('files/{file}/download', FileDownloadController::class)
+        ->middleware('signed')
+        ->name(StorageService::DOWNLOAD_ROUTE);
+});

@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * Droits requis pour modifier un paramètre, selon son niveau (catalogue config/permissions.php).
+ */
+$platform = 'platform.settings.manage';
+
 return [
 
     /*
@@ -7,21 +12,166 @@ return [
     | Registre des paramètres (02-TRD §7.5, 05-BACKEND-SCHEMA §16)
     |--------------------------------------------------------------------------
     |
-    | Chaque clé lue par le code est déclarée ici avec son type, son niveau
-    | (platform, network, cga) et sa valeur par défaut. La table « settings »
-    | (étapes 0.6 et 0.7) permettra de la modifier à l'écran ; d'ici là, la
-    | valeur par défaut s'applique. Une clé non déclarée ne peut pas être lue.
+    | Chaque clé lue par le code est déclarée ici. Une clé non déclarée ne peut
+    | être ni lue ni écrite (SettingsService). Pour chaque clé :
+    | - type : integer, string, boolean, array ;
+    | - level : platform (administrateur), network (CNCGA), cga (gérant), ou
+    |   une liste de niveaux ; la valeur d'un CGA l'emporte sur celle du réseau ;
+    | - default : valeur tant que rien n'est enregistré ;
+    | - rules : règles de validation Laravel de la valeur ('' = la valeur
+    |   elle-même, 'champ' = un champ d'une valeur structurée) ;
+    | - permission : droit requis pour la modifier à l'écran.
     |
     */
 
     'settings' => [
 
+        // Compteur incrémenté à chaque modification d'un paramètre (02-TRD §7.5) ; interne, jamais saisi.
+        'settings' => [
+            'version' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 0, 'internal' => true, 'permission' => null,
+                'rules' => ['' => ['integer', 'min:0']],
+            ],
+        ],
+
         'files' => [
+            'max_upload_mb' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 10, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:100']],
+            ],
+            'allowed_types' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => ['application/pdf', 'image/jpeg', 'image/png'],
+                'rules' => ['' => ['array', 'min:1'], '*' => ['string', 'max:100']],
+            ],
+            'download_link_minutes' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 5, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:1440']],
+            ],
             // Alerte quand le disque de stockage dépasse ce pourcentage d'occupation (02-TRD §6.4).
             'disk_alert_percent' => [
-                'type' => 'integer',
-                'level' => 'platform',
-                'default' => 80,
+                'type' => 'integer', 'level' => 'platform', 'default' => 80, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:100']],
+            ],
+        ],
+
+        'pdf' => [
+            'timeout_seconds' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 60, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:5', 'max:600']],
+            ],
+        ],
+
+        'documents' => [
+            'workers' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 1, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:16']],
+            ],
+        ],
+
+        'rate_limit' => [
+            'login' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => ['max_attempts' => 5, 'decay_minutes' => 15],
+                'rules' => ['' => ['array:max_attempts,decay_minutes'], 'max_attempts' => ['required', 'integer', 'min:1'], 'decay_minutes' => ['required', 'integer', 'min:1']],
+            ],
+            'otp' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => ['max_attempts' => 3, 'decay_minutes' => 60],
+                'rules' => ['' => ['array:max_attempts,decay_minutes'], 'max_attempts' => ['required', 'integer', 'min:1'], 'decay_minutes' => ['required', 'integer', 'min:1']],
+            ],
+            'verification' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => ['max_attempts' => 30, 'decay_minutes' => 1],
+                'rules' => ['' => ['array:max_attempts,decay_minutes'], 'max_attempts' => ['required', 'integer', 'min:1'], 'decay_minutes' => ['required', 'integer', 'min:1']],
+            ],
+        ],
+
+        'session' => [
+            'timeout_agent_minutes' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 30, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:5', 'max:720']],
+            ],
+            'timeout_member_minutes' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 60, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:5', 'max:720']],
+            ],
+        ],
+
+        'messaging' => [
+            'send_window' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => ['from' => '07:00', 'to' => '20:00'],
+                'rules' => ['' => ['array:from,to'], 'from' => ['required', 'date_format:H:i'], 'to' => ['required', 'date_format:H:i', 'after:value.from']],
+            ],
+        ],
+
+        'logs' => [
+            'activity_retention_months' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 24, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:240']],
+            ],
+            'audit_retention_months' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 60, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:240']],
+            ],
+            // Champs remplacés par *** dans les journaux (02-TRD §6.5).
+            'redacted_fields' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => [
+                    'password', 'password_confirmation', 'current_password', 'new_password', 'token', 'code', 'otp',
+                    'secret', 'api_key', 'api_secret', 'client_secret', 'authorization', 'cookie', 'x-xsrf-token',
+                ],
+                'rules' => ['' => ['array'], '*' => ['string', 'max:60']],
+            ],
+        ],
+
+        'pagination' => [
+            'default' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 25, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:5', 'max:100']],
+            ],
+            'max' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 100, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:10', 'max:500']],
+            ],
+        ],
+
+        'invitation' => [
+            'validity_days' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 7, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:60']],
+            ],
+        ],
+
+        'otp' => [
+            'validity_minutes' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 10, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:60']],
+            ],
+        ],
+
+        'queue' => [
+            'alert_delay_minutes' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 15, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:1440']],
+            ],
+        ],
+
+        // Formats de numérotation (02-TRD §7.1, RG-ADH-03) : {YYYY} année, {ABR} abréviation du CGA,
+        // {N:4} numéro sur 4 chiffres au moins.
+        'numbering' => [
+            'membership' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => '{YYYY}-{ABR}-{N:4}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
+            'client' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => 'CAB-{ABR}-{N:5}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
+                ],
             ],
         ],
 

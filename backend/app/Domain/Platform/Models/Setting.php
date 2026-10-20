@@ -2,6 +2,7 @@
 
 namespace App\Domain\Platform\Models;
 
+use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Organizations\Models\Organization;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Setting extends Model
 {
+    use Auditable;
+
     /**
      * Écrit par SettingsService seulement, après validation selon le registre.
      *

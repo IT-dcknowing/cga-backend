@@ -2,6 +2,7 @@
 
 namespace App\Domain\Auth\Models;
 
+use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Auth\Enums\OtpPurpose;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +18,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class OtpCode extends Model
 {
+    use Auditable;
+
     /**
      * Créé et vérifié par les Actions d'authentification seulement.
      *

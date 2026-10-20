@@ -6,6 +6,7 @@ use App\Support\Config\SettingsService;
 use App\Support\Health\HealthCheck;
 use App\Support\Health\HealthCheckError;
 use App\Support\Health\HealthCheckResult;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -35,7 +36,7 @@ class StorageCheck implements HealthCheck
         }
 
         $usedPercent = $this->usedPercent($diskName);
-        $alertPercent = (int) $this->settings->get('files.disk_alert_percent');
+        $alertPercent = $this->alertPercent();
 
         if ($usedPercent !== null && $usedPercent > $alertPercent) {
             return HealthCheckResult::failed(HealthCheckError::LowSpace, [
@@ -46,6 +47,19 @@ class StorageCheck implements HealthCheck
         }
 
         return HealthCheckResult::ok();
+    }
+
+    /**
+     * Seuil enregistré, ou valeur par défaut du registre si la base ne répond pas : le contrôle du
+     * disque ne dépend pas de la base, contrôlée à part.
+     */
+    private function alertPercent(): int
+    {
+        try {
+            return (int) $this->settings->get('files.disk_alert_percent');
+        } catch (QueryException) {
+            return (int) $this->settings->default('files.disk_alert_percent');
+        }
     }
 
     private function canWriteAndRead(): bool

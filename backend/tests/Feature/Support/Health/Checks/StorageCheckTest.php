@@ -1,9 +1,11 @@
 <?php
 
+use App\Support\Config\SettingsService;
 use App\Support\Health\Checks\StorageCheck;
 use App\Support\Health\HealthCheckError;
 use App\Support\Health\HealthStatus;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Storage;
 
 /*
@@ -82,3 +84,16 @@ it('lève une exception quand l\'espace du disque est illisible', function () {
 
     app(StorageCheck::class)->run();
 })->throws(RuntimeException::class);
+
+it('prend le seuil par défaut du registre quand la base ne répond pas', function () {
+    Storage::fake();
+    $settings = Mockery::mock(SettingsService::class);
+    $settings->shouldReceive('get')->andThrow(new QueryException('pgsql', 'select', [], new RuntimeException('connexion refusée')));
+    $settings->shouldReceive('default')->with('files.disk_alert_percent')->andReturn(0);
+    app()->instance(SettingsService::class, $settings);
+
+    $result = app(StorageCheck::class)->run();
+
+    expect($result->error)->toBe(HealthCheckError::LowSpace)
+        ->and($result->context['alert_percent'])->toBe(0);
+});

@@ -2,6 +2,7 @@
 
 namespace App\Domain\Documents\Models;
 
+use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -23,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class File extends Model
 {
-    use HasUlids;
+    use Auditable, HasUlids;
 
     public const UPDATED_AT = null;
 

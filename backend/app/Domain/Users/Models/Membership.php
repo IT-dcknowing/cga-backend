@@ -2,10 +2,12 @@
 
 namespace App\Domain\Users\Models;
 
+use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Auth\Models\Invitation;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
+use App\Domain\Users\Permissions\PermissionResolver;
 use Database\Factories\MembershipFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Membership extends Model
 {
     /** @use HasFactory<MembershipFactory> */
-    use HasFactory, HasUlids;
+    use Auditable, HasFactory, HasUlids;
 
     /**
      * Organisation, rôle, adhérent et statut sont fixés par les Actions (02-TRD §6.7) : aucun champ
@@ -49,6 +51,15 @@ class Membership extends Model
             'activated_at' => 'immutable_datetime',
             'disabled_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * Un rôle ou un statut modifié change les droits : ceux en cache sont invalidés (RG-ROLE-05).
+     */
+    protected static function booted(): void
+    {
+        static::saved(static fn () => app(PermissionResolver::class)->flush());
+        static::deleted(static fn () => app(PermissionResolver::class)->flush());
     }
 
     /**

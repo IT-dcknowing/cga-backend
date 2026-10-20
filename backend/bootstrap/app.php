@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Tenancy\ResolveTenant;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Le SPA s'authentifie par le cookie de session de Sanctum, avec le jeton CSRF (02-TRD §6.1).
         $middleware->statefulApi();
+
+        // Routes métier : espace actif obligatoire, chargé dans TenantContext (02-TRD §6.2).
+        $middleware->alias(['tenant' => ResolveTenant::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // API seulement (02-TRD §3) : toute erreur est rendue en JSON, jamais en page HTML.

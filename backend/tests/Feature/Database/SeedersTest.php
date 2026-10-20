@@ -9,6 +9,7 @@ use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
+use App\Support\Config\SettingsService;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\PlatformSeeder;
 use Database\Seeders\SettingsSeeder;
@@ -16,6 +17,16 @@ use Database\Seeders\SettingsSeeder;
 /*
  * Seeders du socle (06-IMPLEMENTATION-PLAN étape 0.6) : rejouables sans doublon.
  */
+
+/**
+ * Paramètres réseau et plateforme du registre, ceux que SettingsSeeder enregistre.
+ */
+function seededSettingsCount(): int
+{
+    return collect(app(SettingsService::class)->definitions())
+        ->filter(fn (array $definition): bool => array_intersect((array) $definition['level'], ['platform', 'network']) !== [])
+        ->count();
+}
 
 it('crée l\'organisation plateforme et le CNCGA, en données provisoires', function () {
     $this->seed(PlatformSeeder::class);
@@ -60,7 +71,7 @@ it('peut être rejoué sans rien créer deux fois', function () {
     expect(Organization::query()->count())->toBe(2)
         ->and(User::query()->count())->toBe(1)
         ->and(Membership::query()->count())->toBe(1)
-        ->and(Setting::query()->count())->toBe(1);
+        ->and(Setting::query()->count())->toBe(seededSettingsCount());
 });
 
 it('enregistre la valeur par défaut des paramètres réseau et plateforme, sans remplacer une valeur modifiée', function () {

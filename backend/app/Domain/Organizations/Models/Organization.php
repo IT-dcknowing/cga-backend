@@ -2,6 +2,7 @@
 
 namespace App\Domain\Organizations\Models;
 
+use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Documents\Models\File;
 use App\Domain\Organizations\Enums\AgreementStatus;
 use App\Domain\Organizations\Enums\OrganizationStatus;
@@ -33,7 +34,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Organization extends Model
 {
     /** @use HasFactory<OrganizationFactory> */
-    use HasFactory, HasUlids, SoftDeletes;
+    use Auditable, HasFactory, HasUlids, SoftDeletes;
 
     /**
      * Fiche d'identité saisissable. Le type, les statuts, l'abréviation de numérotation, l'abonnement
