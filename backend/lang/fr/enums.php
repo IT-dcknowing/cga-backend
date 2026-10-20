@@ -57,6 +57,13 @@ return [
         'phone_change' => 'Changement de téléphone',
     ],
 
+    'sector_status' => [
+        'validated' => 'Validé',
+        'proposed' => 'Proposé',
+        'rejected' => 'Rejeté',
+        'merged' => 'Fusionné',
+    ],
+
     'preference_channel' => [
         'sms' => 'SMS',
         'whatsapp' => 'WhatsApp',

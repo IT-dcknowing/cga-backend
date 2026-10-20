@@ -8,6 +8,7 @@ use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Enums\SubscriptionStatus;
 use App\Domain\Referentials\Enums\DataStatus;
+use App\Domain\Referentials\Enums\SectorStatus;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Enums\UserStatus;
@@ -23,7 +24,7 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
 })->with([
     Role::class, MembershipStatus::class, UserStatus::class, InvitationChannel::class, OtpPurpose::class,
     OrganizationType::class, OrganizationStatus::class, AgreementStatus::class, SubscriptionStatus::class, DataStatus::class,
-    PreferenceChannel::class,
+    PreferenceChannel::class, SectorStatus::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {

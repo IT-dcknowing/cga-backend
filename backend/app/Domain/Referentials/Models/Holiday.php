@@ -3,8 +3,11 @@
 namespace App\Domain\Referentials\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
+use App\Domain\Referentials\Contracts\Referential;
 use App\Support\Calendar\BusinessCalendar;
 use Carbon\CarbonImmutable;
+use Database\Factories\HolidayFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -14,9 +17,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property CarbonImmutable $date
  * @property string $label
  */
-class Holiday extends Model
+class Holiday extends Model implements Referential
 {
-    use Auditable;
+    /** @use HasFactory<HolidayFactory> */
+    use Auditable, HasFactory;
 
     /**
      * @var list<string>
@@ -29,6 +33,16 @@ class Holiday extends Model
     protected function casts(): array
     {
         return ['date' => 'immutable_date'];
+    }
+
+    public static function referencedBy(): array
+    {
+        return [];
+    }
+
+    protected static function newFactory(): HolidayFactory
+    {
+        return HolidayFactory::new();
     }
 
     protected static function booted(): void

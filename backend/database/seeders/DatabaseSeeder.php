@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             PlatformSeeder::class,
             SettingsSeeder::class,
             PermissionSeeder::class,
+            ReferentialSeeder::class,
         ]);
 
         if (config('cga.seed.demo.enabled') === true) {

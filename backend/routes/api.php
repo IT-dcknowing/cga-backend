@@ -7,6 +7,12 @@ use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Platform\Http\Controllers\HealthController;
+use App\Domain\Referentials\Http\Controllers\CommuneController;
+use App\Domain\Referentials\Http\Controllers\HolidayController;
+use App\Domain\Referentials\Http\Controllers\NationalReferenceController;
+use App\Domain\Referentials\Http\Controllers\RegionalDirectorateController;
+use App\Domain\Referentials\Http\Controllers\SectorController;
+use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
 use App\Support\Files\StorageService;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -41,6 +47,22 @@ Route::prefix('v1')->group(function (): void {
         Route::post('phone/code', [ProfileSecurityController::class, 'phoneCode'])->name('phone.code');
         Route::post('phone', [ProfileSecurityController::class, 'phone'])->name('phone');
         Route::patch('preferences', [ProfileSecurityController::class, 'preferences'])->name('preferences');
+    });
+
+    // Référentiels nationaux (F-REF-01 à 04, 05-BACKEND-SCHEMA §4) : lus dans tout espace, gérés par le CNCGA.
+    // La modification remplace toute la fiche : PUT seulement.
+    Route::middleware(['auth', 'tenant'])->prefix('referentials')->name('referentials.')->group(function (): void {
+        $referential = static function (string $uri, string $controller, string $parameter): void {
+            Route::apiResource($uri, $controller)->parameters([$uri => $parameter])->except('update');
+            Route::put("{$uri}/{{$parameter}}", [$controller, 'update'])->name("{$uri}.update");
+        };
+
+        $referential('regional-directorates', RegionalDirectorateController::class, 'regionalDirectorate');
+        $referential('tax-offices', TaxOfficeController::class, 'taxOffice');
+        $referential('communes', CommuneController::class, 'commune');
+        $referential('sectors', SectorController::class, 'sector');
+        $referential('holidays', HolidayController::class, 'holiday');
+        $referential('national-references', NationalReferenceController::class, 'nationalReference');
     });
 
     // Téléchargement par lien temporaire signé, délivré après le contrôle des droits (02-TRD §6.4).

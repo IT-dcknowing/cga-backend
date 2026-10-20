@@ -4,6 +4,12 @@ namespace Tests\Support;
 
 use App\Domain\Documents\Models\File;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Referentials\Models\Commune;
+use App\Domain\Referentials\Models\Holiday;
+use App\Domain\Referentials\Models\NationalReference;
+use App\Domain\Referentials\Models\RegionalDirectorate;
+use App\Domain\Referentials\Models\Sector;
+use App\Domain\Referentials\Models\TaxOffice;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -35,6 +41,27 @@ final class CrossTenantObjects
                 return $file;
             },
             Organization::class => static fn (Organization $other): Organization => $other,
+        ];
+    }
+
+    /**
+     * Modèles nationaux, sans organisation (05-BACKEND-SCHEMA §4 : référentiels lisibles par tous) : leurs
+     * routes ne relèvent pas du cloisonnement entre CGA. Un modèle cloisonné ne peut pas figurer ici
+     * (vérifié par le test de cloisonnement).
+     *
+     * @return array<class-string<Model>, string> modèle => raison
+     */
+    public static function globalModels(): array
+    {
+        $referential = 'Référentiel national géré par le CNCGA, lisible dans tout espace (05-BACKEND-SCHEMA §4).';
+
+        return [
+            RegionalDirectorate::class => $referential,
+            TaxOffice::class => $referential,
+            Commune::class => $referential,
+            Sector::class => 'Référentiel national ; un secteur proposé n\'est visible que du CGA qui l\'a proposé (RG-REF-01, test dédié).',
+            Holiday::class => $referential,
+            NationalReference::class => $referential,
         ];
     }
 

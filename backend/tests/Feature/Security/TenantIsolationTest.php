@@ -4,11 +4,13 @@ use App\Domain\Audit\Models\AuditLog;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
+use App\Support\Tenancy\BelongsToOrganization;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Routing\Route as RouteDefinition;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\ExpectationFailedException;
 use Tests\Support\CrossTenantObjects;
 
@@ -28,8 +30,23 @@ function routesWithParameters(?string $prefix = null): array
 {
     return array_values(array_filter(
         Route::getRoutes()->getRoutes(),
-        fn (RouteDefinition $route): bool => str_starts_with($route->uri(), $prefix ?? 'api/v1/') && $route->parameterNames() !== [],
+        fn (RouteDefinition $route): bool => str_starts_with($route->uri(), $prefix ?? 'api/v1/') && $route->parameterNames() !== [] && ! designatesGlobalModel($route),
     ));
+}
+
+/**
+ * La route désigne un objet national (référentiel), hors du cloisonnement entre CGA.
+ */
+function designatesGlobalModel(RouteDefinition $route): bool
+{
+    foreach ($route->signatureParameters(['subClass' => UrlRoutable::class]) as $parameter) {
+        $class = $parameter->getType()?->getName();
+        if ($class !== null && array_key_exists($class, CrossTenantObjects::globalModels())) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -97,6 +114,13 @@ function assertIsolated(array $routes): int
 
     return $checked;
 }
+
+it('ne tient pour nationaux que des modèles sans organisation', function () {
+    foreach (array_keys(CrossTenantObjects::globalModels()) as $model) {
+        expect(class_uses_recursive($model))->not->toHaveKey(BelongsToOrganization::class)
+            ->and(Schema::hasColumn((new $model)->getTable(), 'organization_id'))->toBeFalse("{$model} a une colonne organization_id : il relève du cloisonnement.");
+    }
+});
 
 it('connaît les routes /api/v1 qui désignent un objet', function () {
     expect(routesWithParameters())->not->toBeEmpty();
