@@ -57,6 +57,20 @@ return [
         'phone_change' => 'Changement de téléphone',
     ],
 
+    'cga_image_kind' => [
+        'logo' => 'Logo',
+        'signature' => 'Signature du gérant',
+        'stamp' => 'Cachet',
+    ],
+
+    'organization_status_event' => [
+        'suspended' => 'Suspension',
+        'reactivated' => 'Réactivation',
+        'agreement_withdrawn' => 'Retrait d\'agrément',
+        'subscription_changed' => 'Changement d\'abonnement',
+        'terminated' => 'Résiliation',
+    ],
+
     'sector_status' => [
         'validated' => 'Validé',
         'proposed' => 'Proposé',

@@ -170,6 +170,7 @@ return [
     'ulid' => 'Le champ :attribute doit être un ULID valide.',
     'phone' => 'Le numéro de téléphone n\'est pas valide.',
     'phone_taken' => 'Ce numéro est déjà associé à un autre compte.',
+    'tax_office_of_directorate' => 'Ce CDI n\'appartient pas à la direction régionale choisie.',
     'uuid' => 'Le champ :attribute doit être un UUID valide.',
 
     /*

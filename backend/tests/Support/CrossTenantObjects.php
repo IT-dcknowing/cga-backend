@@ -77,6 +77,7 @@ final class CrossTenantObjects
         return [
             'auth.invitations.show:invitationToken' => $invitationToken,
             'auth.invitations.accept:invitationToken' => $invitationToken,
+            'cga.profile.images.store:kind' => 'Type d\'image (logo, signature, cachet) de la fiche du CGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',
         ];
     }
 }

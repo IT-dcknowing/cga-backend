@@ -6,8 +6,12 @@ use App\Domain\Auth\Actions\IssueInvitation;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Models\Invitation;
 use App\Domain\Organizations\Enums\AgreementStatus;
+use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
+use App\Domain\Organizations\Enums\SubscriptionStatus;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Referentials\Models\RegionalDirectorate;
+use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Enums\UserStatus;
@@ -17,15 +21,15 @@ use App\Support\Config\SettingsService;
 use Illuminate\Database\Seeder;
 
 /**
- * Jeu de démonstration (SEED_DEMO=true) : deux CGA fictifs et un compte par cas utile au SPA et à la
- * collection Postman, tous avec le mot de passe cga.seed.demo.password. Rejouable : rien n'est créé
+ * Jeu de démonstration (SEED_DEMO=true) : trois CGA fictifs (dont un suspendu), deux directions
+ * régionales et leurs CDI d'exemple, et un compte par cas utile au SPA et à la collection Postman, tous avec le mot de passe cga.seed.demo.password. Rejouable : rien n'est créé
  * deux fois. N'utilise pas les fabriques de test (absentes d'une installation sans --dev).
  *
  * 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA,
  * DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé ·
  * 0700000006 invité (lien cga.seed.demo.invitation_token, l'ancien lien révoqué) · 0700000007 profil
  * (profil@cga-connect.demo) · 0700000008 mot de passe oublié · 0700000009 administrateur de la
- * plateforme.
+ * plateforme · 0700000010 gérant du CGA suspendu (consultation seule, RG-ORG-08).
  */
 class DemoSeeder extends Seeder
 {
@@ -38,8 +42,10 @@ class DemoSeeder extends Seeder
     {
         $platform = Organization::query()->where('type', OrganizationType::Platform)->sole();
         $cncga = Organization::query()->where('type', OrganizationType::Cncga)->sole();
-        $dck = $this->cga('DC-KNOWING CGA', 'DCK', 'Abidjan', '+2252722000001', 'contact@dcknowing.demo');
-        $bouake = $this->cga('CGA Démo Bouaké', 'DEMOB', 'Bouaké', '+2252731000002', 'contact@cga-bouake.demo');
+        $dck = $this->cga('DC-KNOWING CGA', 'DCK', 'Abidjan', '+2252722445501', 'contact@dcknowing.demo');
+        $bouake = $this->cga('CGA Démo Bouaké', 'DEMOB', 'Bouaké', '+2252731630102', 'contact@cga-bouake.demo');
+        $suspended = $this->suspended($this->cga('CGA Démo Suspendu', 'DEMOS', 'Korhogo', '+2252722445502', 'contact@cga-suspendu.demo'));
+        $this->referentials();
 
         $this->account('0700000001', 'Aminata', 'Présidente', [[$cncga, Role::CncgaPresident]]);
         $this->account('0700000002', 'Koffi', 'Gérant', [[$dck, Role::CgaManager]]);
@@ -53,6 +59,7 @@ class DemoSeeder extends Seeder
         $this->account('0700000007', 'Mariam', 'Profil', [[$bouake, Role::CgaTrainer]], email: 'profil@cga-connect.demo');
         $this->account('0700000008', 'Ibrahim', 'Oubli', [[$dck, Role::CgaLegal]], email: 'motdepasse@cga-connect.demo');
         $this->account('0700000009', 'Awa', 'Administratrice', [[$platform, Role::PlatformAdmin]]);
+        $this->account('0700000010', 'Salif', 'Suspendu', [[$suspended, Role::CgaManager]]);
         $this->invitee($dck);
 
         // Fenêtre des demandes de code ramenée à une minute : la collection Postman se rejoue.
@@ -70,9 +77,44 @@ class DemoSeeder extends Seeder
         $organization->type = OrganizationType::Cga;
         $organization->numbering_abbreviation = $abbreviation;
         $organization->agreement_status = AgreementStatus::Granted;
+        $organization->subscription_status = SubscriptionStatus::Active;
+        $organization->subscription_started_at = now()->startOfYear();
         $organization->save();
 
         return $organization;
+    }
+
+    /**
+     * CGA suspendu à sa création par le jeu de démonstration (F-ORG-06) ; le CNCGA peut ensuite le
+     * réactiver à l'écran.
+     */
+    private function suspended(Organization $organization): Organization
+    {
+        if ($organization->wasRecentlyCreated) {
+            $organization->status = OrganizationStatus::Suspended;
+            $organization->suspended_at = now();
+            $organization->suspension_reason = 'Suspension de démonstration';
+            $organization->save();
+        }
+
+        return $organization;
+    }
+
+    /**
+     * Directions régionales et CDI d'exemple, en données provisoires (RG-DATA-01) : de quoi compléter
+     * la fiche d'un CGA (F-ORG-03).
+     */
+    private function referentials(): void
+    {
+        $directorates = [
+            'DEMO-ABJ' => ['DR Abidjan (démo)', 'DEMO-PLT', 'CDI Plateau (démo)'],
+            'DEMO-BKE' => ['DR Bouaké (démo)', 'DEMO-BKE', 'CDI Bouaké (démo)'],
+        ];
+
+        foreach ($directorates as $code => [$name, $officeCode, $officeName]) {
+            $directorate = RegionalDirectorate::query()->firstOrCreate(['code' => $code], ['name' => $name]);
+            TaxOffice::query()->firstOrCreate(['code' => $officeCode], ['regional_directorate_id' => $directorate->id, 'name' => $officeName]);
+        }
     }
 
     /**

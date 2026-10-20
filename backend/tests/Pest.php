@@ -1,6 +1,9 @@
 <?php
 
+use App\Domain\Users\Models\Membership;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Tests\Support\Spa;
 use Tests\TestCase;
 
 /*
@@ -16,3 +19,13 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)->use(LazilyRefreshDatabase::class)->in('Feature');
+
+/**
+ * Requête du SPA connecté dans l'espace de ce rattachement (02-TRD §6.2).
+ */
+function inSpace(Membership $membership): TestCase
+{
+    return test()->actingAs($membership->user)
+        ->withHeaders(Spa::headers())
+        ->withSession([TenantContext::SESSION_KEY => $membership->id]);
+}

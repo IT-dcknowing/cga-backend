@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Domain\Organizations\Enums\AgreementStatus;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
+use App\Domain\Organizations\Enums\SubscriptionStatus;
 use App\Domain\Organizations\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -17,7 +18,7 @@ class OrganizationFactory extends Factory
     protected $model = Organization::class;
 
     /**
-     * Un CGA agréé et actif par défaut.
+     * Un CGA agréé, actif et abonné par défaut (un CGA non abonné n'a aucun accès, RG-ORG-06).
      *
      * @return array<string, mixed>
      */
@@ -37,6 +38,8 @@ class OrganizationFactory extends Factory
             'phone_1' => '+22527'.fake()->numerify('########'),
             'email' => fake()->unique()->companyEmail(),
             'status' => OrganizationStatus::Active,
+            'subscription_status' => SubscriptionStatus::Active,
+            'subscription_started_at' => now()->subYear(),
         ];
     }
 

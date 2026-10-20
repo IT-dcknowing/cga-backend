@@ -6,6 +6,9 @@ use App\Domain\Auth\Http\Controllers\PasswordResetController;
 use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
+use App\Domain\Organizations\Http\Controllers\CgaProfileController;
+use App\Domain\Organizations\Http\Controllers\OrganizationController;
+use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
 use App\Domain\Platform\Http\Controllers\HealthController;
 use App\Domain\Referentials\Http\Controllers\CommuneController;
 use App\Domain\Referentials\Http\Controllers\HolidayController;
@@ -63,6 +66,25 @@ Route::prefix('v1')->group(function (): void {
         $referential('sectors', SectorController::class, 'sector');
         $referential('holidays', HolidayController::class, 'holiday');
         $referential('national-references', NationalReferenceController::class, 'nationalReference');
+    });
+
+    // Registre des CGA tenu par le CNCGA (F-ORG-01 à 07). La modification remplace la fiche minimale : PUT seulement.
+    Route::middleware(['auth', 'tenant'])->prefix('network/organizations')->name('network.organizations.')->group(function (): void {
+        Route::get('/', [OrganizationController::class, 'index'])->name('index');
+        Route::post('/', [OrganizationController::class, 'store'])->name('store');
+        Route::get('{organization}', [OrganizationController::class, 'show'])->name('show');
+        Route::put('{organization}', [OrganizationController::class, 'update'])->name('update');
+        Route::post('{organization}/subscription', [OrganizationStatusController::class, 'subscription'])->name('subscription');
+        Route::post('{organization}/suspend', [OrganizationStatusController::class, 'suspend'])->name('suspend');
+        Route::post('{organization}/reactivate', [OrganizationStatusController::class, 'reactivate'])->name('reactivate');
+        Route::post('{organization}/withdraw-agreement', [OrganizationStatusController::class, 'withdrawAgreement'])->name('withdraw-agreement');
+    });
+
+    // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).
+    Route::middleware(['auth', 'tenant'])->prefix('cga/profile')->name('cga.profile.')->group(function (): void {
+        Route::get('/', [CgaProfileController::class, 'show'])->name('show');
+        Route::put('/', [CgaProfileController::class, 'update'])->name('update');
+        Route::post('images/{kind}', [CgaProfileController::class, 'storeImage'])->name('images.store');
     });
 
     // Téléchargement par lien temporaire signé, délivré après le contrôle des droits (02-TRD §6.4).

@@ -36,6 +36,28 @@ class PhoneNormalizer
     }
 
     /**
+     * Saisie validée dont les champs téléphone donnés passent au format E.164 ; un champ absent ou
+     * vide reste tel quel.
+     *
+     * @param  array<string, mixed>  $attributes
+     * @param  list<string>  $fields
+     * @return array<string, mixed>
+     *
+     * @throws InvalidArgumentException numéro non validé par rule()
+     */
+    public function normalizeFields(array $attributes, array $fields): array
+    {
+        foreach ($fields as $field) {
+            $value = $attributes[$field] ?? null;
+            if (is_string($value) && $value !== '') {
+                $attributes[$field] = $this->e164OrFail($value);
+            }
+        }
+
+        return $attributes;
+    }
+
+    /**
      * Règle de validation : numéro valide, du pays par défaut ou avec son indicatif international.
      */
     public function rule(): Phone

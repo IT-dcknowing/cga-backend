@@ -30,6 +30,15 @@ return [
     'unknown_permission' => 'Ce droit n\'existe pas.',
     'setting_not_editable' => 'Ce paramètre ne peut pas être modifié à ce niveau.',
 
+    // Organisations (F-ORG-02 à 07)
+    'organization_suspended' => 'Votre CGA est suspendu : seule la consultation est possible.',
+    'organization_not_suspended' => 'Ce CGA n\'est pas suspendu.',
+    'organization_already_suspended' => 'Ce CGA est déjà suspendu.',
+    'organization_terminated' => 'Ce CGA est résilié : il ne peut plus être modifié.',
+    'agreement_already_withdrawn' => 'L\'agrément de ce CGA est déjà retiré.',
+    'abbreviation_locked' => 'L\'abréviation de numérotation ne peut plus changer : des numéros d\'adhésion ont déjà été attribués.',
+    'subscription_unchanged' => 'Ce CGA a déjà cet état d\'abonnement.',
+
     // Référentiels (RG-DATA-05)
     'referential_in_use' => 'Cette valeur est déjà utilisée : elle ne peut pas être supprimée. Désactivez-la ou fusionnez-la plutôt.',
 

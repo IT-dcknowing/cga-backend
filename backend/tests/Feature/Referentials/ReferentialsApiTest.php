@@ -12,24 +12,15 @@ use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Support\Calendar\BusinessCalendar;
 use App\Support\Config\SettingsService;
-use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Tests\Support\Spa;
-use Tests\TestCase;
 
 /*
  * Référentiels nationaux (06-IMPLEMENTATION-PLAN étape 1.1, F-REF-01 à 04) : CRUD par le CNCGA
  * (droit referentials.manage), lecture dans tout espace ; une valeur utilisée ne se supprime pas
  * (RG-DATA-05).
  */
-
-function inSpace(Membership $membership): TestCase
-{
-    return test()->actingAs($membership->user)
-        ->withHeaders(Spa::headers())
-        ->withSession([TenantContext::SESSION_KEY => $membership->id]);
-}
 
 function cncgaManager(): Membership
 {

@@ -5,6 +5,8 @@ namespace App\Domain\Users\Models;
 use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Auth\Models\Invitation;
 use App\Domain\Organizations\Enums\OrganizationStatus;
+use App\Domain\Organizations\Enums\OrganizationType;
+use App\Domain\Organizations\Enums\SubscriptionStatus;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
@@ -71,7 +73,8 @@ class Membership extends Model
 
     /**
      * Rattachements qui ouvrent un espace : actifs, ou en consultation seule (adhérent radié,
-     * RG-ADH-12), dans une organisation non résiliée (02-TRD §6.2).
+     * RG-ADH-12), dans une organisation non résiliée (02-TRD §6.2) ; pour un CGA, abonné ou à
+     * l'essai : un CGA non abonné n'a aucun accès (RG-ORG-06).
      *
      * @param  Builder<self>  $query
      */
@@ -80,7 +83,11 @@ class Membership extends Model
     {
         $query->whereIn('status', [MembershipStatus::Active, MembershipStatus::ReadOnly])
             ->whereHas('organization', static function (Builder $organization): void {
-                $organization->where('status', '!=', OrganizationStatus::Terminated);
+                $organization->where('status', '!=', OrganizationStatus::Terminated)
+                    ->where(static function (Builder $access): void {
+                        $access->where('type', '!=', OrganizationType::Cga)
+                            ->orWhereIn('subscription_status', [SubscriptionStatus::Trial, SubscriptionStatus::Active]);
+                    });
             });
     }
 

@@ -9,6 +9,8 @@ use App\Domain\Notifications\Channels\SmsChannel;
 use App\Domain\Notifications\Contracts\SmsProvider;
 use App\Domain\Notifications\Listeners\LogNotificationActivity;
 use App\Domain\Notifications\Providers\LogSmsProvider;
+use App\Domain\Organizations\Models\Organization;
+use App\Domain\Organizations\Policies\OrganizationPolicy;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
 use App\Domain\Referentials\Models\NationalReference;
@@ -84,6 +86,9 @@ class AppServiceProvider extends ServiceProvider
         foreach ([RegionalDirectorate::class, TaxOffice::class, Commune::class, Sector::class, Holiday::class, NationalReference::class] as $referential) {
             Gate::policy($referential, ReferentialPolicy::class);
         }
+
+        // Registre des CGA et fiche du CGA de l'espace actif (PRD §3.3).
+        Gate::policy(Organization::class, OrganizationPolicy::class);
 
         // Lien d'invitation : l'invitation est désignée par son jeton secret (F-AUTH-02).
         Route::bind('invitationToken', static fn (string $token): InvitationToken => InvitationToken::resolve($token));

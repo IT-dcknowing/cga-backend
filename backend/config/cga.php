@@ -156,6 +156,19 @@ return [
             ],
         ],
 
+        // Abonnement des CGA (F-ORG-05, RG-ORG-07) : durée de l'essai offert, délai de suppression des
+        // données après une résiliation (sous réserve des durées légales).
+        'subscription' => [
+            'trial_months' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 3, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:24']],
+            ],
+            'data_retention_months' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 6, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:120']],
+            ],
+        ],
+
         'queue' => [
             'alert_delay_minutes' => [
                 'type' => 'integer', 'level' => 'platform', 'default' => 15, 'permission' => $platform,
