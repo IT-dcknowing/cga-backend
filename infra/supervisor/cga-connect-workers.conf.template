@@ -25,6 +25,8 @@ stdout_logfile_backups=${WORKER_LOG_BACKUPS}
 command=${PHP_BIN} ${APP_DIR}/current/backend/artisan queue:work --queue=documents --sleep=${WORKER_SLEEP_SECONDS} --max-time=${WORKER_MAX_TIME_SECONDS}
 process_name=%(program_name)s_%(process_num)02d
 numprocs=${WORKERS_DOCUMENTS}
+; Un profil LibreOffice par worker (02-TRD §8.2).
+environment=LIBREOFFICE_PROFILE_SLOT="%(process_num)02d"
 directory=${APP_DIR}/current/backend
 user=${APP_USER}
 autostart=true

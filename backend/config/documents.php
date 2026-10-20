@@ -1,0 +1,117 @@
+<?php
+
+/*
+|--------------------------------------------------------------------------
+| Modèles de documents (02-TRD §8, 06-IMPLEMENTATION-PLAN étape 0.11)
+|--------------------------------------------------------------------------
+|
+| Modèles de la maquette, nettoyés de toute donnée réelle et balisés ${…}
+| (resources/templates). Ce sont les versions 1 provisoires : à l'étape des
+| documents, ils sont chargés dans document_templates, où le CNCGA les valide
+| et les remplace (F-ADM-02). Pour chaque modèle : ses variables, ses images
+| (insérées à la place d'une variable, ou « encadrées » : une image neutre du
+| modèle, word/media/{variable}.jpeg, remplacée en gardant son cadre) et les
+| lignes répétées (cloneRow) avec leur variable de ligne.
+| Un test vérifie que chaque fichier porte exactement ces variables.
+|
+*/
+
+$cga = ['cga_name', 'cga_ncc', 'cga_agreement'];
+$signature = ['cga_signature', 'cga_stamp', 'qr_code'];
+
+return [
+
+    'templates' => [
+
+        'membership_contract' => [
+            'label' => 'Contrat d\'adhésion',
+            'format' => 'docx',
+            'path' => resource_path('templates/membership_contract.docx'),
+            'images' => $signature,
+            'rows' => [],
+            'variables' => [
+                ...$cga, 'cga_legal_form', 'cga_share_capital', 'cga_address', 'cga_phones', 'cga_email', 'cga_rccm',
+                'cga_signatory', 'cga_signatory_name', 'cga_signatory_title',
+                'member_name', 'member_legal_form', 'member_sigle', 'member_share_capital', 'member_address', 'member_section',
+                'member_parcel', 'member_phone', 'member_fax', 'member_email', 'member_activities', 'member_rccm', 'member_ncc',
+                'member_tax_regime', 'member_activity_code', 'member_signatory',
+                'document_place', 'document_date',
+            ],
+        ],
+
+        'membership_certificate' => [
+            'label' => 'Attestation d\'adhésion',
+            'format' => 'docx',
+            'path' => resource_path('templates/membership_certificate.docx'),
+            'images' => $signature,
+            // Logo dans le cadre flottant de l'en-tête : image word/media/cga_logo.jpeg du modèle.
+            'framed_images' => ['cga_logo'],
+            'rows' => [],
+            'variables' => [
+                ...$cga, 'cga_legal_form', 'cga_legal_form_full', 'cga_share_capital', 'cga_address', 'cga_phones', 'cga_email',
+                'cga_rccm', 'cga_signatory_name', 'cga_signatory_title',
+                'certificate_number', 'certificate_year', 'membership_number', 'membership_date',
+                'member_name', 'member_trade_name', 'member_location', 'member_ncc', 'member_legal_form', 'member_tax_regime',
+                'member_tax_office', 'member_phone',
+                'document_place', 'document_date',
+            ],
+        ],
+
+        'quarterly_report_docx' => [
+            'label' => 'Rapport trimestriel (Word)',
+            'format' => 'docx',
+            'path' => resource_path('templates/quarterly_report_docx.docx'),
+            'images' => ['cga_signature', 'cga_stamp', 'qr_code'],
+            'rows' => [
+                'director_name' => ['director_index', 'director_name', 'director_profession', 'director_function', 'director_start_date', 'director_experience'],
+                'employee_name' => ['employee_index', 'employee_name', 'employee_profession', 'employee_function', 'employee_start_date', 'employee_cnps'],
+                'occasional_name' => ['occasional_index', 'occasional_name', 'occasional_diploma', 'occasional_function', 'occasional_since'],
+                'movement_name' => ['movement_name', 'movement_ncc', 'movement_regime', 'movement_number', 'movement_status'],
+            ],
+            'variables' => [
+                ...$cga, 'cga_address', 'cga_seat', 'cga_location', 'cga_contacts', 'cga_tax_service', 'cga_legal_form_capital',
+                'cga_history', 'cga_previous_year_revenue',
+                'report_quarter', 'report_date', 'regional_directorate', 'document_place',
+                'res_rooms', 'res_training_rooms', 'res_furniture', 'res_computers', 'res_software', 'res_projectors', 'res_vehicles',
+                'trainings', 'smt_count', 'balance_sheet_count', 'meetings', 'difficulties', 'suggestions', 'forecasts',
+                'active_tee', 'active_rme', 'active_total', 'new_tee', 'new_rme', 'new_total',
+                'terminated_tee', 'terminated_rme', 'terminated_total',
+                'tax_tee', 'tax_rme', 'tax_vat', 'tax_its', 'tax_cnps', 'tax_total',
+                'signatory_name', 'signatory_title', 'verification_reference',
+            ],
+        ],
+
+        // Classeur officiel SP-CGA, 14 feuilles (02-TRD §8.3) : export de compatibilité.
+        'quarterly_report_xlsx' => [
+            'label' => 'Rapport trimestriel (classeur officiel)',
+            'format' => 'xlsx',
+            'path' => resource_path('templates/quarterly_report_xlsx.xlsx'),
+            'sheets' => 14,
+            'variables' => [
+                'report_quarter_label', 'report_date', 'period_start', 'period_end', 'tax_office_name',
+                ...$cga, 'cga_seat', 'cga_location', 'cga_contacts', 'regional_directorate', 'cga_tax_service',
+                'cga_legal_form_capital', 'cga_history', 'cga_previous_year_revenue',
+                'director_name', 'director_nationality', 'director_profession', 'director_diplomas', 'director_function',
+                'director_start_date', 'director_practice_structure', 'director_practice_function', 'director_practice_years',
+                'employee_name', 'employee_nationality', 'employee_profession', 'employee_diplomas', 'employee_function',
+                'employee_start_date', 'employee_cnps', 'employee_its', 'employee_igr',
+                'occasional_name', 'occasional_nationality', 'occasional_profession', 'occasional_diplomas', 'occasional_function',
+                'occasional_start_date', 'occasional_duration',
+                'res_rooms', 'res_training_rooms', 'res_furniture', 'res_computers', 'res_software', 'res_projectors',
+                'res_vehicles', 'res_other',
+                'trainings', 'training_beneficiaries', 'synthetic_client_name', 'synthetic_client_ncc', 'rsi_client_name', 'rsi_client_ncc',
+                'member_name', 'member_ncc', 'member_activity', 'member_address', 'membership_number_date', 'member_section_parcel',
+                'member_turnover', 'registration_date', 'termination_date_reason',
+            ],
+        ],
+
+    ],
+
+    // Taille des images insérées (pixels) : logo, signature et cachet du signataire, QR de vérification (RG-DOC-02).
+    'images' => [
+        'cga_signature' => ['width' => 96, 'height' => 40],
+        'cga_stamp' => ['width' => 56, 'height' => 56],
+        'qr_code' => ['width' => 64, 'height' => 64],
+    ],
+
+];

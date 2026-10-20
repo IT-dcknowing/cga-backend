@@ -13,6 +13,8 @@ use App\Domain\Users\Permissions\PermissionCatalog;
 use App\Domain\Users\Permissions\PermissionResolver;
 use App\Support\Calendar\BusinessCalendar;
 use App\Support\Config\SettingsService;
+use App\Support\Files\LibreOfficePdfConverter;
+use App\Support\Files\PdfConverter;
 use App\Support\Logging\ActivityLogger;
 use App\Support\Logging\RequestContext;
 use App\Support\Logging\SystemActivityListener;
@@ -25,6 +27,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use InvalidArgumentException;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -49,6 +52,12 @@ class AppServiceProvider extends ServiceProvider
 
         // Pilote SMS « log » jusqu'au branchement des fournisseurs de l'écran « Envois » (lot 6).
         $this->app->bind(SmsProvider::class, LogSmsProvider::class);
+
+        // Conversion PDF : pilote choisi par PDF_CONVERTER (02-TRD §8.2).
+        $this->app->bind(PdfConverter::class, static fn (Application $app): PdfConverter => match (config('pdf.driver')) {
+            'libreoffice' => $app->make(LibreOfficePdfConverter::class),
+            default => throw new InvalidArgumentException('Pilote de conversion PDF inconnu : '.var_export(config('pdf.driver'), true)),
+        });
     }
 
     public function boot(): void
