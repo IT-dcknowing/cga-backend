@@ -12,9 +12,10 @@ use Illuminate\Support\Facades\Log;
 use Throwable;
 
 /**
- * Échantillons des modèles de documents (06-IMPLEMENTATION-PLAN étape 0.11) : chaque modèle rempli
- * avec des données fictives, en DOCX ou XLSX et en PDF par la chaîne de production (LibreOffice), pour
- * le contrôle visuel de la QA dans Word, Excel et LibreOffice (docs/decisions/0001).
+ * Échantillons des modèles de documents (06-IMPLEMENTATION-PLAN étapes 0.11 et 0.12) : chaque modèle
+ * rempli avec des données fictives, et un essai des graphiques natifs du rapport modernisé, en DOCX
+ * ou XLSX et en PDF par la chaîne de production (LibreOffice), pour le contrôle visuel de la QA dans
+ * Word, Excel et LibreOffice (docs/decisions/0001 et 0002).
  */
 class GenerateDocumentSamples extends Command
 {
@@ -50,6 +51,15 @@ class GenerateDocumentSamples extends Command
 
                 $rows[] = [$template['label'], basename($file), number_format((hrtime(true) - $started) / 1e9, 1, ',', ' ').' s'];
             }
+
+            $started = hrtime(true);
+            $file = "{$output}/report_charts.docx";
+            $renderer->render($data->chartTemplate("{$output}/report_charts_template.docx"), $file, [], [], [], $data->charts());
+            File::delete("{$output}/report_charts_template.docx");
+            if (! $this->option('without-pdf')) {
+                file_put_contents("{$output}/report_charts.pdf", $pdf->convert($file));
+            }
+            $rows[] = ['Graphiques du rapport modernisé', basename($file), number_format((hrtime(true) - $started) / 1e9, 1, ',', ' ').' s'];
         } catch (Throwable $exception) {
             Log::error('Échantillons de documents : échec.', ['exception' => $exception]);
 

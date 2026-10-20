@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use Symfony\Component\Process\Exception\ProcessTimedOutException as SymfonyTimeout;
 use Symfony\Component\Process\Process as SymfonyProcess;
+use Tests\Support\LibreOffice;
 
 /*
  * Conversion DOCX → PDF par LibreOffice (02-TRD §8.2) : profil par worker, délai maximal
@@ -46,13 +47,14 @@ it('convertit un document rempli en PDF avec LibreOffice, sans laisser de fichie
     $data = app(SampleDocumentData::class);
     $docx = $this->work.'/contrat.docx';
     app(DocxTemplateRenderer::class)->render($template['path'], $docx, $data->values('membership_contract'), array_intersect_key($data->images($this->work, 'https://cga-connect.ci/verifier/essai'), array_flip($template['images'])));
-    $before = File::isDirectory(storage_path('framework/pdf')) ? count(File::directories(storage_path('framework/pdf'))) : 0;
+    config(['pdf.work_path' => $this->work.'/conversions']);
+    LibreOffice::prepare();
 
     $pdf = app(PdfConverter::class)->convert($docx);
 
     expect($pdf)->toStartWith('%PDF')
         ->and(strlen($pdf))->toBeGreaterThan(10_000)
-        ->and(count(File::directories(storage_path('framework/pdf'))))->toBe($before);
+        ->and(File::directories($this->work.'/conversions'))->toBe([]);
 })->group('libreoffice');
 
 it('lance LibreOffice sans interface, avec le profil du worker et le délai du paramètre', function () {

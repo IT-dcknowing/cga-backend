@@ -107,6 +107,19 @@ return [
 
     ],
 
+    // Graphiques natifs du rapport modernisé (02-TRD §8.4, décision T-21) : taille (EMU, 1 cm =
+    // 360 000), palette de la charte (04-UX-UI : primary, série secondaire, accent, info…), légende
+    // sous le graphique. La même palette sert aux graphiques de l'écran.
+    'charts' => [
+        'width' => 5_760_000,
+        'height' => 3_240_000,
+        'palette' => ['1E6A4E', '4E9273', 'E5732A', '2B4C7E', '9A4A12', '5C6B62'],
+        'legend_position' => 'b',
+    ],
+
+    // Dossier des fichiers temporaires de PhpWord, un sous-dossier par rendu.
+    'temporary_path' => storage_path('framework/phpword'),
+
     // Taille des images insérées (pixels) : logo, signature et cachet du signataire, QR de vérification (RG-DOC-02).
     'images' => [
         'cga_signature' => ['width' => 96, 'height' => 40],

@@ -5,6 +5,7 @@ use App\Domain\Documents\Templates\DocxTemplateRenderer;
 use App\Domain\Documents\Templates\IncompleteTemplateDataException;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use PhpOffice\PhpWord\Settings;
 
 /*
  * Remplissage des modèles Word (02-TRD §8.1-8.2) : variables, lignes répétées, images insérées ou
@@ -94,6 +95,16 @@ it('répète les lignes des tableaux du rapport (cloneRow)', function () {
     expect($document)->not->toContain('${')
         ->toContain('EXEMPLE Awa')->toContain('EXEMPLE Koné')
         ->toContain('BOUTIQUE EXEMPLE')->toContain('EXEMPLE Ibrahim');
+});
+
+it('travaille dans un dossier temporaire propre au rendu, supprimé ensuite : deux workers ne se gênent pas', function () {
+    config(['documents.temporary_path' => $this->work.'/phpword']);
+    $template = config('documents.templates.membership_contract');
+
+    app(DocxTemplateRenderer::class)->render($template['path'], $this->work.'/contrat.docx', app(SampleDocumentData::class)->values('membership_contract'), imagesFor($this->images, $template['images']));
+
+    expect(File::directories($this->work.'/phpword'))->toBe([])
+        ->and(Settings::getTempDir())->toBe(sys_get_temp_dir());
 });
 
 it('refuse de produire un document dont une variable n\'a pas de valeur', function () {

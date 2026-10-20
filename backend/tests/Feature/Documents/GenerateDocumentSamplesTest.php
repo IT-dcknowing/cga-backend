@@ -31,11 +31,12 @@ it('produit chaque modèle rempli, en DOCX ou XLSX et en PDF', function () {
         ->expectsOutputToContain('Attestation d\'adhésion')
         ->assertSuccessful();
 
-    foreach (['membership_contract.docx', 'membership_certificate.docx', 'quarterly_report_docx.docx', 'quarterly_report_xlsx.xlsx'] as $file) {
+    foreach (['membership_contract.docx', 'membership_certificate.docx', 'quarterly_report_docx.docx', 'quarterly_report_xlsx.xlsx', 'report_charts.docx'] as $file) {
         expect($this->work.'/'.$file)->toBeFile()
             ->and((string) file_get_contents($this->work.'/'.pathinfo($file, PATHINFO_FILENAME).'.pdf'))->toBe('%PDF-1.7 '.$file);
     }
-    expect($this->work.'/images/qr.png')->toBeFile();
+    expect($this->work.'/images/qr.png')->toBeFile()
+        ->and($this->work.'/report_charts_template.docx')->not->toBeFile();
 });
 
 it('peut se passer de la conversion PDF', function () {

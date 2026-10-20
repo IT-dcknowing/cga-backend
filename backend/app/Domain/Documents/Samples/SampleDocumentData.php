@@ -2,14 +2,18 @@
 
 namespace App\Domain\Documents\Samples;
 
+use App\Domain\Reports\Charts\ReportChart;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Contracts\Config\Repository;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
 use RuntimeException;
 
 /**
- * Données fictives des échantillons de documents (étape 0.11, contrôle visuel par la QA) : un CGA,
- * un adhérent et un rapport inventés, et des images de remplacement (logo, signature, cachet, QR).
+ * Données fictives des échantillons de documents (étapes 0.11 et 0.12, contrôle visuel par la QA) :
+ * un CGA, un adhérent et un rapport inventés, des images de remplacement (logo, signature, cachet,
+ * QR) et les trois graphiques du rapport modernisé (secteurs, barres, courbe).
  */
 class SampleDocumentData
 {
@@ -136,6 +140,59 @@ class SampleDocumentData
                 ],
             ],
         ];
+    }
+
+    /**
+     * Graphiques du rapport modernisé à éprouver (décision T-21) : répartition par régime (secteurs),
+     * adhérents par CDI (barres, deux séries), évolution trimestrielle (courbe).
+     *
+     * @return array<string, ReportChart>
+     */
+    public function charts(): array
+    {
+        return [
+            'chart_regimes' => new ReportChart('pie', 'Portefeuille par régime', ['TEE', 'RME', 'RSI'], ['Adhérents' => [120, 45, 12]]),
+            'chart_tax_offices' => new ReportChart('column', 'Adhérents par CDI', ['CDI Nord', 'CDI Sud', 'CDI Est'], [
+                'Adhérents actifs' => [40, 55, 30],
+                'Nouveaux du trimestre' => [5, 8, 2],
+            ], 'Nombre d\'adhérents'),
+            'chart_trend' => new ReportChart('line', 'Adhérents actifs par trimestre', ['T4 2025', 'T1 2026', 'T2 2026', 'T3 2026'], ['Adhérents actifs' => [140, 150, 165, 177]]),
+        ];
+    }
+
+    /**
+     * Modèle d'essai des graphiques : un titre et, pour chaque graphique, sa variable ${…} suivie de
+     * son tableau de données (accessibilité, 04-UX-UI). Le modèle du rapport modernisé suivra ce
+     * principe à l'étape du rapport trimestriel.
+     */
+    public function chartTemplate(string $path): string
+    {
+        $document = new PhpWord;
+        $section = $document->addSection();
+        $section->addText('Rapport modernisé — essai des graphiques', ['bold' => true, 'size' => 16, 'color' => '1E6A4E']);
+
+        foreach ($this->charts() as $variable => $chart) {
+            $section->addText($chart->title, ['bold' => true, 'size' => 12]);
+            $section->addText('${'.$variable.'}');
+            $table = $section->addTable(['borderSize' => 4, 'borderColor' => 'E1E6E0', 'cellMargin' => 60]);
+            $table->addRow();
+            $table->addCell(2400)->addText('');
+            foreach (array_keys($chart->series) as $name) {
+                $table->addCell(2400)->addText($name, ['bold' => true]);
+            }
+            foreach ($chart->categories as $index => $category) {
+                $table->addRow();
+                $table->addCell(2400)->addText($category);
+                foreach ($chart->series as $values) {
+                    $table->addCell(2400)->addText((string) $values[$index]);
+                }
+            }
+            $section->addTextBreak();
+        }
+
+        IOFactory::createWriter($document, 'Word2007')->save($path);
+
+        return $path;
     }
 
     /**

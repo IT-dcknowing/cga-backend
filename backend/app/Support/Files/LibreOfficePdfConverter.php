@@ -28,7 +28,7 @@ class LibreOfficePdfConverter implements PdfConverter
             throw new ExternalServiceException('libreoffice', "Fichier à convertir introuvable : {$sourcePath}");
         }
 
-        $workDirectory = storage_path('framework/pdf/'.Str::lower((string) Str::ulid()));
+        $workDirectory = $this->config->string('pdf.work_path').'/'.Str::lower((string) Str::ulid());
         File::ensureDirectoryExists($workDirectory);
 
         try {

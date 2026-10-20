@@ -16,6 +16,9 @@ return [
     // Pilote de conversion : « libreoffice » au démarrage ; « gotenberg » possible plus tard.
     'driver' => env('PDF_CONVERTER', 'libreoffice'),
 
+    // Dossier de travail des conversions, un sous-dossier jetable par conversion.
+    'work_path' => storage_path('framework/pdf'),
+
     'libreoffice' => [
         'binary' => env('LIBREOFFICE_BIN', 'soffice'),
         // Un profil LibreOffice par worker : deux conversions simultanées ne se bloquent pas. Le

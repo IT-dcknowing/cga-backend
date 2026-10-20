@@ -2,9 +2,13 @@
 
 namespace App\Domain\Documents\Templates;
 
+use App\Domain\Reports\Charts\ChartFactory;
+use App\Domain\Reports\Charts\ReportChart;
 use finfo;
 use GdImage;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 use PhpOffice\PhpWord\Settings;
 use PhpOffice\PhpWord\TemplateProcessor;
 use RuntimeException;
@@ -12,7 +16,8 @@ use ZipArchive;
 
 /**
  * Remplit un modèle DOCX balisé ${…} (02-TRD §8.1, PhpWord TemplateProcessor) : lignes répétées
- * (cloneRow), images et valeurs, échappées pour le XML. Une image est soit insérée à la place de sa
+ * (cloneRow), graphiques natifs (rapport modernisé, décision T-21), images et valeurs, échappées pour
+ * le XML. Une image est soit insérée à la place de sa
  * variable (signature, cachet, QR), soit « encadrée » : le modèle contient une image neutre
  * word/media/{variable}.jpeg|png dans un cadre fixe (logo de l'en-tête), remplacée par l'image donnée,
  * ajustée au cadre sans déformation. Un modèle dont une variable reste sans valeur est refusé : aucun
@@ -22,16 +27,20 @@ class DocxTemplateRenderer
 {
     private const FRAMED = '#^word/media/(?<variable>[a-z0-9_]+)\.(?<extension>jpe?g|png)$#';
 
-    public function __construct(private readonly Repository $config) {}
+    public function __construct(
+        private readonly Repository $config,
+        private readonly ChartFactory $charts,
+    ) {}
 
     /**
      * @param  array<string, string>  $values  variable => texte
      * @param  array<string, string>  $images  variable => chemin d'une image PNG ou JPEG
      * @param  array<string, list<array<string, string>>>  $rows  variable de ligne => lignes (variable => texte)
+     * @param  array<string, ReportChart>  $charts  variable => graphique, à la place du paragraphe de la variable
      *
      * @throws IncompleteTemplateDataException
      */
-    public function render(string $templatePath, string $outputPath, array $values, array $images = [], array $rows = []): void
+    public function render(string $templatePath, string $outputPath, array $values, array $images = [], array $rows = [], array $charts = []): void
     {
         $framed = $this->framedImages($templatePath);
         $missingFrames = array_diff(array_keys($framed), array_keys($images));
@@ -39,27 +48,46 @@ class DocxTemplateRenderer
             throw new IncompleteTemplateDataException(array_values($missingFrames));
         }
 
+        // PhpWord nomme ses fichiers temporaires d'images sans les rendre uniques (image_rId14_document.png) :
+        // un dossier temporaire par rendu évite que deux workers ne se les prennent.
+        $temporary = $this->config->string('documents.temporary_path').'/'.Str::lower((string) Str::ulid());
+        File::ensureDirectoryExists($temporary);
+        Settings::setTempDir($temporary);
         Settings::setOutputEscapingEnabled(true);
-        $processor = new TemplateProcessor($templatePath);
 
-        foreach ($rows as $rowVariable => $lines) {
-            $processor->cloneRowAndSetValues($rowVariable, $lines);
+        try {
+            $processor = new TemplateProcessor($templatePath);
+
+            foreach ($rows as $rowVariable => $lines) {
+                $processor->cloneRowAndSetValues($rowVariable, $lines);
+            }
+
+            foreach ($charts as $variable => $chart) {
+                $processor->setChart($variable, $this->charts->make($chart));
+            }
+
+            foreach (array_diff_key($images, $framed) as $variable => $path) {
+                $size = (array) $this->config->get("documents.images.{$variable}", []);
+                $processor->setImageValue($variable, ['path' => $path, 'width' => $size['width'] ?? 120, 'height' => $size['height'] ?? 120, 'ratio' => true]);
+            }
+
+            $processor->setValues($values);
+
+            $missing = array_values(array_unique($processor->getVariables()));
+            if ($missing !== []) {
+                throw new IncompleteTemplateDataException($missing);
+            }
+
+            $processor->saveAs($outputPath);
+        } finally {
+            File::deleteDirectory($temporary);
+            Settings::setTempDir(sys_get_temp_dir());
         }
 
-        foreach (array_diff_key($images, $framed) as $variable => $path) {
-            $size = (array) $this->config->get("documents.images.{$variable}", []);
-            $processor->setImageValue($variable, ['path' => $path, 'width' => $size['width'] ?? 120, 'height' => $size['height'] ?? 120, 'ratio' => true]);
-        }
-
-        $processor->setValues($values);
-
-        $missing = array_values(array_unique($processor->getVariables()));
-        if ($missing !== []) {
-            throw new IncompleteTemplateDataException($missing);
-        }
-
-        $processor->saveAs($outputPath);
         $this->replaceFramedImages($outputPath, $framed, $images);
+        if ($charts !== []) {
+            $this->colorCharts($outputPath);
+        }
     }
 
     /**
@@ -93,6 +121,21 @@ class DocxTemplateRenderer
         $zip->close();
 
         return $framed;
+    }
+
+    /**
+     * Couleur de chaque série des graphiques, d'après la palette (ChartFactory::colorSeries).
+     */
+    private function colorCharts(string $documentPath): void
+    {
+        $zip = $this->open($documentPath);
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $entry = (string) $zip->getNameIndex($i);
+            if (preg_match('#^word/charts/chart\d+\.xml$#', $entry) === 1) {
+                $zip->addFromString($entry, $this->charts->colorSeries((string) $zip->getFromName($entry)));
+            }
+        }
+        $zip->close();
     }
 
     /**
