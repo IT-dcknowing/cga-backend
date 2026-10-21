@@ -21,8 +21,9 @@ use App\Support\Config\SettingsService;
 use Illuminate\Database\Seeder;
 
 /**
- * Jeu de démonstration (SEED_DEMO=true) : trois CGA fictifs (dont un suspendu), deux directions
- * régionales et leurs CDI d'exemple, et un compte par cas utile au SPA et à la collection Postman, tous avec le mot de passe cga.seed.demo.password. Rejouable : rien n'est créé
+ * Jeu de démonstration (SEED_DEMO=true) : trois CGA fictifs (dont un suspendu), les quatre autres CGA
+ * de la maquette (registre provisoire, non abonnés), deux directions régionales et leurs CDI
+ * d'exemple, et un compte par cas utile au SPA et à la collection Postman, tous avec le mot de passe cga.seed.demo.password. Rejouable : rien n'est créé
  * deux fois. N'utilise pas les fabriques de test (absentes d'une installation sans --dev).
  *
  * 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA,
@@ -46,6 +47,7 @@ class DemoSeeder extends Seeder
         $bouake = $this->cga('CGA Démo Bouaké', 'DEMOB', 'Bouaké', '+2252731630102', 'contact@cga-bouake.demo');
         $suspended = $this->suspended($this->cga('CGA Démo Suspendu', 'DEMOS', 'Korhogo', '+2252722445502', 'contact@cga-suspendu.demo'));
         $this->referentials();
+        $this->mockupRegistry();
 
         $this->account('0700000001', 'Aminata', 'Présidente', [[$cncga, Role::CncgaPresident]]);
         $this->account('0700000002', 'Koffi', 'Gérant', [[$dck, Role::CgaManager]]);
@@ -98,6 +100,31 @@ class DemoSeeder extends Seeder
         }
 
         return $organization;
+    }
+
+    /**
+     * Autres CGA de la maquette, au registre provisoire (RG-DATA-01) : non abonnés, sans compte ;
+     * remplacés par la liste réelle depuis « Données de référence ».
+     */
+    private function mockupRegistry(): void
+    {
+        $registry = [
+            ['CGA EXCELLENCE', 'Abidjan – Plateau', '301/SEPMBPE/DGI'],
+            ['CGA IVOIRE GESTION', 'Bouaké', '287/SEPMBPE/DGI'],
+            ['CGA SAN PEDRO CONSEIL', 'San Pedro', '312/SEPMBPE/DGI'],
+            ['CGA YAMOUSSOUKRO PME', 'Yamoussoukro', '295/SEPMBPE/DGI'],
+        ];
+
+        foreach ($registry as [$name, $city, $agreement]) {
+            if (Organization::query()->where('agreement_number', $agreement)->exists()) {
+                continue;
+            }
+
+            $organization = new Organization(['name' => $name, 'city' => $city, 'agreement_number' => $agreement, 'agreement_date' => '2018-01-01', 'phone_1' => '+2252722445566']);
+            $organization->type = OrganizationType::Cga;
+            $organization->agreement_status = AgreementStatus::Granted;
+            $organization->save();
+        }
     }
 
     /**

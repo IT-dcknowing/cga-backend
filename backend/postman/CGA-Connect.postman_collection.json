@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "3f0c6a51-7d2e-4b8a-9c41-5e2f8a7b6c10",
         "name": "CGA Connect — plateforme",
-        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --folder \"10. Étape 1.8 — Droits par rôle\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
+        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --folder \"10. Étape 1.8 — Droits par rôle\" --folder \"11. Étape 1.10 — Données de référence\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -16495,6 +16495,1498 @@
             ]
         },
         {
+            "name": "11. Étape 1.10 — Données de référence",
+            "description": "RG-DATA-01, 02, 05 : jeux de référence remplaçables sans développement — vue d'ensemble, modèle, aperçu (« mettre à jour » ou « remplacer », rien n'est écrit), confirmation, « Marquer comme validé », fusion d'une valeur. Seul le mode « mettre à jour » est appliqué ici (le mode « remplacer » retirerait des données de démo) ; les valeurs créées pour la fusion sont supprimées : le dossier se rejoue.",
+            "item": [
+                {
+                    "name": "Données de référence — vue d'ensemble",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Cinq jeux\", () => pm.expect(data.map(d => d.dataset)).to.eql([\"cgas\", \"regional-directorates\", \"tax-offices\", \"communes\", \"national-references\"]));",
+                                    "    pm.test(\"Communes d'exemple chargées\", () => pm.expect(data.find(d => d.dataset === \"communes\").count).to.be.at.least(12));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data"
+                            ]
+                        },
+                        "description": "Onglet « Données de référence » de /plateforme (RG-DATA-01, 02) : pour chaque jeu, nombre d'éléments, nombre de provisoires, état (provisoire ou validé) ; total des provisoires dans `meta`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Données de référence — refusées au gérant",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data"
+                            ]
+                        },
+                        "description": "Réservées au CNCGA et à l'administrateur : 403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Modèle — directions régionales",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Téléchargé sous le nom du modèle\", () => pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"modele-directions-regionales.xlsx\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/regional-directorates/template",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "regional-directorates",
+                                "template"
+                            ]
+                        },
+                        "description": "Modèle Excel du jeu (feuilles « Données » et « Aide »)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Aperçu — communes, mettre à jour",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"reference_file_id\", data.file_id);",
+                                    "    pm.test(\"Synthèse de l'effet\", () => pm.expect(data.summary).to.have.all.keys(\"creates\", \"updates\", \"unchanged\", \"deletes\", \"deactivates\", \"kept\", \"rejected\"));",
+                                    "    pm.test(\"Ligne sans nom rejetée\", () => pm.expect(data.rejected[0].messages).to.include(\"Nom : champ obligatoire.\"));",
+                                    "    pm.test(\"DR inconnue signalée\", () => pm.expect(data.warnings.length).to.be.at.least(1));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/communes/preview",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "communes",
+                                "preview"
+                            ]
+                        },
+                        "description": "Aperçu du fichier `postman/files/communes-demo.xlsx` (mode « mettre à jour ») : rien n'est écrit. Une commune déjà connue (Cocody), une nouvelle, une DR inconnue laissée vide (avertissement), une ligne sans nom rejetée. Le fichier est rangé : `file_id` sert à la confirmation.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/communes-demo.xlsx"
+                                },
+                                {
+                                    "key": "mode",
+                                    "value": "update",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Aperçu — communes, remplacer",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Synthèse de l'effet\", () => pm.expect(data.summary).to.have.all.keys(\"creates\", \"updates\", \"unchanged\", \"deletes\", \"deactivates\", \"kept\", \"rejected\"));",
+                                    "    pm.test(\"Retraits annoncés\", () => pm.expect(data.removals.length).to.be.above(0));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/communes/preview",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "communes",
+                                "preview"
+                            ]
+                        },
+                        "description": "Même fichier en mode « remplacer », en aperçu seulement : les communes absentes du fichier seraient supprimées si rien ne les utilise, gardées sinon (RG-DATA-05). Rien n'est écrit.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/communes-demo.xlsx"
+                                },
+                                {
+                                    "key": "mode",
+                                    "value": "replace",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Application — communes, mettre à jour",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Synthèse de l'effet\", () => pm.expect(data.summary).to.have.all.keys(\"creates\", \"updates\", \"unchanged\", \"deletes\", \"deactivates\", \"kept\", \"rejected\"));",
+                                    "    pm.test(\"Commune ajoutée ou déjà là\", () => pm.expect(data.summary.creates + data.summary.unchanged).to.be.at.least(2));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/communes/apply",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "communes",
+                                "apply"
+                            ]
+                        },
+                        "description": "Confirmation : le fichier rangé à l'aperçu est relu et appliqué en une transaction (lignes rejetées laissées de côté). Rejoué, la commune ajoutée est inchangée.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"file_id\": \"{{reference_file_id}}\",\n    \"mode\": \"update\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Application — fichier inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/communes/apply",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "communes",
+                                "apply"
+                            ]
+                        },
+                        "description": "Seul un fichier rangé par un aperçu de l'organisation de l'espace actif se confirme : 404 `not_found`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"file_id\": \"01HZZZZZZZZZZZZZZZZZZZZZZZ\",\n    \"mode\": \"update\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Aperçu — fichier qui n'est pas un classeur",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur file\", () => pm.expect(pm.response.json().errors).to.have.property(\"file\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/communes/preview",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "communes",
+                                "preview"
+                            ]
+                        },
+                        "description": "Seul un classeur Excel (.xlsx) est accepté : 422.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/pas-une-image.txt"
+                                },
+                                {
+                                    "key": "mode",
+                                    "value": "update",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Aperçu — mode inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur mode\", () => pm.expect(pm.response.json().errors).to.have.property(\"mode\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/communes/preview",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "communes",
+                                "preview"
+                            ]
+                        },
+                        "description": "Mode `update` ou `replace` : 422.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/communes-demo.xlsx"
+                                },
+                                {
+                                    "key": "mode",
+                                    "value": "fusionner",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Marquer comme validé — références nationales",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Nombre de valeurs validées\", () => pm.expect(data.validated).to.be.a(\"number\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/national-references/validate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "national-references",
+                                "validate"
+                            ]
+                        },
+                        "description": "« Marquer comme validé » (RG-DATA-02) : les valeurs provisoires du jeu passent validées. Rejoué : 0."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Marquer comme validé — refusé au gérant",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/reference-data/communes/validate",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "reference-data",
+                                "communes",
+                                "validate"
+                            ]
+                        },
+                        "description": "403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — DR d'essai",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"merge_suffix\", Date.now().toString(36).toUpperCase().slice(-6));",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"merge_dr_id\", data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/regional-directorates",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "regional-directorates"
+                            ]
+                        },
+                        "description": "DR créée pour l'essai de fusion (code unique à chaque envoi).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"DR-M{{merge_suffix}}\",\n    \"name\": \"DR Fusion {{merge_suffix}}\",\n    \"geo_key\": null,\n    \"active\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — CDI à fusionner",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"merge_source_id\", data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/tax-offices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "tax-offices"
+                            ]
+                        },
+                        "description": "Premier CDI de la DR d'essai.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"regional_directorate_id\": \"{{merge_dr_id}}\",\n    \"code\": \"CDI-A{{merge_suffix}}\",\n    \"name\": \"CDI doublon {{merge_suffix}}\",\n    \"active\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — CDI cible",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"merge_target_id\", data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/tax-offices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "tax-offices"
+                            ]
+                        },
+                        "description": "Second CDI de la même DR.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"regional_directorate_id\": \"{{merge_dr_id}}\",\n    \"code\": \"CDI-B{{merge_suffix}}\",\n    \"name\": \"CDI retenu {{merge_suffix}}\",\n    \"active\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — CDI dans un CDI de la même DR",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Répond la cible\", () => pm.expect(data.id).to.eql(pm.collectionVariables.get(\"merge_target_id\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/tax-offices/{{merge_source_id}}/merge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "tax-offices",
+                                "{{merge_source_id}}",
+                                "merge"
+                            ]
+                        },
+                        "description": "Fusion (RG-DATA-05) : les données qui désignaient le CDI fusionné désignent la cible, puis il disparaît. Journalisé.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"into_id\": \"{{merge_target_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — dans elle-même",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Code d'erreur merge_same_value\", () => pm.expect(pm.response.json().code).to.eql(\"merge_same_value\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/tax-offices/{{merge_target_id}}/merge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "tax-offices",
+                                "{{merge_target_id}}",
+                                "merge"
+                            ]
+                        },
+                        "description": "Une valeur ne se fusionne pas avec elle-même : 422 `merge_same_value`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"into_id\": \"{{merge_target_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — refusée au gérant",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/tax-offices/{{merge_target_id}}/merge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "tax-offices",
+                                "{{merge_target_id}}",
+                                "merge"
+                            ]
+                        },
+                        "description": "Droit `referentials.manage` : 403 `forbidden`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"into_id\": \"{{merge_target_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — DR inconnue",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/regional-directorates/01HZZZZZZZZZZZZZZZZZZZZZZZ/merge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "regional-directorates",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "merge"
+                            ]
+                        },
+                        "description": "Fusion d'une DR : toutes ses données (CDI, communes, CGA) passent à la DR cible. Valeur inconnue : 404 `not_found`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"into_id\": \"{{merge_dr_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — commune inconnue",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/communes/01HZZZZZZZZZZZZZZZZZZZZZZZ/merge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "communes",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "merge"
+                            ]
+                        },
+                        "description": "Fusion d'une commune dans une autre. Valeur inconnue : 404 `not_found`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"into_id\": \"01HZZZZZZZZZZZZZZZZZZZZZZZ\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — secteur inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/sectors/01HZZZZZZZZZZZZZZZZZZZZZZZ/merge",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "sectors",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "merge"
+                            ]
+                        },
+                        "description": "Un secteur fusionné reste, « fusionné », pointant sa cible (RG-REF-01). Valeur inconnue : 404 `not_found`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"into_id\": \"01HZZZZZZZZZZZZZZZZZZZZZZZ\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — nettoyage du CDI",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 204\", () => pm.response.to.have.status(204));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/tax-offices/{{merge_target_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "tax-offices",
+                                "{{merge_target_id}}"
+                            ]
+                        },
+                        "description": "Le CDI d'essai est supprimé : le dossier se rejoue."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fusion — nettoyage de la DR",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 204\", () => pm.response.to.have.status(204));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/referentials/regional-directorates/{{merge_dr_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "referentials",
+                                "regional-directorates",
+                                "{{merge_dr_id}}"
+                            ]
+                        },
+                        "description": "La DR d'essai est supprimée."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -16866,6 +18358,26 @@
         },
         {
             "key": "impact_query",
+            "value": ""
+        },
+        {
+            "key": "reference_file_id",
+            "value": ""
+        },
+        {
+            "key": "merge_suffix",
+            "value": ""
+        },
+        {
+            "key": "merge_dr_id",
+            "value": ""
+        },
+        {
+            "key": "merge_source_id",
+            "value": ""
+        },
+        {
+            "key": "merge_target_id",
             "value": ""
         }
     ]

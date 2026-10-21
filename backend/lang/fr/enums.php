@@ -57,6 +57,25 @@ return [
         'phone_change' => 'Changement de téléphone',
     ],
 
+    'reference_dataset' => [
+        'cgas' => 'Liste des CGA',
+        'regional-directorates' => 'Directions régionales',
+        'tax-offices' => 'Centres des impôts',
+        'communes' => 'Communes',
+        'national-references' => 'Références nationales',
+    ],
+
+    'import_mode' => [
+        'update' => 'Mettre à jour',
+        'replace' => 'Remplacer',
+    ],
+
+    'removal' => [
+        'delete' => 'Supprimée',
+        'deactivate' => 'Désactivée (utilisée)',
+        'keep' => 'Gardée (utilisée)',
+    ],
+
     'import_type' => [
         'cgas' => 'Registre des CGA',
         'members' => 'Portefeuille d\'adhérents',

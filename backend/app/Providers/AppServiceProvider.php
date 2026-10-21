@@ -19,7 +19,9 @@ use App\Domain\Referentials\Models\NationalReference;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Referentials\Policies\ReferenceDataPolicy;
 use App\Domain\Referentials\Policies\ReferentialPolicy;
+use App\Domain\Referentials\ReferenceData\ReferenceDataset;
 use App\Domain\Users\Models\RolePermission;
 use App\Domain\Users\Models\User;
 use App\Domain\Users\Permissions\PermissionCatalog;
@@ -94,6 +96,9 @@ class AppServiceProvider extends ServiceProvider
         foreach ([RegionalDirectorate::class, TaxOffice::class, Commune::class, Sector::class, Holiday::class, NationalReference::class] as $referential) {
             Gate::policy($referential, ReferentialPolicy::class);
         }
+
+        // Données de référence remplaçables par fichier (RG-DATA-01, 02).
+        Gate::policy(ReferenceDataset::class, ReferenceDataPolicy::class);
 
         // Registre des CGA et fiche du CGA de l'espace actif (PRD §3.3).
         Gate::policy(Organization::class, OrganizationPolicy::class);

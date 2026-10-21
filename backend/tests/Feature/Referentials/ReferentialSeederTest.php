@@ -1,7 +1,10 @@
 <?php
 
+use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
+use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
+use App\Domain\Referentials\Models\TaxOffice;
 use Database\Seeders\ReferentialSeeder;
 
 /*
@@ -46,4 +49,15 @@ it('charge les jours fériés à date fixe et ceux liés à Pâques, pour l\'ann
             '2027-05-17' => 'Lundi de Pentecôte',
             '2027-12-25' => 'Noël',
         ]);
+});
+
+it('RG-DATA-01 charge des DR, CDI et communes d\'exemple, provisoires, rejouables sans doublon', function () {
+    $this->seed(ReferentialSeeder::class);
+    $this->seed(ReferentialSeeder::class);
+
+    expect(RegionalDirectorate::query()->count())->toBe(9)
+        ->and(RegionalDirectorate::query()->where('data_status', 'provisional')->count())->toBe(9)
+        ->and(TaxOffice::query()->where('code', 'CDI-2PLAT')->sole()->regionalDirectorate->code)->toBe('DRAN-4')
+        ->and(Commune::query()->count())->toBe(12)
+        ->and(Commune::query()->where('name', 'Bouaké')->sole()->regional_directorate_id)->toBe(RegionalDirectorate::query()->where('code', 'DR-BKE')->value('id'));
 });

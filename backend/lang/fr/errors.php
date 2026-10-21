@@ -50,6 +50,9 @@ return [
     'email_required' => 'Une adresse e-mail est nécessaire pour envoyer l\'invitation par e-mail.',
 
     // Référentiels (RG-DATA-05)
+    'merge_same_value' => 'Une valeur ne se fusionne pas avec elle-même.',
+    'merge_other_directorate' => 'Un CDI ne se fusionne que dans un CDI de la même direction régionale.',
+    'merge_target_inactive' => 'La valeur cible doit être active (ou validée pour un secteur).',
     'referential_in_use' => 'Cette valeur est déjà utilisée : elle ne peut pas être supprimée. Désactivez-la ou fusionnez-la plutôt.',
 
     // Authentification (F-AUTH-01 à 05, 03-APPFLOW §2)

@@ -3,8 +3,11 @@
 namespace Database\Seeders;
 
 use App\Domain\Referentials\Enums\SectorStatus;
+use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
+use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
+use App\Domain\Referentials\Models\TaxOffice;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use LogicException;
@@ -16,7 +19,8 @@ use LogicException;
  * - les jours fériés de date connue, pour l'année en cours et la suivante : fêtes à date fixe et fêtes
  *   liées à Pâques. Les fêtes musulmanes, fixées chaque année par annonce officielle, sont saisies par
  *   le CNCGA.
- * Les DR, CDI et communes viennent par import (F-REF-02, étape 1.10).
+ * - des DR, CDI et communes d'exemple, tirés de la maquette (RG-DATA-01 : provisoires, remplacés par le
+ *   fichier de la DGI dans « Données de référence », sans développement).
  */
 class ReferentialSeeder extends Seeder
 {
@@ -32,6 +36,33 @@ class ReferentialSeeder extends Seeder
         'SAN001' => 'Santé / pharmacie',
         'TRA001' => 'Transport',
         'NUM001' => 'Numérique',
+    ];
+
+    /**
+     * Directions régionales d'exemple : code => [nom, zone de la carte, [code du CDI => nom du CDI]].
+     *
+     * @var array<string, array{0: string, 1: string, 2: array<string, string>}>
+     */
+    private const DIRECTORATES = [
+        'DRAN-1' => ['Abidjan Nord 1', 'abidjan', []],
+        'DRAN-2' => ['Abidjan Nord 2', 'abidjan', []],
+        'DRAN-3' => ['Abidjan Nord 3', 'abidjan', []],
+        'DRAN-4' => ['Abidjan Nord 4', 'abidjan', ['CDI-2PLAT' => 'II Plateaux 2']],
+        'DR-BKE' => ['Bouaké', 'bouake', ['CDI-BKE' => 'Bouaké']],
+        'DR-YAM' => ['Yamoussoukro', 'yamoussoukro', ['CDI-YAM' => 'Yamoussoukro']],
+        'DR-SPE' => ['San Pedro', 'san-pedro', ['CDI-SPE' => 'San Pedro']],
+        'DR-KHO' => ['Korhogo', 'korhogo', ['CDI-KHO' => 'Korhogo']],
+        'DR-DAL' => ['Daloa', 'daloa', ['CDI-DAL' => 'Daloa']],
+    ];
+
+    /**
+     * Communes d'exemple et leur DR (aucune pour celles d'Abidjan, partagées entre les DRAN).
+     *
+     * @var array<string, string|null>
+     */
+    private const COMMUNES = [
+        'Cocody' => null, 'Plateau' => null, 'Adjamé' => null, 'Yopougon' => null, 'Treichville' => null, 'Marcory' => null,
+        'Abobo' => null, 'Koumassi' => null, 'Bingerville' => null, 'Bouaké' => 'DR-BKE', 'Yamoussoukro' => 'DR-YAM', 'San Pedro' => 'DR-SPE',
     ];
 
     /**
@@ -56,6 +87,18 @@ class ReferentialSeeder extends Seeder
                 $sector->validated_at = now();
                 $sector->save();
             }
+        }
+
+        foreach (self::DIRECTORATES as $code => [$name, $geoKey, $offices]) {
+            $directorate = RegionalDirectorate::query()->firstOrCreate(['code' => $code], ['name' => $name, 'geo_key' => $geoKey]);
+            foreach ($offices as $officeCode => $officeName) {
+                TaxOffice::query()->firstOrCreate(['code' => $officeCode], ['name' => $officeName, 'regional_directorate_id' => $directorate->id]);
+            }
+        }
+        foreach (self::COMMUNES as $name => $directorateCode) {
+            Commune::query()->firstOrCreate(['name' => $name], [
+                'regional_directorate_id' => $directorateCode === null ? null : RegionalDirectorate::query()->where('code', $directorateCode)->value('id'),
+            ]);
         }
 
         $year = CarbonImmutable::now()->year;

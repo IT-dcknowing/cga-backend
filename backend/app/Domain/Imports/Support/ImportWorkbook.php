@@ -2,7 +2,7 @@
 
 namespace App\Domain\Imports\Support;
 
-use App\Domain\Imports\Contracts\RowImporter;
+use App\Domain\Imports\Contracts\SpreadsheetLayout;
 use Generator;
 use Illuminate\Support\Str;
 use OpenSpout\Common\Entity\Row;
@@ -26,7 +26,7 @@ final class ImportWorkbook
     /**
      * Modèle à remplir : en-têtes en gras, une feuille d'aide colonne par colonne.
      */
-    public function template(RowImporter $importer): string
+    public function template(SpreadsheetLayout $importer): string
     {
         $columns = $importer->columns();
 
@@ -59,7 +59,7 @@ final class ImportWorkbook
      *
      * @throws UnreadableImportFile fichier illisible ou vide, en-tête sans les colonnes obligatoires
      */
-    public function columns(string $path, RowImporter $importer): array
+    public function columns(string $path, SpreadsheetLayout $importer): array
     {
         $reader = $this->open($path);
         $headers = null;
@@ -221,7 +221,7 @@ final class ImportWorkbook
      *
      * @throws UnreadableImportFile colonnes obligatoires absentes
      */
-    private function positions(array $headers, RowImporter $importer): array
+    private function positions(array $headers, SpreadsheetLayout $importer): array
     {
         $found = [];
         foreach ($headers as $position => $header) {

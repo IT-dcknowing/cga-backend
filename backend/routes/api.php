@@ -13,7 +13,9 @@ use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
 use App\Domain\Platform\Http\Controllers\HealthController;
 use App\Domain\Referentials\Http\Controllers\CommuneController;
 use App\Domain\Referentials\Http\Controllers\HolidayController;
+use App\Domain\Referentials\Http\Controllers\MergeController;
 use App\Domain\Referentials\Http\Controllers\NationalReferenceController;
+use App\Domain\Referentials\Http\Controllers\ReferenceDataController;
 use App\Domain\Referentials\Http\Controllers\RegionalDirectorateController;
 use App\Domain\Referentials\Http\Controllers\SectorController;
 use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
@@ -69,6 +71,21 @@ Route::prefix('v1')->group(function (): void {
         $referential('sectors', SectorController::class, 'sector');
         $referential('holidays', HolidayController::class, 'holiday');
         $referential('national-references', NationalReferenceController::class, 'nationalReference');
+
+        // Fusion d'une valeur utilisée dans une autre (RG-DATA-05).
+        Route::post('regional-directorates/{regionalDirectorate}/merge', [MergeController::class, 'regionalDirectorate'])->name('regional-directorates.merge');
+        Route::post('tax-offices/{taxOffice}/merge', [MergeController::class, 'taxOffice'])->name('tax-offices.merge');
+        Route::post('communes/{commune}/merge', [MergeController::class, 'commune'])->name('communes.merge');
+        Route::post('sectors/{sector}/merge', [MergeController::class, 'sector'])->name('sectors.merge');
+    });
+
+    // Données de référence remplaçables sans développement (RG-DATA-01, 02) : aperçu puis application d'un fichier.
+    Route::middleware(['auth', 'tenant'])->prefix('reference-data')->name('reference-data.')->group(function (): void {
+        Route::get('/', [ReferenceDataController::class, 'index'])->name('index');
+        Route::get('{dataset}/template', [ReferenceDataController::class, 'template'])->name('template');
+        Route::post('{dataset}/preview', [ReferenceDataController::class, 'preview'])->name('preview');
+        Route::post('{dataset}/apply', [ReferenceDataController::class, 'apply'])->name('apply');
+        Route::post('{dataset}/validate', [ReferenceDataController::class, 'validate'])->name('validate');
     });
 
     // Registre des CGA tenu par le CNCGA (F-ORG-01 à 07). La modification remplace la fiche minimale : PUT seulement.

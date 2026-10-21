@@ -14,6 +14,9 @@ use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Enums\SubscriptionStatus;
 use App\Domain\Referentials\Enums\DataStatus;
 use App\Domain\Referentials\Enums\SectorStatus;
+use App\Domain\Referentials\ReferenceData\ImportMode;
+use App\Domain\Referentials\ReferenceData\ReferenceDataset;
+use App\Domain\Referentials\ReferenceData\Removal;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Enums\UserStatus;
@@ -30,7 +33,7 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
     Role::class, MembershipStatus::class, UserStatus::class, InvitationChannel::class, OtpPurpose::class,
     OrganizationType::class, OrganizationStatus::class, AgreementStatus::class, SubscriptionStatus::class, DataStatus::class,
     PreferenceChannel::class, SectorStatus::class, OrganizationStatusEvent::class, CgaImageKind::class,
-    ImportType::class, ImportStatus::class, ImportRowStatus::class,
+    ImportType::class, ImportStatus::class, ImportRowStatus::class, ReferenceDataset::class, ImportMode::class, Removal::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {

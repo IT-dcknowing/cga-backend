@@ -24,6 +24,7 @@ it('crée les CGA et les comptes de démonstration, rejouable sans doublon', fun
 
     expect(Organization::query()->whereIn('numbering_abbreviation', ['DCK', 'DEMOB', 'DEMOS'])->count())->toBe(3)
         ->and(Organization::query()->where('numbering_abbreviation', 'DEMOS')->value('status'))->toBe(OrganizationStatus::Suspended)
+        ->and(Organization::query()->where('agreement_number', 'like', '%/SEPMBPE/DGI')->count())->toBe(4)
         ->and(TaxOffice::query()->whereIn('code', ['DEMO-PLT', 'DEMO-BKE'])->distinct()->count('regional_directorate_id'))->toBe(2)
         ->and(User::query()->where('phone', 'like', '+2250700000%')->count())->toBe(10)
         ->and(Membership::query()->whereHas('user', fn ($q) => $q->where('phone', '+2250700000003'))->count())->toBe(3)

@@ -3,6 +3,7 @@
 namespace App\Domain\Referentials\Actions;
 
 use App\Domain\Referentials\Contracts\Referential;
+use App\Domain\Referentials\Support\ReferentialUsage;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -13,23 +14,18 @@ use Illuminate\Support\Facades\DB;
  */
 class DeleteReferential
 {
+    public function __construct(private readonly ReferentialUsage $usage) {}
+
     /**
      * @throws BusinessRuleException referential_in_use
      */
     public function execute(Model&Referential $referential): void
     {
-        DB::transaction(static function () use ($referential): void {
+        DB::transaction(function () use ($referential): void {
             $referential->newQuery()->whereKey($referential->getKey())->lockForUpdate()->first();
 
-            foreach ($referential::referencedBy() as $table => $column) {
-                $used = DB::table($table)
-                    ->where($column, $referential->getKey())
-                    ->when($table === $referential->getTable(), fn ($query) => $query->where($referential->getKeyName(), '!=', $referential->getKey()))
-                    ->exists();
-
-                if ($used) {
-                    throw new BusinessRuleException('referential_in_use');
-                }
+            if ($this->usage->isUsed($referential)) {
+                throw new BusinessRuleException('referential_in_use');
             }
 
             $referential->delete();
