@@ -57,6 +57,125 @@ return [
         'phone_change' => 'Changement de téléphone',
     ],
 
+    'portfolio' => [
+        'cga' => 'Portefeuille CGA',
+        'cabinet' => 'Portefeuille Cabinet',
+    ],
+
+    'member_status' => [
+        'draft' => 'Brouillon',
+        'active' => 'Actif',
+        'radiation_pending' => 'Radiation en cours',
+        'radiated' => 'Radié',
+        'closed' => 'Clos',
+    ],
+
+    'entity_type' => [
+        'company' => 'Personne morale',
+        'individual' => 'Entreprise individuelle',
+    ],
+
+    'legal_form' => [
+        'SARL' => 'SARL',
+        'SARLU' => 'SARLU',
+        'SAS' => 'SAS',
+        'SASU' => 'SASU',
+        'SA' => 'SA',
+        'SNC' => 'SNC',
+        'GIE' => 'GIE',
+        'COOP' => 'Coopérative',
+        'EI' => 'Entreprise individuelle',
+        'OTHER' => 'Autre',
+    ],
+
+    'tax_regime' => [
+        'RME' => 'RME — microentreprise',
+        'TEE' => 'TEE — entreprenant',
+        'RSI' => 'RSI — réel simplifié',
+        'RNI' => 'RNI — réel normal',
+    ],
+
+    'fees_periodicity' => [
+        'monthly' => 'Mensuelle',
+        'quarterly' => 'Trimestrielle',
+        'yearly' => 'Annuelle',
+    ],
+
+    'pieces_status' => [
+        'pending' => 'Pièces en attente',
+        'complete' => 'Pièces complètes',
+    ],
+
+    'piece_type' => [
+        'rccm' => 'RCCM',
+        'dfe' => 'DFE',
+        'id_document' => 'Pièce d\'identité du dirigeant',
+        'statutes' => 'Statuts',
+        'location_plan' => 'Plan de localisation',
+        'signed_cga_contract' => 'Contrat CGA signé',
+    ],
+
+    'piece_status' => [
+        'expected' => 'Attendue',
+        'received' => 'Reçue',
+        'expired' => 'Expirée',
+        'not_applicable' => 'Sans objet',
+    ],
+
+    'radiation_initiator' => [
+        'cga' => 'CGA / cabinet',
+        'member' => 'Contribuable',
+        'sp_cga' => 'SP-CGA',
+    ],
+
+    'radiation_reason' => [
+        'zone_change' => 'Changement de zone géographique',
+        'follow_up_impossible' => 'Impossibilité matérielle de suivi',
+        'serious_breach' => 'Manquements graves',
+        'reclassified_real_regime' => 'Reclassement au régime réel',
+        'cessation' => 'Cessation d\'activité',
+        'business_sale' => 'Vente ou cession du fonds',
+        'death' => 'Décès',
+        'dissatisfaction' => 'Insatisfaction des prestations',
+        'firm_change' => 'Changement de cabinet ou de CGA',
+        'mutual_termination' => 'Rupture conventionnelle',
+        'agreement_loss' => 'Perte d\'agrément du CGA',
+        'other' => 'Autre',
+    ],
+
+    'radiation_status' => [
+        'requested' => 'Radiation en cours',
+        'validated' => 'Radiation validée',
+        'cancelled' => 'Radiation annulée',
+    ],
+
+    'radiation_outcome' => [
+        'closed' => 'Dossier clos',
+        'moved_to_cabinet' => 'Basculé dans le portefeuille Cabinet',
+    ],
+
+    'revenue_kind' => [
+        'forecast' => 'Prévisionnel',
+        'actual' => 'Réalisé',
+    ],
+
+    'revenue_source' => [
+        'entry' => 'Saisie',
+        'import' => 'Import',
+        'report' => 'Rapport',
+        'compta_flow' => 'Compta Flow',
+    ],
+
+    'movement_direction' => [
+        'cabinet_to_cga' => 'Cabinet vers CGA',
+        'cga_to_cabinet' => 'CGA vers Cabinet',
+    ],
+
+    'fee_kind' => [
+        'entry_fee' => 'Droit d\'adhésion',
+        'fees' => 'Honoraires',
+    ],
+
     'reference_dataset' => [
         'cgas' => 'Liste des CGA',
         'regional-directorates' => 'Directions régionales',

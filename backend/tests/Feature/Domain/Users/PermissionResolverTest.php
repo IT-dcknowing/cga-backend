@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Audit\Models\AuditLog;
+use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
@@ -13,7 +14,6 @@ use App\Domain\Users\Permissions\PermissionResolver;
 use App\Domain\Users\Permissions\UnknownPermissionException;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use App\Support\Tenancy\TenantContext;
-use Illuminate\Support\Str;
 
 /*
  * Droits paramétrables (RG-ROLE-01 à 07, 02-TRD §6.2) : verrou → ajustement utilisateur → surcharge
@@ -26,7 +26,7 @@ function membershipAs(Role $role, ?Organization $organization = null, ?User $use
     $attributes = array_filter([
         'organization_id' => $organization?->id,
         'user_id' => $user?->id,
-        'member_id' => $role->isMemberRole() ? strtolower((string) Str::ulid()) : null,
+        'member_id' => $role->isMemberRole() && $organization !== null ? Member::factory()->create(['organization_id' => $organization->id])->id : null,
     ]);
 
     return $factory->create($attributes);

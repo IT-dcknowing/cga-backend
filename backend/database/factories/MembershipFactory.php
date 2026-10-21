@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\MembershipStatus;
@@ -35,7 +36,8 @@ class MembershipFactory extends Factory
 
     /**
      * Rôle donné, rattaché à une organisation du bon type : un nouveau CGA, ou le CNCGA et
-     * l'organisation « plateforme », uniques, réutilisés s'ils existent.
+     * l'organisation « plateforme », uniques, réutilisés s'ils existent. Un accès adhérent porte un
+     * dossier de la même organisation.
      */
     public function role(Role $role): static
     {
@@ -46,6 +48,9 @@ class MembershipFactory extends Factory
             'organization_id' => fn () => $type === OrganizationType::Cga
                 ? Organization::factory()->state(['type' => $type])
                 : (Organization::query()->where('type', $type)->value('id') ?? Organization::factory()->state(['type' => $type])),
+            'member_id' => fn (array $attributes): ?string => $role->isMemberRole()
+                ? Member::factory()->create(['organization_id' => $attributes['organization_id']])->id
+                : null,
         ]);
     }
 

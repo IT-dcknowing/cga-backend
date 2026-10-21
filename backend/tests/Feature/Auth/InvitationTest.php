@@ -3,6 +3,7 @@
 use App\Domain\Audit\Models\ActivityLog;
 use App\Domain\Audit\Models\AuditLog;
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Members\Models\Member;
 use App\Domain\Notifications\Models\NotificationPreference;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\Role;
@@ -10,7 +11,6 @@ use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\Spa;
 
@@ -35,7 +35,7 @@ function invitation(Role $role = Role::CgaAccountant, array $attributes = []): I
         'user_id' => User::factory()->invited()->create(['first_name' => 'Awa', 'phone' => '+2250700000001', 'email' => 'awa@cga.ci']),
         'organization_id' => $organization->id,
         'role' => $role,
-        'member_id' => $role->isMemberRole() ? strtolower((string) Str::ulid()) : null,
+        'member_id' => $role->isMemberRole() ? Member::factory()->create(['organization_id' => $organization->id])->id : null,
     ]);
 
     return Invitation::factory()->token(INVITATION_TOKEN)->create(['membership_id' => $membership->id, ...$attributes]);

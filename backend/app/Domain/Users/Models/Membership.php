@@ -4,6 +4,7 @@ namespace App\Domain\Users\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Enums\SubscriptionStatus;
@@ -99,6 +100,16 @@ class Membership extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Adhérent d'un accès adhérent (member_owner, member_user).
+     *
+     * @return BelongsTo<Member, $this>
+     */
+    public function member(): BelongsTo
+    {
+        return $this->belongsTo(Member::class);
     }
 
     /**

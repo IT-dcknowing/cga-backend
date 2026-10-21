@@ -9,7 +9,6 @@ use App\Domain\Users\Models\UserPermissionOverride;
 use App\Support\Config\SettingsService;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 use Tests\Support\Spa;
 
@@ -177,7 +176,7 @@ describe('déconnexion après inactivité (02-TRD §6.1)', function () {
     });
 
     it('déconnecte un adhérent après 60 minutes sans requête', function () {
-        $membership = Membership::factory()->role(Role::MemberOwner)->create(['member_id' => strtolower((string) Str::ulid())]);
+        $membership = Membership::factory()->role(Role::MemberOwner)->create();
         signIn($membership->user);
 
         $this->travel(45)->minutes();

@@ -16,7 +16,6 @@ use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Str;
 use Tests\Support\Spa;
 
 /*
@@ -223,7 +222,7 @@ describe('droits sur les agents (PRD §3.3)', function () {
     it('ne trouve que les agents de l\'organisation active', function () {
         $manager = gerant();
         $elsewhere = agentIn(Organization::factory()->create());
-        $member = Membership::factory()->create(['organization_id' => $manager->organization_id, 'role' => Role::MemberOwner, 'member_id' => strtolower((string) Str::ulid())]);
+        $member = Membership::factory()->role(Role::MemberOwner)->create(['organization_id' => $manager->organization_id]);
 
         inSpace($manager)->getJson("/api/v1/cga/users/{$elsewhere->user_id}")->assertNotFound();
         inSpace($manager)->getJson("/api/v1/cga/users/{$member->user_id}")->assertNotFound();

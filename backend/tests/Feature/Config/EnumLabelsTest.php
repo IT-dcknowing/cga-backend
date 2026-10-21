@@ -5,6 +5,23 @@ use App\Domain\Auth\Enums\OtpPurpose;
 use App\Domain\Imports\Enums\ImportRowStatus;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
+use App\Domain\Members\Enums\EntityType;
+use App\Domain\Members\Enums\FeeKind;
+use App\Domain\Members\Enums\FeesPeriodicity;
+use App\Domain\Members\Enums\LegalForm;
+use App\Domain\Members\Enums\MemberStatus;
+use App\Domain\Members\Enums\MovementDirection;
+use App\Domain\Members\Enums\PiecesStatus;
+use App\Domain\Members\Enums\PieceStatus;
+use App\Domain\Members\Enums\PieceType;
+use App\Domain\Members\Enums\Portfolio;
+use App\Domain\Members\Enums\RadiationInitiator;
+use App\Domain\Members\Enums\RadiationOutcome;
+use App\Domain\Members\Enums\RadiationReason;
+use App\Domain\Members\Enums\RadiationStatus;
+use App\Domain\Members\Enums\RevenueKind;
+use App\Domain\Members\Enums\RevenueSource;
+use App\Domain\Members\Enums\TaxRegime;
 use App\Domain\Notifications\Enums\PreferenceChannel;
 use App\Domain\Organizations\Enums\AgreementStatus;
 use App\Domain\Organizations\Enums\CgaImageKind;
@@ -34,6 +51,7 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
     OrganizationType::class, OrganizationStatus::class, AgreementStatus::class, SubscriptionStatus::class, DataStatus::class,
     PreferenceChannel::class, SectorStatus::class, OrganizationStatusEvent::class, CgaImageKind::class,
     ImportType::class, ImportStatus::class, ImportRowStatus::class, ReferenceDataset::class, ImportMode::class, Removal::class,
+    Portfolio::class, MemberStatus::class, EntityType::class, LegalForm::class, TaxRegime::class, FeesPeriodicity::class, PiecesStatus::class, PieceType::class, PieceStatus::class, RadiationInitiator::class, RadiationReason::class, RadiationStatus::class, RadiationOutcome::class, RevenueKind::class, RevenueSource::class, MovementDirection::class, FeeKind::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {

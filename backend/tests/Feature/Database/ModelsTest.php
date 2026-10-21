@@ -68,7 +68,7 @@ it('ne laisse remplir en masse ni le statut, ni le rôle, ni l\'organisation', f
 });
 
 it('rattache chaque rôle au bon type d\'organisation', function (Role $role, OrganizationType $type) {
-    $membership = Membership::factory()->role($role)->create($role->isMemberRole() ? ['member_id' => strtolower((string) Str::ulid())] : []);
+    $membership = Membership::factory()->role($role)->create();
 
     expect($membership->organization->type)->toBe($type)
         ->and($membership->role)->toBe($role);

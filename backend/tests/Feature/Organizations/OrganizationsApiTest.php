@@ -289,9 +289,7 @@ describe('suspension, réactivation et perte d\'agrément (F-ORG-06, 07)', funct
     it('RG-ORG-08 laisse les adhérents d\'un CGA suspendu agir sur leurs documents', function () {
         Route::middleware(['api', 'auth', 'tenant'])->post('api/v1/essai-adherent', fn () => ['ok' => true]);
         $organization = Organization::factory()->suspended()->create();
-        $member = Membership::factory()->create([
-            'organization_id' => $organization->id, 'role' => Role::MemberOwner, 'member_id' => strtolower((string) Str::ulid()),
-        ]);
+        $member = Membership::factory()->role(Role::MemberOwner)->create(['organization_id' => $organization->id]);
 
         inSpace($member)->postJson('/api/v1/essai-adherent')->assertOk();
         inSpace(agentOf($organization))->postJson('/api/v1/essai-adherent')->assertStatus(409);
