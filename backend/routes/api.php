@@ -7,6 +7,7 @@ use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Imports\Http\Controllers\ImportController;
+use App\Domain\Members\Http\Controllers\MemberController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
 use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
@@ -151,6 +152,17 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{agent}/permissions', [UserPermissionController::class, 'show'])->name('permissions.show');
         Route::put('{agent}/permissions', [UserPermissionController::class, 'update'])->name('permissions.update');
         Route::post('{agent}/permissions/reset', [UserPermissionController::class, 'reset'])->name('permissions.reset');
+    });
+
+    // Dossiers des adhérents du centre (F-ADH-01 à 04). La modification remplace la fiche : PUT (multipart avec
+    // _method=PUT quand elle porte un justificatif, RG-ADH-06b).
+    Route::middleware(['auth', 'tenant'])->prefix('cga/members')->name('cga.members.')->group(function (): void {
+        Route::get('/', [MemberController::class, 'index'])->name('index');
+        Route::post('/', [MemberController::class, 'store'])->name('store');
+        Route::get('ncc-check', [MemberController::class, 'nccCheck'])->name('ncc-check');
+        Route::get('{member}', [MemberController::class, 'show'])->name('show');
+        Route::put('{member}', [MemberController::class, 'update'])->name('update');
+        Route::delete('{member}', [MemberController::class, 'destroy'])->name('destroy');
     });
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).

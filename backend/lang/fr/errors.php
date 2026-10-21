@@ -49,6 +49,13 @@ return [
     'user_disabled' => 'Le compte de cette personne est désactivé sur la plateforme.',
     'email_required' => 'Une adresse e-mail est nécessaire pour envoyer l\'invitation par e-mail.',
 
+    // Dossiers des adhérents (M04)
+    'ncc_already_registered' => 'Ce NCC a déjà un dossier ouvert dans votre centre : ouvrez-le (ou basculez-le) plutôt que d\'en créer un autre.',
+    'membership_exclusive' => 'Ce contribuable est adhérent d\'un autre CGA. L\'inscription sera possible dès que sa radiation y aura été validée.',
+    'member_not_draft' => 'Seul un brouillon se supprime : un dossier validé se radie.',
+    'member_closed' => 'Ce dossier est radié ou clos : il ne se modifie plus. Un retour est une nouvelle adhésion.',
+    'source_locked' => 'Cette valeur vient de Compta Flow, qui fait foi : elle se corrige dans Compta Flow.',
+
     // Référentiels (RG-DATA-05)
     'merge_same_value' => 'Une valeur ne se fusionne pas avec elle-même.',
     'merge_other_directorate' => 'Un CDI ne se fusionne que dans un CDI de la même direction régionale.',

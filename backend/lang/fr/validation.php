@@ -169,6 +169,8 @@ return [
     'url' => 'Le champ :attribute doit être une URL valide.',
     'ulid' => 'Le champ :attribute doit être un ULID valide.',
     'phone' => 'Le numéro de téléphone n\'est pas valide.',
+    'ncc' => 'Le NCC compte 7 chiffres suivis d\'une lettre (ex. 1234567A).',
+    'regime_of_portfolio' => 'Au portefeuille CGA, le régime est RME ou TEE ; le régime réel (RSI, RNI) relève du portefeuille Cabinet.',
     'phone_taken' => 'Ce numéro est déjà associé à un autre compte.',
     'tax_office_of_directorate' => 'Ce CDI n\'appartient pas à la direction régionale choisie.',
     'uuid' => 'Le champ :attribute doit être un UUID valide.',

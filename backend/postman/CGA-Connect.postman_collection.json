@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "3f0c6a51-7d2e-4b8a-9c41-5e2f8a7b6c10",
         "name": "CGA Connect — plateforme",
-        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --folder \"10. Étape 1.8 — Droits par rôle\" --folder \"11. Étape 1.10 — Données de référence\" --folder \"12. Étape 1.11 — Habilitations par utilisateur\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
+        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --folder \"10. Étape 1.8 — Droits par rôle\" --folder \"11. Étape 1.10 — Données de référence\" --folder \"12. Étape 1.11 — Habilitations par utilisateur\" --folder \"13. Étape 2.2 — Dossiers des adhérents\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -18795,6 +18795,1267 @@
             ]
         },
         {
+            "name": "13. Étape 2.2 — Dossiers des adhérents",
+            "description": "F-ADH-01 à 04, RG-ADH-01, 05, 06b : liste par portefeuille, contrôle du NCC, inscription en brouillon (portefeuilles CGA et Cabinet), doublon dans le centre, règles de régime, fiche, modification, suppression d'un brouillon. Chaque envoi tire un NCC au hasard et supprime ses brouillons : le dossier se rejoue.",
+            "item": [
+                {
+                    "name": "Adhérents — liste",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test(\"Liste paginée\", () => { pm.expect(json.data).to.be.an(\"array\"); pm.expect(json.meta).to.have.property(\"per_page\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Adhérents du centre (F-ADH-01), portefeuille CGA par défaut (`filter[portfolio]=cabinet` pour l'autre), paginés ; recherche `filter[search]` (raison sociale, sigle, NCC, numéros, ancien n°, téléphone), filtres statut, régime, secteur, CDI, pièces, apporteur, dates d'adhésion."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Adhérents — liste du portefeuille Cabinet",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test(\"Seulement le Cabinet\", () => json.data.forEach(m => pm.expect(m.portfolio).to.eql(\"cabinet\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members?filter[portfolio]=cabinet",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[portfolio]",
+                                    "value": "cabinet"
+                                }
+                            ]
+                        },
+                        "description": "Portefeuille Cabinet (droit `members.cabinet.view`)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Adhérents — filtre inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur filter.regime\", () => pm.expect(pm.response.json().errors).to.have.property(\"filter.regime\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members?filter[regime]=XYZ",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[regime]",
+                                    "value": "XYZ"
+                                }
+                            ]
+                        },
+                        "description": "Régime hors liste : 422."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Adhérents — refusés hors d'un CGA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "L'espace du CNCGA n'a pas de dossiers d'adhérents : 403 `forbidden` (RG-SEC-01)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Adhérents — sans session",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 401\", () => pm.response.to.have.status(401));",
+                                    "    pm.test(\"Code d'erreur unauthenticated\", () => pm.expect(pm.response.json().code).to.eql(\"unauthenticated\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "401 `unauthenticated`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "NCC — contrôle à la volée",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"member_ncc\", String(Math.floor(Math.random() * 1e7)).padStart(7, \"0\") + \"A\");",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"NCC normalisé et valide\", () => { pm.expect(data.valid).to.be.true; pm.expect(data.ncc).to.match(/^[0-9]{7}A$/); });",
+                                    "    pm.test(\"Aucun dossier ouvert\", () => pm.expect(data.existing).to.eql(null));",
+                                    "    pm.test(\"Pas inscrit ailleurs\", () => pm.expect(data.enrolled_elsewhere).to.be.false);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/ncc-check?ncc={{member_ncc}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "ncc-check"
+                            ],
+                            "query": [
+                                {
+                                    "key": "ncc",
+                                    "value": "{{member_ncc}}"
+                                }
+                            ]
+                        },
+                        "description": "Contrôle du NCC saisi (F-ADH-02, RG-ADH-05) : format après normalisation, dossier déjà ouvert dans le centre, inscription au portefeuille CGA d'un autre CGA (oui / non, sans nom). NCC tiré au hasard."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Inscription — brouillon",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"member_id\", data.id);",
+                                    "    pm.test(\"Brouillon sans numéro\", () => { pm.expect(data.status).to.eql(\"draft\"); pm.expect(data.membership_number).to.eql(null); });",
+                                    "    pm.test(\"Fiche mise en forme\", () => { pm.expect(data.company_name).to.eql(\"ETS POSTMAN & FILS\"); pm.expect(data.sigle).to.eql(\"EPF\"); pm.expect(data.phone).to.eql(\"+2250707070707\"); });",
+                                    "    pm.test(\"Chiffre d'affaires de référence\", () => pm.expect(data.reference_revenue.amount).to.eql(24500000));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Inscription enregistrée comme brouillon (RG-ADH-01) : sans numéro ; raison sociale en majuscules, sigle par défaut (initiales), téléphone E.164, montants du barème du CGA s'ils ne sont pas saisis, chiffre d'affaires de référence.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Postman & Fils\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{member_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"07 07 07 07 07\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Inscription — NCC déjà ouvert",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur ncc_already_registered\", () => pm.expect(pm.response.json().code).to.eql(\"ncc_already_registered\"));",
+                                    "    pm.test(\"Dossier existant désigné\", () => pm.expect(pm.response.json().details.member_id).to.eql(pm.collectionVariables.get(\"member_id\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Un NCC n'a qu'un dossier ouvert dans le centre (RG-ADH-05) : 409 `ncc_already_registered`, avec le dossier existant.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Postman & Fils\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{member_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"07 07 07 07 07\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Inscription — régime réel au portefeuille CGA",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"member_ncc_2\", String(Math.floor(Math.random() * 1e7)).padStart(7, \"0\") + \"B\");",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur regime\", () => pm.expect(pm.response.json().errors).to.have.property(\"regime\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Au portefeuille CGA, le régime est RME ou TEE (RG-ADH-08) : 422 sur `regime`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Postman & Fils\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{member_ncc_2}}\",\n    \"regime\": \"RSI\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"07 07 07 07 07\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Inscription — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur company_name\", () => pm.expect(pm.response.json().errors).to.have.property(\"company_name\"));",
+                                    "    pm.test(\"Erreur de validation sur ncc\", () => pm.expect(pm.response.json().errors).to.have.property(\"ncc\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Champs du dossier obligatoires, NCC lisible : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"123\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"07 07 07 07 07\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Inscription — portefeuille Cabinet au régime réel",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"cabinet_member_id\", data.id);",
+                                    "    pm.test(\"Cabinet, RSI\", () => { pm.expect(data.portfolio).to.eql(\"cabinet\"); pm.expect(data.regime).to.eql(\"RSI\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Le portefeuille Cabinet accepte les quatre régimes, sans contrat CGA ni apporteur.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cabinet\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Postman & Fils\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{member_ncc_2}}\",\n    \"regime\": \"RSI\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"07 07 07 07 07\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Inscription — refusée hors d'un CGA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "403 `forbidden`.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Postman & Fils\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{member_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"07 07 07 07 07\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fiche — lecture",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Dossier inscrit plus haut\", () => pm.expect(data.id).to.eql(pm.collectionVariables.get(\"member_id\")));",
+                                    "    pm.test(\"Supprimable (brouillon)\", () => pm.expect(data.can.delete).to.be.true);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{member_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{member_id}}"
+                            ]
+                        },
+                        "description": "Fiche du dossier (F-ADH-03), avec les actions permises."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Fiche — dossier inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ"
+                            ]
+                        },
+                        "description": "404 `not_found` (cloisonnement)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Modification — brouillon",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Fiche modifiée\", () => { pm.expect(data.main_activity).to.eql(\"Quincaillerie\"); pm.expect(data.regime).to.eql(\"RME\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{member_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{member_id}}"
+                            ]
+                        },
+                        "description": "Modification de la fiche (F-ADH-04). Sur un dossier validé, changer la raison sociale ou le NCC exige un justificatif (envoi multipart avec `_method=PUT`, champ `justification`, RG-ADH-06b) ; le régime d'un dossier validé change par « Changer de régime ».",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Postman & Fils\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{member_ncc}}\",\n    \"regime\": \"RME\",\n    \"main_activity\": \"Quincaillerie\",\n    \"phone\": \"07 07 07 07 07\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Modification — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur phone\", () => pm.expect(pm.response.json().errors).to.have.property(\"phone\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{member_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{member_id}}"
+                            ]
+                        },
+                        "description": "Téléphone invalide : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Postman & Fils\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{member_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"12\",\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 24500000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Suppression — brouillon Cabinet",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 204\", () => pm.response.to.have.status(204));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{cabinet_member_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{cabinet_member_id}}"
+                            ]
+                        },
+                        "description": "Un brouillon se supprime (RG-ADH-01) ; un dossier validé se radie (409 `member_not_draft`)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Suppression — brouillon",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 204\", () => pm.response.to.have.status(204));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{member_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{member_id}}"
+                            ]
+                        },
+                        "description": "Le brouillon inscrit plus haut est supprimé : le dossier se rejoue."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Suppression — dossier déjà supprimé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{member_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{member_id}}"
+                            ]
+                        },
+                        "description": "404 `not_found`."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -19206,6 +20467,22 @@
         },
         {
             "key": "user_rights_body",
+            "value": ""
+        },
+        {
+            "key": "member_ncc",
+            "value": ""
+        },
+        {
+            "key": "member_ncc_2",
+            "value": ""
+        },
+        {
+            "key": "member_id",
+            "value": ""
+        },
+        {
+            "key": "cabinet_member_id",
             "value": ""
         }
     ]
