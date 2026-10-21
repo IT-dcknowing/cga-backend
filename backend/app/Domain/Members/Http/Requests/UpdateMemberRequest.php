@@ -3,11 +3,10 @@
 namespace App\Domain\Members\Http\Requests;
 
 use App\Domain\Members\Enums\Portfolio;
-use App\Domain\Members\Models\Member;
+use App\Domain\Members\Http\Requests\Concerns\RouteMember;
 use App\Support\Config\SettingsService;
 use App\Support\Phones\PhoneNormalizer;
 use App\Support\Tenancy\TenantContext;
-use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Gate;
 
@@ -18,6 +17,8 @@ use Illuminate\Support\Facades\Gate;
  */
 class UpdateMemberRequest extends MemberRequest
 {
+    use RouteMember;
+
     public function authorize(): bool
     {
         return Gate::allows('update', $this->member());
@@ -41,16 +42,6 @@ class UpdateMemberRequest extends MemberRequest
         $file = $this->validated('justification');
 
         return $file instanceof UploadedFile ? $file : null;
-    }
-
-    /**
-     * @throws AuthorizationException route sans dossier
-     */
-    public function member(): Member
-    {
-        $member = $this->route('member');
-
-        return $member instanceof Member ? $member : throw new AuthorizationException;
     }
 
     protected function fixedPortfolio(): ?Portfolio

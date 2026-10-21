@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -92,6 +93,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property CarbonInterface|null $deleted_at
  * @property-read Collection<int, MemberPiece> $pieces
  * @property-read Collection<int, Radiation> $radiations
+ * @property-read Radiation|null $currentRadiation
  * @property-read Collection<int, MemberRevenue> $revenues
  * @property-read BusinessReferrer|null $referrer
  * @property-read TaxOffice|null $taxOffice
@@ -192,6 +194,16 @@ class Member extends Model
     public function radiations(): HasMany
     {
         return $this->hasMany(Radiation::class);
+    }
+
+    /**
+     * Radiation en vigueur : demandée ou validée, non annulée (RG-ADH-17).
+     *
+     * @return HasOne<Radiation, $this>
+     */
+    public function currentRadiation(): HasOne
+    {
+        return $this->hasOne(Radiation::class)->whereNull('cancelled_at')->latest('requested_at');
     }
 
     /**

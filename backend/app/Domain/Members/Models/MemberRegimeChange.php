@@ -3,7 +3,9 @@
 namespace App\Domain\Members\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
+use App\Domain\Documents\Models\File;
 use App\Domain\Members\Enums\TaxRegime;
+use App\Domain\Users\Models\User;
 use App\Support\Tenancy\BelongsToOrganization;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -23,6 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $justification_file_id
  * @property string|null $created_by
  * @property-read Member $member
+ * @property-read File|null $justification
+ * @property-read User|null $author
  */
 class MemberRegimeChange extends Model
 {
@@ -56,5 +60,21 @@ class MemberRegimeChange extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    /**
+     * @return BelongsTo<File, $this>
+     */
+    public function justification(): BelongsTo
+    {
+        return $this->belongsTo(File::class, 'justification_file_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

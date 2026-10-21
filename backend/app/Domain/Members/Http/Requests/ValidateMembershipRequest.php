@@ -2,8 +2,7 @@
 
 namespace App\Domain\Members\Http\Requests;
 
-use App\Domain\Members\Models\Member;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Domain\Members\Http\Requests\Concerns\RouteMember;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 
@@ -13,6 +12,8 @@ use Illuminate\Support\Facades\Gate;
  */
 class ValidateMembershipRequest extends FormRequest
 {
+    use RouteMember;
+
     public function authorize(): bool
     {
         return Gate::allows('validate', $this->member());
@@ -31,15 +32,5 @@ class ValidateMembershipRequest extends FormRequest
     public function exclusivityConfirmed(): bool
     {
         return (bool) $this->validated('exclusivity_confirmed');
-    }
-
-    /**
-     * @throws AuthorizationException route sans dossier
-     */
-    public function member(): Member
-    {
-        $member = $this->route('member');
-
-        return $member instanceof Member ? $member : throw new AuthorizationException;
     }
 }

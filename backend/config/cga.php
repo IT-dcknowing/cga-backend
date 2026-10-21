@@ -145,11 +145,6 @@ return [
                 'type' => 'boolean', 'level' => 'platform', 'default' => false, 'permission' => $platform,
                 'rules' => ['' => ['boolean']],
             ],
-            // Alerte au gérant d'un adhérent du portefeuille CGA resté au régime réel (RG-ADH-09).
-            'rsi_alert_days' => [
-                'type' => 'integer', 'level' => 'network', 'default' => 90, 'permission' => 'network_settings.manage',
-                'rules' => ['' => ['integer', 'min:1', 'max:365']],
-            ],
             // Délai d'annulation d'une radiation par le gérant (RG-ADH-11).
             'radiation_cancel_days' => [
                 'type' => 'integer', 'level' => 'network', 'default' => 30, 'permission' => 'network_settings.manage',
@@ -159,6 +154,15 @@ return [
             'read_only_months' => [
                 'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 6, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:1', 'max:120']],
+            ],
+        ],
+
+        // Adhérent du portefeuille CGA reclassé au régime réel (RG-ADH-08, 09) : alerte au gérant passé ce délai
+        // sans radiation, jamais de blocage ni de radiation automatique (CR-04, RG-ADH-18).
+        'rsi' => [
+            'radiation_deadline_days' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 90, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:365']],
             ],
         ],
 

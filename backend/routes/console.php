@@ -10,3 +10,8 @@ Schedule::command('logs:partitions')
     ->dailyAt(config('schedule.logs_partitions'))
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('members:radiation-expiry')
+    ->dailyAt(config('schedule.radiation_expiry'))
+    ->withoutOverlapping()
+    ->onOneServer();

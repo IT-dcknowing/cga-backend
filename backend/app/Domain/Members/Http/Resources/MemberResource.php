@@ -2,9 +2,12 @@
 
 namespace App\Domain\Members\Http\Resources;
 
+use App\Domain\Members\Enums\MemberStatus;
+use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberRevenue;
 use App\Domain\Members\Support\MembershipReadiness;
+use App\Support\Config\SettingsService;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -13,7 +16,8 @@ use Illuminate\Support\Facades\Gate;
 /**
  * Dossier d'un adhérent (F-ADH-03) : portefeuille, statut, numéros, contrat CGA, identité, fiscalité,
  * localisation, contacts, honoraires, état des pièces, chiffre d'affaires de référence et actions
- * permises. L'apporteur n'est montré qu'avec le droit members.referrers.view (RG-PTF-06).
+ * permises, alertes et radiation en vigueur. L'apporteur n'est montré qu'avec le droit
+ * members.referrers.view (RG-PTF-06).
  *
  * @property Member $resource
  */
@@ -90,6 +94,8 @@ class MemberResource extends JsonResource
             'fees_periodicity' => $member->fees_periodicity->value,
             'pieces_status' => $member->pieces_status->value,
             'attestation_blocked' => $member->attestation_blocked,
+            'alerts' => $this->alerts($member),
+            'radiation' => $member->relationLoaded('currentRadiation') && $member->currentRadiation !== null ? new RadiationResource($member->currentRadiation, $member) : null,
             'reference_revenue' => $revenue instanceof MemberRevenue ? ['year' => $revenue->year, 'amount' => $revenue->amount, 'kind' => $revenue->kind->value, 'source' => $revenue->source->value] : null,
             // Ce qui manque encore pour valider l'adhésion (RG-ADH-02) : brouillon seulement.
             'missing_for_validation' => $member->status->value === 'draft' ? app(MembershipReadiness::class)->missing($member) : [],
@@ -98,7 +104,33 @@ class MemberResource extends JsonResource
                 'update' => Gate::allows('update', $member),
                 'validate' => Gate::allows('validate', $member) && $member->status->value === 'draft',
                 'delete' => Gate::allows('delete', $member) && $member->status->value === 'draft',
+                'change_regime' => Gate::allows('changeRegime', $member) && in_array($member->status, [MemberStatus::Active, MemberStatus::RadiationPending], true),
+                'request_radiation' => Gate::allows('requestRadiation', $member) && $member->portfolio === Portfolio::Cga && $member->status === MemberStatus::Active,
             ],
         ];
+    }
+
+    /**
+     * Bandeaux d'alerte de la fiche : « Radiation requise — reclassement au régime réel » tant qu'un
+     * dossier actif du portefeuille CGA reste au régime réel sans radiation demandée (RG-ADH-08), en
+     * retard passé rsi.radiation_deadline_days (RG-ADH-09). Une alerte ne bloque rien (CR-04).
+     *
+     * @return list<array{code: string, label: string, since: string, days: int, overdue: bool}>
+     */
+    private function alerts(Member $member): array
+    {
+        if ($member->portfolio !== Portfolio::Cga || $member->status !== MemberStatus::Active || $member->rsi_since === null) {
+            return [];
+        }
+        $days = max(0, (int) $member->rsi_since->diffInDays(today()));
+        $deadline = (int) app(SettingsService::class)->get('rsi.radiation_deadline_days', $member->organization_id);
+
+        return [[
+            'code' => 'radiation_required',
+            'label' => __('members.alerts.radiation_required'),
+            'since' => $member->rsi_since->toDateString(),
+            'days' => $days,
+            'overdue' => $days >= $deadline,
+        ]];
     }
 }

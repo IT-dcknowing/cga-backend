@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $member_id
  * @property Role $role
  * @property MembershipStatus $status
+ * @property CarbonInterface|null $read_only_until
  * @property CarbonInterface|null $activated_at
  * @property CarbonInterface|null $disabled_at
  * @property string|null $invited_by

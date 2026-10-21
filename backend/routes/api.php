@@ -8,6 +8,8 @@ use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Members\Http\Controllers\MemberController;
+use App\Domain\Members\Http\Controllers\RadiationController;
+use App\Domain\Members\Http\Controllers\RegimeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
 use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
@@ -154,16 +156,22 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{agent}/permissions/reset', [UserPermissionController::class, 'reset'])->name('permissions.reset');
     });
 
-    // Dossiers des adhérents du centre (F-ADH-01 à 04). La modification remplace la fiche : PUT (multipart avec
-    // _method=PUT quand elle porte un justificatif, RG-ADH-06b).
+    // Dossiers des adhérents du centre (F-ADH-01 à 07) : fiche, régime, radiation en deux temps. La modification
+    // remplace la fiche : PUT (multipart avec _method=PUT quand elle porte un justificatif, RG-ADH-06b).
     Route::middleware(['auth', 'tenant'])->prefix('cga/members')->name('cga.members.')->group(function (): void {
         Route::get('/', [MemberController::class, 'index'])->name('index');
         Route::post('/', [MemberController::class, 'store'])->name('store');
         Route::get('ncc-check', [MemberController::class, 'nccCheck'])->name('ncc-check');
+        Route::get('radiation-options', [RadiationController::class, 'options'])->name('radiation-options');
         Route::get('{member}', [MemberController::class, 'show'])->name('show');
         Route::put('{member}', [MemberController::class, 'update'])->name('update');
         Route::delete('{member}', [MemberController::class, 'destroy'])->name('destroy');
         Route::post('{member}/validate', [MemberController::class, 'validate'])->name('validate');
+        Route::get('{member}/regimes', [RegimeController::class, 'index'])->name('regimes.index');
+        Route::post('{member}/regimes', [RegimeController::class, 'store'])->name('regimes.store');
+        Route::post('{member}/radiation', [RadiationController::class, 'store'])->name('radiation.store');
+        Route::post('{member}/radiation/validate', [RadiationController::class, 'validate'])->name('radiation.validate');
+        Route::post('{member}/radiation/cancel', [RadiationController::class, 'cancel'])->name('radiation.cancel');
     });
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).

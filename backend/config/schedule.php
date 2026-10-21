@@ -15,4 +15,7 @@ return [
     // Partitions mensuelles des journaux, préparées à l'avance.
     'logs_partitions' => env('SCHEDULE_LOGS_PARTITIONS', '00:05'),
 
+    // Fin de la consultation seule des adhérents radiés (RG-ADH-12).
+    'radiation_expiry' => env('SCHEDULE_RADIATION_EXPIRY', '03:30'),
+
 ];

@@ -3,6 +3,7 @@
 namespace App\Domain\Members\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
+use App\Domain\Documents\Models\File;
 use App\Domain\Members\Enums\RadiationInitiator;
 use App\Domain\Members\Enums\RadiationOutcome;
 use App\Domain\Members\Enums\RadiationReason;
@@ -40,6 +41,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $cancelled_by
  * @property string|null $cancel_reason
  * @property-read Member $member
+ * @property-read File|null $proof
  */
 class Radiation extends Model
 {
@@ -78,5 +80,13 @@ class Radiation extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    /**
+     * @return BelongsTo<File, $this>
+     */
+    public function proof(): BelongsTo
+    {
+        return $this->belongsTo(File::class, 'proof_file_id');
     }
 }

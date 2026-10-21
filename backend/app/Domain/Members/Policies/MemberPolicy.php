@@ -62,6 +62,47 @@ class MemberPolicy
         return $this->update($user, $member);
     }
 
+    /**
+     * « Changer de régime » (F-ADH-05) : gérant, expert-comptable, comptables, comme la modification.
+     */
+    public function changeRegime(User $user, Member $member): bool
+    {
+        return $this->update($user, $member);
+    }
+
+    /**
+     * « Demander la radiation » (F-ADH-06) : gérant, expert-comptable.
+     */
+    public function requestRadiation(User $user, Member $member): bool
+    {
+        return $this->inCga() && $this->context->allows('members.radiation.request') && $this->seesPortfolio($member->portfolio);
+    }
+
+    /**
+     * « Valider la radiation » (RG-ADH-17) : gérant, expert-comptable.
+     */
+    public function validateRadiation(User $user, Member $member): bool
+    {
+        return $this->inCga() && $this->context->allows('members.radiation.validate') && $this->seesPortfolio($member->portfolio);
+    }
+
+    /**
+     * « Annuler la radiation » (RG-ADH-11) : le gérant seulement (permission verrouillée).
+     */
+    public function cancelRadiation(User $user, Member $member): bool
+    {
+        return $this->inCga() && $this->context->allows('members.radiation.cancel') && $this->seesPortfolio($member->portfolio);
+    }
+
+    /**
+     * Issue « basculer dans le portefeuille Cabinet » d'une radiation (RG-PTF-04) : le droit de basculer
+     * et la vue du portefeuille Cabinet.
+     */
+    public function moveToCabinet(User $user, Member $member): bool
+    {
+        return $this->inCga() && $this->context->allows('members.portfolio.move') && $this->seesPortfolio(Portfolio::Cabinet);
+    }
+
     public function seesPortfolio(Portfolio $portfolio): bool
     {
         return $portfolio === Portfolio::Cga || $this->context->allows('members.cabinet.view');

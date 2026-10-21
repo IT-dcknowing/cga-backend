@@ -15,4 +15,12 @@ enum TaxRegime: string
     case Tee = 'TEE';
     case Rsi = 'RSI';
     case Rni = 'RNI';
+
+    /**
+     * Régime réel (RSI, RNI) : au portefeuille CGA, un reclassement de l'administration (RG-ADH-08).
+     */
+    public function isReal(): bool
+    {
+        return $this === self::Rsi || $this === self::Rni;
+    }
 }
