@@ -13,6 +13,8 @@ use App\Domain\Referentials\Models\NationalReference;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Users\Models\Membership;
+use App\Domain\Users\Models\User;
 use App\Support\Tenancy\Tenancy;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
@@ -45,6 +47,7 @@ final class CrossTenantObjects
                 return $file;
             },
             Organization::class => static fn (Organization $other): Organization => $other,
+            User::class => static fn (Organization $other): User => Membership::factory()->create(['organization_id' => $other->id])->user,
             ImportBatch::class => static fn (Organization $other): ImportBatch => Tenancy::bypass(static function () use ($other): ImportBatch {
                 $batch = new ImportBatch;
                 $batch->organization_id = $other->id;

@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Domain\Auth\Actions\IssueInvitation;
 use App\Domain\Auth\Enums\InvitationChannel;
+use App\Domain\Auth\Support\ActivationLink;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
@@ -22,7 +23,7 @@ class InvitePlatformAdmin extends Command
 
     protected $description = 'Émet le lien d\'activation de l\'administrateur de la plateforme encore en attente';
 
-    public function handle(IssueInvitation $issueInvitation): int
+    public function handle(IssueInvitation $issueInvitation, ActivationLink $links): int
     {
         $membership = Membership::query()
             ->with('user')
@@ -46,7 +47,7 @@ class InvitePlatformAdmin extends Command
         }
 
         $this->info("Lien d'activation de {$membership->user->fullName()} ({$membership->user->phone}) :");
-        $this->line(rtrim((string) config('app.url'), '/').'/activer/'.$token);
+        $this->line($links->for($token));
 
         return self::SUCCESS;
     }

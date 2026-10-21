@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\DB;
 /**
  * Activation par invitation (F-AUTH-02, RG-ACC-03) : l'invité choisit son mot de passe et accepte
  * les conditions d'utilisation ; un adhérent donne en plus ses choix SMS / WhatsApp (RG-NOT-04,
- * consentement recueilli à l'activation). Le compte et le rattachement deviennent actifs, le lien
- * ne sert qu'une fois. Le canal qui a reçu le lien est tenu pour vérifié. Lien expiré, déjà utilisé
- * ou révoqué : 409 invitation_invalid, avec le contact de l'organisation qui invite.
+ * consentement recueilli à l'activation). Le compte et ses rattachements invités dans l'organisation
+ * deviennent actifs, le lien ne sert qu'une fois. Le canal qui a reçu le lien est tenu pour vérifié.
+ * Lien expiré, déjà utilisé ou révoqué : 409 invitation_invalid, avec le contact de l'organisation qui
+ * invite.
  */
 class AcceptInvitation
 {
@@ -50,6 +51,20 @@ class AcceptInvitation
                 $user->email_verified_at ??= now();
             }
             $user->save();
+
+            // Les rôles reçus avec la même invitation (même organisation, même adhérent) s'activent ensemble.
+            Membership::query()
+                ->where('user_id', $user->id)
+                ->where('organization_id', $membership->organization_id)
+                ->where('member_id', $membership->member_id)
+                ->where('status', MembershipStatus::Invited)
+                ->whereKeyNot($membership->id)
+                ->get()
+                ->each(static function (Membership $sibling): void {
+                    $sibling->status = MembershipStatus::Active;
+                    $sibling->activated_at = now();
+                    $sibling->save();
+                });
 
             $membership->status = MembershipStatus::Active;
             $membership->activated_at = now();

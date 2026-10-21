@@ -54,6 +54,10 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Adresse du SPA, pour les liens envoyés (activation /activer/{jeton}) : même domaine en recette et en
+    // production, serveur Vite sur le poste local.
+    'frontend_url' => env('FRONTEND_URL', env('APP_URL', 'http://localhost')),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

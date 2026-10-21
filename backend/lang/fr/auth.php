@@ -44,4 +44,18 @@ return [
         ],
     ],
 
+    // Invitation d'un agent ou d'un gérant (RG-ACC-03, F-ORG-09) et nouvel accès d'un compte actif (RG-ACC-02).
+    'invitation' => [
+        'sms' => 'CGA Connect : :organization vous invite. Activez votre accès (lien valable :days jours) : :link',
+        'mail_subject' => ':organization vous invite sur CGA Connect',
+        'mail_line' => ':organization vous a ouvert un accès à CGA Connect. Choisissez votre mot de passe pour l\'activer.',
+        'mail_action' => 'Activer mon accès',
+        'mail_expiry' => 'Ce lien est valable :days jours. Passé ce délai, demandez un nouveau lien à :organization.',
+    ],
+    'access_granted' => [
+        'sms' => 'CGA Connect : vous avez désormais accès à l\'espace :organization (:roles). Choisissez-le à votre prochaine connexion.',
+        'mail_subject' => 'Nouvel accès à CGA Connect : :organization',
+        'mail_line' => 'Vous avez désormais accès à l\'espace :organization (:roles). Choisissez-le dans le sélecteur d\'espace à votre prochaine connexion.',
+    ],
+
 ];

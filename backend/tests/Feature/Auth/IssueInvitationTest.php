@@ -55,7 +55,7 @@ it('n\'invite qu\'un rattachement en attente', function () {
 
 describe('php artisan platform:invite-admin', function () {
     it('donne le lien d\'activation de l\'administrateur créé par PlatformSeeder', function () {
-        config(['cga.seed.platform_admin.phone' => '+2250700000099', 'app.url' => 'https://cga-connect.ci']);
+        config(['cga.seed.platform_admin.phone' => '+2250700000099', 'app.frontend_url' => 'https://cga-connect.ci']);
         $this->seed(PlatformSeeder::class);
 
         $this->artisan('platform:invite-admin')

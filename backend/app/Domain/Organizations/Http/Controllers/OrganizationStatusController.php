@@ -51,6 +51,6 @@ class OrganizationStatusController extends BaseApiController
 
     private function resource(Organization $organization): OrganizationResource
     {
-        return new OrganizationResource($organization->load(['regionalDirectorate', 'statusEvents.actor']));
+        return new OrganizationResource($organization->load(['regionalDirectorate', 'statusEvents.actor', 'manager.user']));
     }
 }

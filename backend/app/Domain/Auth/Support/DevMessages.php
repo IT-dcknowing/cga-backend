@@ -3,8 +3,10 @@
 namespace App\Domain\Auth\Support;
 
 use App\Domain\Auth\Data\IssuedCode;
+use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Notifications\Contracts\SmsProvider;
 use App\Domain\Notifications\Providers\LogSmsProvider;
+use App\Domain\Users\Models\User;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Foundation\Application;
 
@@ -32,6 +34,21 @@ class DevMessages
         }
 
         return ['dev_message' => ['channel' => $issued->channel, 'to' => $issued->target, 'code' => $issued->code]];
+    }
+
+    /**
+     * Lien d'activation d'une invitation (RG-ACC-03), aux mêmes conditions que les codes.
+     *
+     * @return array{dev_message?: array{channel: string, to: string, link: string}}
+     */
+    public function invitation(InvitationChannel $channel, User $user, #[\SensitiveParameter] ?string $link): array
+    {
+        $sms = $channel !== InvitationChannel::Email;
+        if ($link === null || ! $this->enabled($sms ? 'sms' : 'mail')) {
+            return [];
+        }
+
+        return ['dev_message' => ['channel' => $channel->value, 'to' => $sms ? $user->phone : (string) $user->email, 'link' => $link]];
     }
 
     private function enabled(string $channel): bool

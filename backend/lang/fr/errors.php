@@ -39,6 +39,16 @@ return [
     'abbreviation_locked' => 'L\'abréviation de numérotation ne peut plus changer : des numéros d\'adhésion ont déjà été attribués.',
     'subscription_unchanged' => 'Ce CGA a déjà cet état d\'abonnement.',
 
+    // Utilisateurs d'une organisation (F-ORG-09, F-ORG-10)
+    'agent_already_member' => 'Cette personne a déjà un accès à votre organisation : modifiez plutôt ses rôles.',
+    'cannot_manage_self' => 'Vous ne pouvez pas modifier ni désactiver votre propre accès.',
+    'agent_already_disabled' => 'Cet accès est déjà désactivé.',
+    'agent_not_disabled' => 'Cet accès n\'est pas désactivé.',
+    'agent_not_invited' => 'Cette personne a déjà activé son accès : aucune invitation à renvoyer.',
+    'cga_manager_exists' => 'Ce CGA a déjà un gérant, invité ou actif.',
+    'user_disabled' => 'Le compte de cette personne est désactivé sur la plateforme.',
+    'email_required' => 'Une adresse e-mail est nécessaire pour envoyer l\'invitation par e-mail.',
+
     // Référentiels (RG-DATA-05)
     'referential_in_use' => 'Cette valeur est déjà utilisée : elle ne peut pas être supprimée. Désactivez-la ou fusionnez-la plutôt.',
 

@@ -47,6 +47,14 @@ class OrganizationPolicy
         return $this->isCga($organization) && $this->allows('organizations.suspend');
     }
 
+    /**
+     * « Ouvrir l'accès » : invitation du gérant du CGA (F-ORG-02).
+     */
+    public function inviteManager(User $user, Organization $organization): bool
+    {
+        return $this->isCga($organization) && $this->allows('organizations.manage');
+    }
+
     public function viewProfile(User $user, Organization $organization): bool
     {
         return $this->isOwnCga($organization) && $this->allows('cga.profile.view');

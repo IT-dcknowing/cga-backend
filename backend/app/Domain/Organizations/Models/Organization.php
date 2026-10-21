@@ -12,6 +12,8 @@ use App\Domain\Referentials\Enums\DataStatus;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Users\Enums\MembershipStatus;
+use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use Carbon\CarbonInterface;
 use Database\Factories\OrganizationFactory;
@@ -21,6 +23,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -77,6 +80,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read File|null $signature
  * @property-read File|null $stamp
  * @property-read Collection<int, OrganizationStatusEvent> $statusEvents
+ * @property-read Membership|null $manager
  */
 class Organization extends Model
 {
@@ -186,6 +190,18 @@ class Organization extends Model
     public function memberships(): HasMany
     {
         return $this->hasMany(Membership::class);
+    }
+
+    /**
+     * Gérant du CGA, invité ou actif (« Ouvrir l'accès », F-ORG-02).
+     *
+     * @return HasOne<Membership, $this>
+     */
+    public function manager(): HasOne
+    {
+        return $this->hasOne(Membership::class)
+            ->where('role', Role::CgaManager)
+            ->whereIn('status', [MembershipStatus::Invited, MembershipStatus::Active]);
     }
 
     /**

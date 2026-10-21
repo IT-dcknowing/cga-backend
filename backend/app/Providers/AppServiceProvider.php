@@ -20,8 +20,11 @@ use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Referentials\Policies\ReferentialPolicy;
+use App\Domain\Users\Models\User;
 use App\Domain\Users\Permissions\PermissionCatalog;
 use App\Domain\Users\Permissions\PermissionResolver;
+use App\Domain\Users\Policies\AgentPolicy;
+use App\Domain\Users\Support\AgentDirectory;
 use App\Support\Calendar\BusinessCalendar;
 use App\Support\Config\SettingsService;
 use App\Support\Files\LibreOfficePdfConverter;
@@ -95,6 +98,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Imports de fichiers Excel (M17).
         Gate::policy(ImportBatch::class, ImportBatchPolicy::class);
+
+        // Agents d'une organisation (F-ORG-09, F-ORG-10) : un compte n'est trouvé que s'il est agent de
+        // l'organisation de l'espace actif (chargé avant la liaison, ResolveTenant).
+        Gate::policy(User::class, AgentPolicy::class);
+        Route::bind('agent', static fn (string $id): User => app(AgentDirectory::class)->find(app(TenantContext::class)->organization(), $id));
 
         // Développement (php artisan dev) : un seul processus écoute les files des workers de production
         // (infra/supervisor : default, documents, notifications, imports).

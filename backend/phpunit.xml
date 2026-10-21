@@ -40,6 +40,7 @@
         <env name="DB_URL" value=""/>
         <env name="MAIL_MAILER" value="array"/>
         <env name="QUEUE_CONNECTION" value="database"/>
+        <env name="FRONTEND_URL" value="http://localhost:5173"/>
         <env name="SESSION_DRIVER" value="database"/>
         <env name="SESSION_SECURE_COOKIE" value="true"/>
         <env name="SANCTUM_STATEFUL_DOMAINS" value="localhost:5173"/>

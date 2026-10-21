@@ -58,6 +58,14 @@ class OrganizationResource extends JsonResource
             'profile_completed_at' => $organization->profile_completed_at?->toIso8601ZuluString(),
             'data_status' => $organization->data_status->value,
             'created_at' => $organization->created_at?->toIso8601ZuluString(),
+            'manager' => $this->whenLoaded('manager', fn (): ?array => $organization->manager === null ? null : [
+                'id' => $organization->manager->user->id,
+                'name' => $organization->manager->user->fullName(),
+                'phone' => $organization->manager->user->phone,
+                'email' => $organization->manager->user->email,
+                'status' => $organization->manager->status->value,
+                'status_label' => $organization->manager->status->label(),
+            ]),
             'status_events' => $this->whenLoaded('statusEvents', fn (): array => $organization->statusEvents
                 ->sortBy([['occurred_at', 'desc'], ['id', 'desc']])
                 ->map(static fn (OrganizationStatusEvent $event): array => [
@@ -66,7 +74,7 @@ class OrganizationResource extends JsonResource
                     'reason' => $event->reason,
                     'actor' => $event->actor === null ? null : [
                         'id' => $event->actor->id,
-                        'name' => trim($event->actor->first_name.' '.$event->actor->last_name),
+                        'name' => $event->actor->fullName(),
                     ],
                     'occurred_at' => $event->occurred_at->toIso8601ZuluString(),
                 ])
@@ -76,6 +84,7 @@ class OrganizationResource extends JsonResource
                 'update' => Gate::allows('update', $organization),
                 'change_subscription' => Gate::allows('changeSubscription', $organization),
                 'suspend' => Gate::allows('suspend', $organization),
+                'invite_manager' => Gate::allows('inviteManager', $organization),
             ],
         ];
     }

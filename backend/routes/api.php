@@ -17,6 +17,7 @@ use App\Domain\Referentials\Http\Controllers\NationalReferenceController;
 use App\Domain\Referentials\Http\Controllers\RegionalDirectorateController;
 use App\Domain\Referentials\Http\Controllers\SectorController;
 use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
+use App\Domain\Users\Http\Controllers\AgentController;
 use App\Support\Files\StorageService;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -79,6 +80,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{organization}/suspend', [OrganizationStatusController::class, 'suspend'])->name('suspend');
         Route::post('{organization}/reactivate', [OrganizationStatusController::class, 'reactivate'])->name('reactivate');
         Route::post('{organization}/withdraw-agreement', [OrganizationStatusController::class, 'withdrawAgreement'])->name('withdraw-agreement');
+        Route::post('{organization}/manager', [OrganizationController::class, 'inviteManager'])->name('manager');
     });
 
     // Import du registre des CGA par le CNCGA (F-IMP-01) : modèle, dépôt (202, traité en file « imports »),
@@ -90,6 +92,20 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{importBatch}', [ImportController::class, 'show'])->name('show');
         Route::get('{importBatch}/rows', [ImportController::class, 'rows'])->name('rows');
     });
+
+    // Agents d'une organisation (F-ORG-09, F-ORG-10) : ceux du CGA par son gérant, ceux du CNCGA par la Présidente.
+    // {agent} n'est cherché que parmi les agents de l'espace actif.
+    foreach (['cga' => 'cga', 'network' => 'network'] as $prefix => $name) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$prefix}/users")->name("{$name}.users.")->group(function (): void {
+            Route::get('/', [AgentController::class, 'index'])->name('index');
+            Route::post('/', [AgentController::class, 'store'])->name('store');
+            Route::get('{agent}', [AgentController::class, 'show'])->name('show');
+            Route::put('{agent}/roles', [AgentController::class, 'updateRoles'])->name('roles');
+            Route::post('{agent}/disable', [AgentController::class, 'disable'])->name('disable');
+            Route::post('{agent}/enable', [AgentController::class, 'enable'])->name('enable');
+            Route::post('{agent}/invitation', [AgentController::class, 'resendInvitation'])->name('invitation');
+        });
+    }
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).
     Route::middleware(['auth', 'tenant'])->prefix('cga/profile')->name('cga.profile.')->group(function (): void {

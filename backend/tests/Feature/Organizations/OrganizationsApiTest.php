@@ -91,7 +91,7 @@ describe('registre des CGA (F-ORG-01, 02, 04)', function () {
             ->assertOk()
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('meta.total', 2)
-            ->assertJsonPath('data.0.can', ['update' => true, 'change_subscription' => true, 'suspend' => true]);
+            ->assertJsonPath('data.0.can', ['update' => true, 'change_subscription' => true, 'suspend' => true, 'invite_manager' => true]);
     });
 
     it('filtre le registre par statut, abonnement, agrément, direction régionale et recherche sans accent', function () {
