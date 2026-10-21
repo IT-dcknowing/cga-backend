@@ -45,6 +45,32 @@ class AgentPolicy
             && ! $agent->memberships->contains(fn (Membership $m): bool => $m->organization_id === $this->context->organizationId() && $m->role === $head);
     }
 
+    /**
+     * Habilitations individuelles (RG-ROLE-07) : le gérant pour les agents de son centre (hors gérant),
+     * l'administrateur de la plateforme pour les utilisateurs du CNCGA, depuis son espace.
+     */
+    public function adjustPermissions(User $actor, User $agent, OrganizationType $space): bool
+    {
+        return $this->context->has() && match ($space) {
+            OrganizationType::Cga => $this->context->organizationType() === OrganizationType::Cga
+                && $this->context->allows('cga_user_permissions.manage')
+                && ! $agent->memberships->contains(fn (Membership $m): bool => $m->organization_id === $this->context->organizationId() && $m->role === TeamRoles::head(OrganizationType::Cga)),
+            OrganizationType::Cncga => $this->context->organizationType() === OrganizationType::Platform
+                && $this->context->allows('network_user_permissions.manage'),
+            OrganizationType::Platform => false,
+        };
+    }
+
+    /**
+     * Liste des utilisateurs du CNCGA, pour leurs habilitations (administrateur de la plateforme).
+     */
+    public function viewNetworkUsers(User $actor): bool
+    {
+        return $this->context->has()
+            && $this->context->organizationType() === OrganizationType::Platform
+            && $this->context->allows('network_user_permissions.manage');
+    }
+
     private function manages(OrganizationType $space): bool
     {
         $permission = TeamRoles::permission($space);

@@ -60,14 +60,15 @@ class PermissionResolver
 
     /**
      * Valeur et origine de chaque droit (écran des habilitations, GET /cga/users/{id}/permissions).
+     * Sans les ajustements individuels : le profil de l'utilisateur, référence de ses cases.
      *
      * @return array<string, array{granted: bool, origin: string}>
      */
-    public function explain(Membership $membership): array
+    public function explain(Membership $membership, bool $withOverrides = true): array
     {
         $memberships = $this->sameSpaceMemberships($membership);
         $roles = $memberships->map(static fn (Membership $m): Role => $m->role)->unique()->values();
-        $overrides = UserPermissionOverride::query()
+        $overrides = ! $withOverrides ? collect() : UserPermissionOverride::query()
             ->withoutGlobalScope(OrganizationScope::class)
             ->where('organization_id', $membership->organization_id)
             ->whereIn('membership_id', $memberships->map(static fn (Membership $m): string => $m->getKey())->all())

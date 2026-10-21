@@ -21,6 +21,7 @@ use App\Domain\Referentials\Http\Controllers\SectorController;
 use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
 use App\Domain\Users\Http\Controllers\AgentController;
 use App\Domain\Users\Http\Controllers\RolePermissionController;
+use App\Domain\Users\Http\Controllers\UserPermissionController;
 use App\Support\Files\StorageService;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -137,6 +138,20 @@ Route::prefix('v1')->group(function (): void {
             Route::get('{role}/impact', [RolePermissionController::class, 'impact'])->name('impact');
         });
     }
+
+    // Habilitations par utilisateur, le « nuage » (RG-ROLE-07) : agents du centre par le gérant, utilisateurs du
+    // CNCGA par l'administrateur de la plateforme. La modification remplace la liste des droits : PUT.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/users/{agent}/permissions')->name('cga.users.permissions.')->group(function (): void {
+        Route::get('/', [UserPermissionController::class, 'show'])->name('show');
+        Route::put('/', [UserPermissionController::class, 'update'])->name('update');
+        Route::post('reset', [UserPermissionController::class, 'reset'])->name('reset');
+    });
+    Route::middleware(['auth', 'tenant'])->prefix('platform/network-users')->name('platform.network-users.')->group(function (): void {
+        Route::get('/', [UserPermissionController::class, 'networkUsers'])->name('index');
+        Route::get('{agent}/permissions', [UserPermissionController::class, 'show'])->name('permissions.show');
+        Route::put('{agent}/permissions', [UserPermissionController::class, 'update'])->name('permissions.update');
+        Route::post('{agent}/permissions/reset', [UserPermissionController::class, 'reset'])->name('permissions.reset');
+    });
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).
     Route::middleware(['auth', 'tenant'])->prefix('cga/profile')->name('cga.profile.')->group(function (): void {

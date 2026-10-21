@@ -22,6 +22,7 @@ use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Referentials\Policies\ReferenceDataPolicy;
 use App\Domain\Referentials\Policies\ReferentialPolicy;
 use App\Domain\Referentials\ReferenceData\ReferenceDataset;
+use App\Domain\Users\Http\Controllers\UserPermissionController;
 use App\Domain\Users\Models\RolePermission;
 use App\Domain\Users\Models\User;
 use App\Domain\Users\Permissions\PermissionCatalog;
@@ -41,6 +42,7 @@ use App\Support\Tenancy\TenantContext;
 use App\Support\Validation\Rules\NotCommonPassword;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\DevCommands;
+use Illuminate\Routing\Route as RouteDefinition;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
@@ -112,7 +114,11 @@ class AppServiceProvider extends ServiceProvider
 
         // Droits par rôle (F-ADM-05).
         Gate::policy(RolePermission::class, RolePermissionPolicy::class);
-        Route::bind('agent', static fn (string $id): User => app(AgentDirectory::class)->find(app(TenantContext::class)->organization(), $id));
+        // Sous /platform, l'administrateur vise les utilisateurs du CNCGA (RG-ROLE-07).
+        Route::bind('agent', static fn (string $id, RouteDefinition $route): User => app(AgentDirectory::class)->find(
+            str_starts_with((string) $route->getName(), 'platform.') ? UserPermissionController::network() : app(TenantContext::class)->organization(),
+            $id,
+        ));
 
         // Développement (php artisan dev) : un seul processus écoute les files des workers de production
         // (infra/supervisor : default, documents, notifications, imports).
