@@ -7,6 +7,7 @@ use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Imports\Http\Controllers\ImportController;
+use App\Domain\Imports\Http\Controllers\MemberImportController;
 use App\Domain\Members\Http\Controllers\MemberAccessController;
 use App\Domain\Members\Http\Controllers\MemberController;
 use App\Domain\Members\Http\Controllers\MemberTransferController;
@@ -114,6 +115,17 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/', [ImportController::class, 'index'])->name('index');
         Route::get('cgas/template', [ImportController::class, 'cgaTemplate'])->name('cgas.template');
         Route::post('cgas', [ImportController::class, 'storeCgas'])->name('cgas.store');
+        Route::get('{importBatch}', [ImportController::class, 'show'])->name('show');
+        Route::get('{importBatch}/rows', [ImportController::class, 'rows'])->name('rows');
+    });
+
+    // Import d'un portefeuille par le gérant du CGA (F-IMP-02) : modèle, analyse (aperçu, sans rien écrire), dépôt
+    // (202, traité en file « imports »), avancement et rapport.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/imports')->name('cga.imports.')->group(function (): void {
+        Route::get('/', [ImportController::class, 'index'])->name('index');
+        Route::get('members/template', [MemberImportController::class, 'template'])->name('members.template');
+        Route::post('members/preview', [MemberImportController::class, 'preview'])->name('members.preview');
+        Route::post('members', [MemberImportController::class, 'store'])->name('members.store');
         Route::get('{importBatch}', [ImportController::class, 'show'])->name('show');
         Route::get('{importBatch}/rows', [ImportController::class, 'rows'])->name('rows');
     });

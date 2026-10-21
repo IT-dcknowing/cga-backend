@@ -20,9 +20,12 @@ class StartImport
 {
     public function __construct(private readonly StorageService $storage) {}
 
-    public function execute(ImportType $type, UploadedFile $upload, Membership $membership): ImportBatch
+    /**
+     * @param  array<string, mixed>  $options  choix faits au dépôt, transmis à l'importateur (numéro de départ…)
+     */
+    public function execute(ImportType $type, UploadedFile $upload, Membership $membership, array $options = []): ImportBatch
     {
-        return DB::transaction(function () use ($type, $upload, $membership): ImportBatch {
+        return DB::transaction(function () use ($type, $upload, $membership, $options): ImportBatch {
             $file = $this->storage->storeUpload($upload, 'imports', $membership->organization_id, $membership->user_id);
 
             $batch = new ImportBatch;
@@ -33,7 +36,7 @@ class StartImport
             $batch->created_by = $membership->user_id;
             $batch->save();
 
-            ProcessImport::dispatch($batch->id, $membership->id)->afterCommit();
+            ProcessImport::dispatch($batch->id, $membership->id, $options)->afterCommit();
 
             return $batch->refresh();
         });

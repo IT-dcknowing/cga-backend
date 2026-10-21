@@ -76,6 +76,7 @@ return [
         'members.create' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants, $secretary]],
         'members.update' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
         'members.access.manage' => ['locked' => false, 'roles' => [$manager]],
+        'members.import' => ['locked' => false, 'roles' => [$manager]],
         'members.radiation.request' => ['locked' => false, 'roles' => [$manager, $expert]],
         'members.radiation.validate' => ['locked' => false, 'roles' => [$manager, $expert]],
         'members.radiation.cancel' => ['locked' => true, 'roles' => [$manager]],

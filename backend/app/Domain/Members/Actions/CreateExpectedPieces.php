@@ -20,12 +20,13 @@ class CreateExpectedPieces
 {
     public function execute(Member $member): void
     {
+        $existing = MemberPiece::query()->where('member_id', $member->id)->pluck('piece_type')->map(static fn (PieceType $type): string => $type->value)->all();
         foreach ($this->types($member) as $type) {
-            $piece = MemberPiece::query()->where('member_id', $member->id)->where('piece_type', $type)->first() ?? new MemberPiece;
-            if ($piece->exists) {
+            if (in_array($type->value, $existing, true)) {
                 continue;
             }
 
+            $piece = new MemberPiece;
             $piece->member_id = $member->id;
             $piece->organization_id = $member->organization_id;
             $piece->piece_type = $type;

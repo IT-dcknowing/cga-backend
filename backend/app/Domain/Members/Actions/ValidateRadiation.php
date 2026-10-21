@@ -15,13 +15,13 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberPiece;
 use App\Domain\Members\Models\PortfolioMovement;
 use App\Domain\Members\Models\Radiation;
+use App\Domain\Members\Support\MemberNumbering;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
 use App\Support\Http\Exceptions\BusinessRuleException;
-use App\Support\Numbering\NumberFormatter;
 use App\Support\Numbering\SequenceService;
 use Illuminate\Support\Facades\DB;
 
@@ -43,6 +43,7 @@ class ValidateRadiation
     public function __construct(
         private readonly SequenceService $sequences,
         private readonly SettingsService $settings,
+        private readonly MemberNumbering $numbering,
         private readonly CreateExpectedPieces $pieces,
         private readonly AuditLogger $audit,
     ) {}
@@ -106,8 +107,8 @@ class ValidateRadiation
     {
         if ($member->client_number === null) {
             $abbreviation = Organization::query()->whereKey($member->organization_id)->value('numbering_abbreviation');
-            $number = $this->sequences->next($member->organization_id, 'client');
-            $member->client_number = NumberFormatter::format((string) $this->settings->get('numbering.client.pattern'), $number, null, is_string($abbreviation) ? $abbreviation : null);
+            $number = $this->sequences->next($member->organization_id, MemberNumbering::CLIENT);
+            $member->client_number = $this->numbering->clientNumber($number, is_string($abbreviation) ? $abbreviation : null);
         }
         $previousReferrer = $member->referrer_id;
         $member->portfolio = Portfolio::Cabinet;

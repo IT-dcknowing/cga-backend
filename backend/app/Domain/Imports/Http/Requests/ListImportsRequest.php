@@ -11,14 +11,23 @@ use Illuminate\Validation\Rule;
 use Spatie\QueryBuilder\AllowedFilter;
 
 /**
- * GET /api/v1/network/imports : imports lancés par l'organisation de l'espace actif, les plus récents
- * d'abord, filtrés par type et par avancement.
+ * GET /api/v1/network/imports et /api/v1/cga/imports : imports lancés par l'organisation de l'espace
+ * actif, du type de l'espace (registre des CGA au réseau, portefeuille au CGA), les plus récents
+ * d'abord, filtrés par avancement.
  */
 class ListImportsRequest extends ListRequest
 {
     public function authorize(): bool
     {
-        return Gate::allows('viewAny', ImportBatch::class);
+        return Gate::allows('viewAny', [ImportBatch::class, $this->importType()]);
+    }
+
+    /**
+     * Type d'import de l'espace de la route.
+     */
+    public function importType(): ImportType
+    {
+        return str_starts_with((string) $this->route()?->getName(), 'cga.') ? ImportType::Members : ImportType::Cgas;
     }
 
     protected function filters(): array

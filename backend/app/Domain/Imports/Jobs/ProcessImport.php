@@ -23,16 +23,20 @@ class ProcessImport implements ShouldQueue
 
     public int $tries = 1;
 
+    /**
+     * @param  array<string, mixed>  $options  choix faits au dépôt du fichier
+     */
     public function __construct(
         public readonly string $batchId,
         public readonly string $membershipId,
+        public readonly array $options = [],
     ) {
         $this->onQueue(self::QUEUE);
     }
 
     public function handle(TenantContext $context, RunImport $run): void
     {
-        $context->runAs($this->membership(), fn (): ImportBatch => $run->execute(ImportBatch::query()->findOrFail($this->batchId)));
+        $context->runAs($this->membership(), fn (): ImportBatch => $run->execute(ImportBatch::query()->findOrFail($this->batchId), $this->options));
     }
 
     /**

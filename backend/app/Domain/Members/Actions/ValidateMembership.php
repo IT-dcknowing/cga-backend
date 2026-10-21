@@ -6,13 +6,12 @@ use App\Domain\Audit\AuditLogger;
 use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
+use App\Domain\Members\Support\MemberNumbering;
 use App\Domain\Members\Support\MembershipExclusivity;
 use App\Domain\Members\Support\MembershipReadiness;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Models\User;
-use App\Support\Config\SettingsService;
 use App\Support\Http\Exceptions\BusinessRuleException;
-use App\Support\Numbering\NumberFormatter;
 use App\Support\Numbering\SequenceService;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +30,7 @@ class ValidateMembership
         private readonly MembershipReadiness $readiness,
         private readonly MembershipExclusivity $exclusivity,
         private readonly SequenceService $sequences,
-        private readonly SettingsService $settings,
+        private readonly MemberNumbering $numbering,
         private readonly CreateExpectedPieces $pieces,
         private readonly AuditLogger $audit,
     ) {}
@@ -67,12 +66,12 @@ class ValidateMembership
             }
 
             $member->adhesion_date = $cga ? $member->cga_contract_signed_on : today();
-            $number = $this->sequences->next($member->organization_id, $cga ? 'membership' : 'client');
+            $number = $this->sequences->next($member->organization_id, $cga ? MemberNumbering::MEMBERSHIP : MemberNumbering::CLIENT);
             if ($cga) {
                 $member->membership_seq = $number;
-                $member->membership_number = NumberFormatter::format((string) $this->settings->get('numbering.membership.pattern'), $number, $member->adhesion_date?->year, $organization->numbering_abbreviation);
+                $member->membership_number = $this->numbering->membershipNumber($number, $member->adhesion_date?->year, $organization->numbering_abbreviation);
             } else {
-                $member->client_number = NumberFormatter::format((string) $this->settings->get('numbering.client.pattern'), $number, null, $organization->numbering_abbreviation);
+                $member->client_number = $this->numbering->clientNumber($number, $organization->numbering_abbreviation);
             }
             $member->status = MemberStatus::Active;
             $member->validated_at = now();

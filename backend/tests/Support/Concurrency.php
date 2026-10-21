@@ -2,15 +2,12 @@
 
 namespace Tests\Support;
 
-use Closure;
-use Illuminate\Support\Facades\DB;
 use RuntimeException;
 use Symfony\Component\Process\Process;
 
 /**
  * Tests de concurrence (étapes 2.3, 2.13) : de vrais processus PHP, lancés ensemble, travaillent sur la
- * base de test du worker. Les données du test y sont donc validées (commit) avant le départ, puis la
- * base est vidée et la transaction du test rouverte, comme si rien ne s'était passé.
+ * base de test du worker, hors de la transaction du test (RealTransactions).
  */
 final class Concurrency
 {
@@ -25,7 +22,7 @@ final class Concurrency
      */
     public static function validate(array $validations): array
     {
-        return self::committed(static function () use ($validations): array {
+        return RealTransactions::run(static function () use ($validations): array {
             $start = sys_get_temp_dir().DIRECTORY_SEPARATOR.'cga-start-'.bin2hex(random_bytes(6));
             $processes = array_map(static function (array $pair) use ($start): Process {
                 $process = new Process([PHP_BINARY, base_path(self::SCRIPT), $pair[0], $pair[1], $start], base_path(), self::environment(), null, 120);
@@ -54,31 +51,6 @@ final class Concurrency
                 }
             }
         });
-    }
-
-    /**
-     * @template T
-     *
-     * @param  Closure(): T  $callback
-     * @return T
-     */
-    private static function committed(Closure $callback): mixed
-    {
-        $connection = DB::connection();
-        while ($connection->transactionLevel() > 0) {
-            $connection->commit();
-        }
-
-        try {
-            return $callback();
-        } finally {
-            $tables = collect(DB::select("SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> 'migrations'"))
-                ->map(static fn (object $row): string => '"'.$row->tablename.'"')
-                ->implode(', ');
-            // @phpstan-ignore cga.rawSqlWithVariable (noms de tables lus dans le catalogue de PostgreSQL)
-            DB::statement("TRUNCATE TABLE {$tables} RESTART IDENTITY CASCADE");
-            $connection->beginTransaction();
-        }
     }
 
     /**

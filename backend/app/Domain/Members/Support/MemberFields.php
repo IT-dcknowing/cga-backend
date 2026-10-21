@@ -16,6 +16,13 @@ use Illuminate\Support\Str;
  */
 class MemberFields
 {
+    /**
+     * Barème en vigueur déjà lu, par nature et régime (import d'un portefeuille : une lecture par lot).
+     *
+     * @var array<string, FeeSchedule|null>
+     */
+    private array $schedules = [];
+
     public function __construct(private readonly PhoneNormalizer $phones) {}
 
     /**
@@ -50,12 +57,14 @@ class MemberFields
      */
     public function withSchedule(array $attributes, TaxRegime $regime): array
     {
-        $current = static fn (FeeKind $kind, ?TaxRegime $forRegime): ?FeeSchedule => FeeSchedule::query()
-            ->where('kind', $kind)
-            ->where('regime', $forRegime)
-            ->where('valid_from', '<=', today())
-            ->orderByDesc('valid_from')
-            ->first();
+        $current = fn (FeeKind $kind, ?TaxRegime $forRegime): ?FeeSchedule => array_key_exists($key = $kind->value.'|'.$forRegime?->value.'|'.today()->toDateString(), $this->schedules)
+            ? $this->schedules[$key]
+            : $this->schedules[$key] = FeeSchedule::query()
+                ->where('kind', $kind)
+                ->where('regime', $forRegime)
+                ->where('valid_from', '<=', today())
+                ->orderByDesc('valid_from')
+                ->first();
 
         $entry = $current(FeeKind::EntryFee, null);
         $fees = in_array($regime, [TaxRegime::Rme, TaxRegime::Tee], true) ? $current(FeeKind::Fees, $regime) : null;

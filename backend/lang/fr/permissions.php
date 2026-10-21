@@ -64,6 +64,7 @@ return [
         'create' => 'Inscrire un adhérent',
         'update' => 'Modifier un adhérent',
         'access' => ['manage' => 'Inviter les adhérents en ligne et gérer leurs accès'],
+        'import' => 'Importer un portefeuille d\'adhérents',
         'radiation' => [
             'request' => 'Demander une radiation',
             'validate' => 'Valider une radiation',

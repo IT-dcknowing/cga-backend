@@ -2,6 +2,7 @@
 
 namespace App\Domain\Imports\Actions;
 
+use App\Domain\Imports\Contracts\FinishesImport;
 use App\Domain\Imports\Contracts\RowImporter;
 use App\Domain\Imports\Data\RowOutcome;
 use App\Domain\Imports\Enums\ImportRowStatus;
@@ -29,7 +30,10 @@ class RunImport
         private readonly StorageService $storage,
     ) {}
 
-    public function execute(ImportBatch $batch): ImportBatch
+    /**
+     * @param  array<string, mixed>  $options  choix faits au dépôt du fichier, pour l'importateur qui termine le lot
+     */
+    public function execute(ImportBatch $batch, array $options = []): ImportBatch
     {
         $importer = $this->importers->for($batch->type);
         $batch->status = ImportStatus::Processing;
@@ -57,11 +61,46 @@ class RunImport
             }
         }
 
+        if ($importer instanceof FinishesImport && $batch->status === ImportStatus::Done) {
+            $lines = $this->finish($batch, $importer, $options, $lines);
+        }
         $batch->report_file_id = $this->report($batch, $importer, $lines);
         $batch->finished_at = now();
         $batch->save();
 
         return $batch;
+    }
+
+    /**
+     * Fin du lot par l'importateur, dans une transaction ; ses remarques s'ajoutent aux lignes du
+     * rapport et aux messages des lignes concernées.
+     *
+     * @param  array<string, mixed>  $options
+     * @param  list<array{0: int, 1: string, 2: string|null, 3: string}>  $lines
+     * @return list<array{0: int, 1: string, 2: string|null, 3: string}>
+     */
+    private function finish(ImportBatch $batch, FinishesImport $importer, array $options, array $lines): array
+    {
+        $notes = DB::transaction(static fn (): array => $importer->finish($batch, $options));
+        if ($notes === []) {
+            return $lines;
+        }
+
+        $rows = $batch->rows()->whereIn('created_entity_id', array_keys($notes))->get()->keyBy('row_number');
+        foreach ($rows as $row) {
+            $note = $notes[(string) $row->created_entity_id];
+            $row->messages = [...$row->messages, $note];
+            $row->save();
+        }
+
+        return array_map(static function (array $line) use ($rows, $notes): array {
+            $row = $rows->get($line[0]);
+            if ($row !== null) {
+                $line[3] = implode(' ; ', array_filter([$line[3], $notes[(string) $row->created_entity_id]]));
+            }
+
+            return $line;
+        }, $lines);
     }
 
     /**
@@ -97,7 +136,8 @@ class RunImport
             ImportRowStatus::Draft => $batch->draft_rows++,
             ImportRowStatus::Rejected => $batch->rejected_rows++,
         };
-        $batch->save();
+        // Compteurs d'avancement : le journal garde l'état final du lot, pas chaque ligne lue.
+        $batch->saveQuietly();
 
         return [$number, $outcome->status->label(), $outcome->label, implode(' ; ', $outcome->messages)];
     }
