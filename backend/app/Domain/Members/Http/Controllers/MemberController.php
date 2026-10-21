@@ -5,10 +5,12 @@ namespace App\Domain\Members\Http\Controllers;
 use App\Domain\Members\Actions\CreateMemberDraft;
 use App\Domain\Members\Actions\DeleteDraft;
 use App\Domain\Members\Actions\UpdateMember;
+use App\Domain\Members\Actions\ValidateMembership;
 use App\Domain\Members\Http\Requests\ListMembersRequest;
 use App\Domain\Members\Http\Requests\NccCheckRequest;
 use App\Domain\Members\Http\Requests\StoreMemberRequest;
 use App\Domain\Members\Http\Requests\UpdateMemberRequest;
+use App\Domain\Members\Http\Requests\ValidateMembershipRequest;
 use App\Domain\Members\Http\Resources\MemberResource;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Support\MembershipExclusivity;
@@ -24,7 +26,8 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 /**
  * /api/v1/cga/members : dossiers des adhérents du centre (F-ADH-01 à 04) — liste par portefeuille,
- * inscription en brouillon, fiche, modification, suppression d'un brouillon, contrôle du NCC.
+ * inscription en brouillon, validation de l'adhésion, fiche, modification, suppression d'un brouillon,
+ * contrôle du NCC.
  */
 class MemberController extends BaseApiController
 {
@@ -77,6 +80,15 @@ class MemberController extends BaseApiController
 
             return new MemberResource($member->load(self::WITH));
         }, action: 'members.update');
+    }
+
+    public function validate(ValidateMembershipRequest $request, Member $member, ValidateMembership $validate): MemberResource|JsonResponse
+    {
+        return $this->handle(function () use ($request, $member, $validate): MemberResource {
+            $member = $validate->execute($member, $request->exclusivityConfirmed(), $this->currentUser());
+
+            return new MemberResource($member->load(self::WITH));
+        }, action: 'members.validate');
     }
 
     public function destroy(Member $member, DeleteDraft $delete): Response|JsonResponse

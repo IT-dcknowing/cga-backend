@@ -137,6 +137,31 @@ return [
             ],
         ],
 
+        // Dossiers des adhérents (M04).
+        'members' => [
+            // Contrôle « droit d'adhésion payé et confirmé » à la validation (RG-ADH-02) : branché avec les
+            // paiements (Lot 3) ; d'ici là, désactivé.
+            'require_entry_fee_payment' => [
+                'type' => 'boolean', 'level' => 'platform', 'default' => false, 'permission' => $platform,
+                'rules' => ['' => ['boolean']],
+            ],
+            // Alerte au gérant d'un adhérent du portefeuille CGA resté au régime réel (RG-ADH-09).
+            'rsi_alert_days' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 90, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:365']],
+            ],
+            // Délai d'annulation d'une radiation par le gérant (RG-ADH-11).
+            'radiation_cancel_days' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 30, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:365']],
+            ],
+            // Accès d'un adhérent radié à ses documents, en consultation seule (RG-ADH-12), prolongeable par le CGA.
+            'read_only_months' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 6, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:120']],
+            ],
+        ],
+
         'invitation' => [
             'validity_days' => [
                 'type' => 'integer', 'level' => 'platform', 'default' => 7, 'permission' => $platform,

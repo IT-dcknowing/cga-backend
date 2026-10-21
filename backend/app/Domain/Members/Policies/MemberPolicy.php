@@ -47,6 +47,14 @@ class MemberPolicy
     }
 
     /**
+     * « Valider l'adhésion » (F-ADH-02) : ceux qui inscrivent les adhérents.
+     */
+    public function validate(User $user, Member $member): bool
+    {
+        return $this->inCga() && $this->context->allows('members.create') && $this->seesPortfolio($member->portfolio);
+    }
+
+    /**
      * Brouillon à supprimer (RG-ADH-01) : celui qui modifie le dossier.
      */
     public function delete(User $user, Member $member): bool

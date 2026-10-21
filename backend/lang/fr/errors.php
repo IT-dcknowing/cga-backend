@@ -52,6 +52,8 @@ return [
     // Dossiers des adhérents (M04)
     'ncc_already_registered' => 'Ce NCC a déjà un dossier ouvert dans votre centre : ouvrez-le (ou basculez-le) plutôt que d\'en créer un autre.',
     'membership_exclusive' => 'Ce contribuable est adhérent d\'un autre CGA. L\'inscription sera possible dès que sa radiation y aura été validée.',
+    'membership_incomplete' => 'L\'adhésion ne peut pas encore être validée : complétez ce qui manque.',
+    'abbreviation_missing' => 'Renseignez d\'abord l\'abréviation de numérotation du centre (fiche du CGA).',
     'member_not_draft' => 'Seul un brouillon se supprime : un dossier validé se radie.',
     'member_closed' => 'Ce dossier est radié ou clos : il ne se modifie plus. Un retour est une nouvelle adhésion.',
     'source_locked' => 'Cette valeur vient de Compta Flow, qui fait foi : elle se corrige dans Compta Flow.',

@@ -4,6 +4,7 @@ namespace App\Domain\Members\Http\Resources;
 
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberRevenue;
+use App\Domain\Members\Support\MembershipReadiness;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -90,9 +91,12 @@ class MemberResource extends JsonResource
             'pieces_status' => $member->pieces_status->value,
             'attestation_blocked' => $member->attestation_blocked,
             'reference_revenue' => $revenue instanceof MemberRevenue ? ['year' => $revenue->year, 'amount' => $revenue->amount, 'kind' => $revenue->kind->value, 'source' => $revenue->source->value] : null,
+            // Ce qui manque encore pour valider l'adhésion (RG-ADH-02) : brouillon seulement.
+            'missing_for_validation' => $member->status->value === 'draft' ? app(MembershipReadiness::class)->missing($member) : [],
             'created_at' => $member->created_at?->toIso8601ZuluString(),
             'can' => [
                 'update' => Gate::allows('update', $member),
+                'validate' => Gate::allows('validate', $member) && $member->status->value === 'draft',
                 'delete' => Gate::allows('delete', $member) && $member->status->value === 'draft',
             ],
         ];

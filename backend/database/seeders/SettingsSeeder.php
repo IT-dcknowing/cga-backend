@@ -19,7 +19,7 @@ class SettingsSeeder extends Seeder
     public function run(SettingsService $settings): void
     {
         foreach ($settings->definitions() as $key => $definition) {
-            if (! in_array($definition['level'], self::SEEDED_LEVELS, true)) {
+            if (array_intersect((array) $definition['level'], self::SEEDED_LEVELS) === []) {
                 continue;
             }
 

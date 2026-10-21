@@ -163,6 +163,7 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{member}', [MemberController::class, 'show'])->name('show');
         Route::put('{member}', [MemberController::class, 'update'])->name('update');
         Route::delete('{member}', [MemberController::class, 'destroy'])->name('destroy');
+        Route::post('{member}/validate', [MemberController::class, 'validate'])->name('validate');
     });
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).
