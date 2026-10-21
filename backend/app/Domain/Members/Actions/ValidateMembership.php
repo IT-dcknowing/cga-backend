@@ -7,7 +7,6 @@ use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Support\MemberNumbering;
-use App\Domain\Members\Support\MembershipExclusivity;
 use App\Domain\Members\Support\MembershipReadiness;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Models\User;
@@ -17,9 +16,9 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * « Valider l'adhésion » (F-ADH-02, RG-ADH-02, 03) : tout ce qui est exigé est rempli, sinon la liste
- * de ce qui manque (409) ; au portefeuille CGA, l'exclusivité est vérifiée (RG-ADH-05) et l'absence
- * d'adhésion dans un CGA non abonné confirmée sur l'honneur, tracée. Le numéro CGA Connect est
- * attribué dans la transaction, séquence continue du centre sans doublon ni trou (verrou du
+ * de ce qui manque (409) ; au portefeuille CGA, l'exclusivité est vérifiée sous verrou (RG-ADH-05) et
+ * l'absence d'adhésion dans un CGA non abonné confirmée sur l'honneur, tracée. Le numéro CGA Connect
+ * est attribué dans la transaction, séquence continue du centre sans doublon ni trou (verrou du
  * compteur) : AAAA-ABR-NNNN au portefeuille CGA (année de la date d'adhésion), CAB-ABR-NNNNN au
  * Cabinet. L'abréviation du CGA est figée au premier numéro (RG-ORG-05). Les pièces attendues sont
  * créées ; elles ne bloquent pas (RG-PJ-02).
@@ -28,7 +27,7 @@ class ValidateMembership
 {
     public function __construct(
         private readonly MembershipReadiness $readiness,
-        private readonly MembershipExclusivity $exclusivity,
+        private readonly AssertMembershipExclusivity $exclusivity,
         private readonly SequenceService $sequences,
         private readonly MemberNumbering $numbering,
         private readonly CreateExpectedPieces $pieces,
@@ -56,8 +55,8 @@ class ValidateMembership
             if ($missing !== []) {
                 throw new BusinessRuleException('membership_incomplete', details: ['missing' => $missing]);
             }
-            if ($cga && $this->exclusivity->enrolledElsewhere($member->ncc, $member->organization_id)) {
-                throw new BusinessRuleException('membership_exclusive');
+            if ($cga) {
+                $this->exclusivity->execute($member->ncc, $member->organization_id);
             }
 
             $organization = Organization::query()->lockForUpdate()->findOrFail($member->organization_id);

@@ -15,7 +15,6 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberPiece;
 use App\Domain\Members\Models\PortfolioMovement;
 use App\Domain\Members\Models\Radiation;
-use App\Domain\Members\Support\MembershipExclusivity;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
@@ -36,7 +35,7 @@ use Illuminate\Support\Facades\DB;
 class CancelRadiation
 {
     public function __construct(
-        private readonly MembershipExclusivity $exclusivity,
+        private readonly AssertMembershipExclusivity $exclusivity,
         private readonly SettingsService $settings,
         private readonly CreateExpectedPieces $pieces,
         private readonly AuditLogger $audit,
@@ -98,9 +97,7 @@ class CancelRadiation
         if ($radiation->outcome === RadiationOutcome::Closed) {
             AssertNccAvailable::here($member->ncc, $member);
         }
-        if ($this->exclusivity->enrolledElsewhere($member->ncc, $member->organization_id)) {
-            throw new BusinessRuleException('membership_exclusive');
-        }
+        $this->exclusivity->execute($member->ncc, $member->organization_id);
 
         $member->cga_contract_ended_on = null;
         if ($radiation->outcome === RadiationOutcome::Closed) {
