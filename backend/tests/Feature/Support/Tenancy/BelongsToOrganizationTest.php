@@ -7,6 +7,7 @@ use App\Support\Tenancy\Tenancy;
 use App\Support\Tenancy\TenancyViolationException;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 use Tests\Fixtures\TenantNote;
 
 /*
@@ -116,4 +117,13 @@ it('relie une donnée cloisonnée à son organisation', function () {
     enterSpace($this->cgaA);
 
     expect(TenantNote::query()->firstOrFail()->organization->is($this->cgaA->organization))->toBeTrue();
+});
+
+it('charge l\'espace actif avant de chercher l\'objet de la route, et seulement dans cet espace', function () {
+    Route::middleware(['api', 'auth', 'tenant'])->get('api/v1/essai-note/{note}', fn (TenantNote $note) => ['body' => $note->body]);
+    $noteA = TenantNote::query()->withoutGlobalScopes()->where('body', 'note du CGA A')->value('id');
+    $noteB = TenantNote::query()->withoutGlobalScopes()->where('body', 'note du CGA B')->value('id');
+
+    inSpace($this->cgaA)->getJson("/api/v1/essai-note/{$noteA}")->assertOk()->assertJsonPath('body', 'note du CGA A');
+    inSpace($this->cgaA)->getJson("/api/v1/essai-note/{$noteB}")->assertNotFound();
 });

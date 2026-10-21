@@ -3,6 +3,9 @@
 namespace Tests\Support;
 
 use App\Domain\Documents\Models\File;
+use App\Domain\Imports\Enums\ImportStatus;
+use App\Domain\Imports\Enums\ImportType;
+use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
@@ -10,6 +13,7 @@ use App\Domain\Referentials\Models\NationalReference;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Support\Tenancy\Tenancy;
 use Closure;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -41,6 +45,16 @@ final class CrossTenantObjects
                 return $file;
             },
             Organization::class => static fn (Organization $other): Organization => $other,
+            ImportBatch::class => static fn (Organization $other): ImportBatch => Tenancy::bypass(static function () use ($other): ImportBatch {
+                $batch = new ImportBatch;
+                $batch->organization_id = $other->id;
+                $batch->type = ImportType::Cgas;
+                $batch->file_id = (string) self::builders()[File::class]($other)->getKey();
+                $batch->status = ImportStatus::Done;
+                $batch->save();
+
+                return $batch;
+            }, 'Test de cloisonnement : lot d\'import du CGA B.'),
         ];
     }
 

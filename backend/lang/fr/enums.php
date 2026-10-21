@@ -57,6 +57,26 @@ return [
         'phone_change' => 'Changement de téléphone',
     ],
 
+    'import_type' => [
+        'cgas' => 'Registre des CGA',
+        'members' => 'Portefeuille d\'adhérents',
+        'revenues' => 'Chiffre d\'affaires',
+        'tax_payments' => 'Paiements d\'impôts',
+    ],
+
+    'import_status' => [
+        'queued' => 'En attente',
+        'processing' => 'En cours',
+        'done' => 'Terminé',
+        'failed' => 'En échec',
+    ],
+
+    'import_row_status' => [
+        'imported' => 'Importée',
+        'draft' => 'À compléter',
+        'rejected' => 'Rejetée',
+    ],
+
     'cga_image_kind' => [
         'logo' => 'Logo',
         'signature' => 'Signature du gérant',

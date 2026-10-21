@@ -11,6 +11,7 @@
         "laravel/framework": "^13.17",
         "laravel/sanctum": "^4.3",
         "laravel/tinker": "^3.0",
+        "openspout/openspout": "^5.3",
         "phpoffice/phpspreadsheet": "^5.10",
         "phpoffice/phpword": "^1.4",
         "propaganistas/laravel-phone": "^6.1",

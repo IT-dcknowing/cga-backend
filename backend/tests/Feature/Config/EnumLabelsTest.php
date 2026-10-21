@@ -2,6 +2,9 @@
 
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Enums\OtpPurpose;
+use App\Domain\Imports\Enums\ImportRowStatus;
+use App\Domain\Imports\Enums\ImportStatus;
+use App\Domain\Imports\Enums\ImportType;
 use App\Domain\Notifications\Enums\PreferenceChannel;
 use App\Domain\Organizations\Enums\AgreementStatus;
 use App\Domain\Organizations\Enums\CgaImageKind;
@@ -27,6 +30,7 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
     Role::class, MembershipStatus::class, UserStatus::class, InvitationChannel::class, OtpPurpose::class,
     OrganizationType::class, OrganizationStatus::class, AgreementStatus::class, SubscriptionStatus::class, DataStatus::class,
     PreferenceChannel::class, SectorStatus::class, OrganizationStatusEvent::class, CgaImageKind::class,
+    ImportType::class, ImportStatus::class, ImportRowStatus::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {

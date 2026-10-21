@@ -39,8 +39,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // API seule (02-TRD §3) : un appel sans session reçoit 401 en JSON, jamais une redirection.
         $middleware->redirectGuestsTo(static fn (): ?string => null);
 
-        // Routes métier : espace actif obligatoire, chargé dans TenantContext (02-TRD §6.2).
+        // Routes métier : espace actif obligatoire, chargé dans TenantContext (02-TRD §6.2), avant de
+        // chercher les objets de la route : un objet cloisonné n'est cherché que dans l'espace actif.
         $middleware->alias(['tenant' => ResolveTenant::class]);
+        $middleware->prependToPriorityList(before: SubstituteBindings::class, prepend: ResolveTenant::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // API seulement (02-TRD §3) : toute erreur est rendue en JSON, au format de handle() (02-TRD §4.4).

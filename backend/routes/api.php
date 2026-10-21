@@ -6,6 +6,7 @@ use App\Domain\Auth\Http\Controllers\PasswordResetController;
 use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
+use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
 use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
@@ -78,6 +79,16 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{organization}/suspend', [OrganizationStatusController::class, 'suspend'])->name('suspend');
         Route::post('{organization}/reactivate', [OrganizationStatusController::class, 'reactivate'])->name('reactivate');
         Route::post('{organization}/withdraw-agreement', [OrganizationStatusController::class, 'withdrawAgreement'])->name('withdraw-agreement');
+    });
+
+    // Import du registre des CGA par le CNCGA (F-IMP-01) : modèle, dépôt (202, traité en file « imports »),
+    // avancement et rapport d'anomalies ligne par ligne.
+    Route::middleware(['auth', 'tenant'])->prefix('network/imports')->name('network.imports.')->group(function (): void {
+        Route::get('/', [ImportController::class, 'index'])->name('index');
+        Route::get('cgas/template', [ImportController::class, 'cgaTemplate'])->name('cgas.template');
+        Route::post('cgas', [ImportController::class, 'storeCgas'])->name('cgas.store');
+        Route::get('{importBatch}', [ImportController::class, 'show'])->name('show');
+        Route::get('{importBatch}/rows', [ImportController::class, 'rows'])->name('rows');
     });
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).

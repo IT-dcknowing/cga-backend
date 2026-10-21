@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "3f0c6a51-7d2e-4b8a-9c41-5e2f8a7b6c10",
         "name": "CGA Connect — plateforme",
-        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan serve` : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement).\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
+        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -11698,8 +11698,1121 @@
             ]
         },
         {
+            "name": "8. Étape 1.3 — Import du registre des CGA",
+            "description": "F-IMP-01, RG-ORG-01 : modèle Excel du registre, dépôt d'un fichier (traité en file « imports », 202), avancement, sort de chaque ligne et rapport d'anomalies téléchargeable ; cloisonnement des lots. Le traitement demande un worker : `php artisan dev` (écoute toutes les files) ou `php artisan queue:work --queue=imports`. Sans worker, le lot reste « En attente » et les tests du traitement sont sautés. Le fichier déposé vient de `postman/files/` (Newman : `--working-dir .`).",
+            "item": [
+                {
+                    "name": "Modèle — téléchargement",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Classeur Excel\", () => pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"spreadsheetml.sheet\"));",
+                                    "    pm.test(\"Téléchargé sous le nom du modèle\", () => pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"modele-import-registre-cga.xlsx\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/cgas/template",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "cgas",
+                                "template"
+                            ]
+                        },
+                        "description": "Modèle Excel du registre des CGA (F-IMP-01) : feuille « Données » (en-têtes, * = obligatoire) et feuille « Aide » (contenu attendu de chaque colonne)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Modèle — refusé au gérant",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/cgas/template",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "cgas",
+                                "template"
+                            ]
+                        },
+                        "description": "L'import du registre est réservé à ceux qui gèrent le registre (droit `organizations.manage`) : 403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — dépôt du registre",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 202\", () => pm.response.to.have.status(202));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"import_id\", data.id);",
+                                    "    pm.test(\"Lot du registre en attente\", () => { pm.expect(data.type).to.eql(\"cgas\"); pm.expect(data.status).to.eql(\"queued\"); });",
+                                    "    pm.test(\"Fichier déposé\", () => pm.expect(data.file_name).to.eql(\"registre-cga-demo.xlsx\"));",
+                                    "    pm.test(\"Pas encore de rapport\", () => pm.expect(data.report).to.eql(null));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/cgas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "cgas"
+                            ]
+                        },
+                        "description": "Dépôt du fichier `postman/files/registre-cga-demo.xlsx` (trois lignes : une complète, une à compléter, une sans ville). Le serveur range le fichier et met le lot en file « imports » : 202 et le lot « En attente ». Le traitement demande un worker (`php artisan dev`, ou `php artisan queue:work --queue=imports`). Rejoué, le fichier donne des doublons rejetés (les CGA existent déjà).",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/registre-cga-demo.xlsx"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — avancement et rapport",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    const baseUrl = pm.variables.replaceIn(\"{{base_url}}\");",
+                                    "    const spa = pm.variables.replaceIn(\"{{spa_origin}}\");",
+                                    "    const id = pm.collectionVariables.get(\"import_id\");",
+                                    "    const poll = n => pm.sendRequest({ url: baseUrl + \"/network/imports/\" + id, method: \"GET\", header: { Accept: \"application/json\", Origin: spa, Referer: spa + \"/\" } }, (error, response) => {",
+                                    "        const state = response && response.code === 200 ? response.json().data.status : null;",
+                                    "        if (n > 0 && (state === \"queued\" || state === \"processing\")) { setTimeout(() => poll(n - 1), 500); }",
+                                    "    });",
+                                    "    if (id) { poll(20); }",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"import_status\", data.status);",
+                                    "    pm.test(\"Lot déposé plus haut\", () => pm.expect(data.id).to.eql(pm.collectionVariables.get(\"import_id\")));",
+                                    "    pm.test(\"Avancement connu\", () => pm.expect([\"queued\", \"processing\", \"done\"]).to.include(data.status));",
+                                    "    if (data.status === \"done\") {",
+                                    "        pm.test(\"Trois lignes traitées\", () => { pm.expect(data.total_rows).to.eql(3); pm.expect(data.processed_rows).to.eql(3); });",
+                                    "        pm.test(\"La ligne sans ville est rejetée\", () => pm.expect(data.rejected_rows).to.be.at.least(1));",
+                                    "        pm.test(\"Rapport téléchargeable\", () => pm.expect(data.report.url).to.include(\"signature=\"));",
+                                    "    } else {",
+                                    "        console.warn(\"Import pas encore traité : lancez un worker (php artisan dev, ou php artisan queue:work --queue=imports).\");",
+                                    "    }",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/{{import_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "{{import_id}}"
+                            ]
+                        },
+                        "description": "Suivi du lot déposé plus haut (barre de progression : `processed_rows` / `total_rows`). Le script attend jusqu'à 10 s la fin du traitement ; une fois le lot terminé, le rapport d'anomalies ligne par ligne a un lien de téléchargement signé."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — lignes du rapport",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test(\"Liste paginée\", () => { pm.expect(json.data).to.be.an(\"array\"); pm.expect(json.meta).to.have.property(\"per_page\"); });",
+                                    "    if (pm.collectionVariables.get(\"import_status\") === \"done\") {",
+                                    "        pm.test(\"Lignes 2 à 4 du fichier\", () => pm.expect(json.data.map(r => r.row_number)).to.eql([2, 3, 4]));",
+                                    "        pm.test(\"Ligne sans ville rejetée avec son motif\", () => pm.expect(json.data[2].messages).to.include(\"Ville : champ obligatoire.\"));",
+                                    "    }",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/{{import_id}}/rows",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "{{import_id}}",
+                                "rows"
+                            ]
+                        },
+                        "description": "Sort de chaque ligne du fichier, dans l'ordre (numéros de ligne Excel) : importée, à compléter (champs manquants listés), rejetée (motifs)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — lignes rejetées",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test(\"Seulement des lignes rejetées\", () => json.data.forEach(r => pm.expect(r.status).to.eql(\"rejected\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/{{import_id}}/rows?filter[status]=rejected",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "{{import_id}}",
+                                "rows"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[status]",
+                                    "value": "rejected"
+                                }
+                            ]
+                        },
+                        "description": "Filtre `filter[status]` : `imported`, `draft` ou `rejected`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — filtre de lignes inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur filter.status\", () => pm.expect(pm.response.json().errors).to.have.property(\"filter.status\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/{{import_id}}/rows?filter[status]=inconnu",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "{{import_id}}",
+                                "rows"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[status]",
+                                    "value": "inconnu"
+                                }
+                            ]
+                        },
+                        "description": "Statut de ligne hors liste : 422."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — lot d'une autre organisation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/{{import_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "{{import_id}}"
+                            ]
+                        },
+                        "description": "Un lot n'est visible que de l'organisation qui l'a lancé : l'administratrice de la plateforme (autre espace) reçoit 404 `not_found` (cloisonnement)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — lot inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ"
+                            ]
+                        },
+                        "description": "Identifiant inconnu : 404 `not_found`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — dépôt sans fichier",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur file\", () => pm.expect(pm.response.json().errors).to.have.property(\"file\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/cgas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "cgas"
+                            ]
+                        },
+                        "description": "Le fichier est obligatoire : 422.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": []
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — fichier qui n'est pas un classeur",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur file\", () => pm.expect(pm.response.json().errors).to.have.property(\"file\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/cgas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "cgas"
+                            ]
+                        },
+                        "description": "Seul un classeur Excel (.xlsx, type lu dans le contenu) est accepté : 422.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/pas-une-image.txt"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Import — dépôt refusé au gérant",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports/cgas",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports",
+                                "cgas"
+                            ]
+                        },
+                        "description": "Le gérant d'un CGA n'importe pas le registre : 403 `forbidden`.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/registre-cga-demo.xlsx"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Imports — liste",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test(\"Le dernier dépôt en tête\", () => pm.expect(json.data[0].id).to.eql(pm.collectionVariables.get(\"import_id\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports"
+                            ]
+                        },
+                        "description": "Imports lancés par l'organisation de l'espace actif, les plus récents d'abord."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Imports — liste filtrée",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const json = pm.response.json();",
+                                    "    pm.test(\"Seulement des imports du registre\", () => json.data.forEach(b => pm.expect(b.type).to.eql(\"cgas\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports?filter[type]=cgas&sort=-created_at",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[type]",
+                                    "value": "cgas"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "-created_at"
+                                }
+                            ]
+                        },
+                        "description": "Filtres `filter[type]` (`cgas`, `members`, `revenues`, `tax_payments`) et `filter[status]` (`queued`, `processing`, `done`, `failed`) ; tri `sort=created_at` ou `-created_at`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Imports — filtre inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur filter.type\", () => pm.expect(pm.response.json().errors).to.have.property(\"filter.type\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports?filter[type]=inconnu",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[type]",
+                                    "value": "inconnu"
+                                }
+                            ]
+                        },
+                        "description": "Type hors liste : 422."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Imports — liste refusée au gérant",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports"
+                            ]
+                        },
+                        "description": "Réservée à ceux qui gèrent le registre : 403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Imports — sans session",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 401\", () => pm.response.to.have.status(401));",
+                                    "    pm.test(\"Code d'erreur unauthenticated\", () => pm.expect(pm.response.json().code).to.eql(\"unauthenticated\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/imports",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "imports"
+                            ]
+                        },
+                        "description": "Sans session : 401 `unauthenticated`."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "9. Manuel — requêtes non rejouables",
-            "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète : `newman run … --folder` sur les dossiers 0 à 7.",
+            "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète : `newman run … --folder` sur les dossiers 0 à 8.",
             "item": [
                 {
                     "name": "Activation — lien valide (non rejouable)",
@@ -12009,6 +13122,14 @@
         },
         {
             "key": "org_id",
+            "value": ""
+        },
+        {
+            "key": "import_id",
+            "value": ""
+        },
+        {
+            "key": "import_status",
             "value": ""
         }
     ]

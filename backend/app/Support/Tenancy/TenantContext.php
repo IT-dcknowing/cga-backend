@@ -35,6 +35,27 @@ class TenantContext
         $this->membership = null;
     }
 
+    /**
+     * Exécute un traitement dans l'espace de ce rattachement (Job lancé par un utilisateur, qui en
+     * reprend l'espace), puis rétablit l'espace d'avant.
+     *
+     * @template T
+     *
+     * @param  callable(): T  $callback
+     * @return T
+     */
+    public function runAs(Membership $membership, callable $callback): mixed
+    {
+        $previous = $this->membership;
+        $this->set($membership);
+
+        try {
+            return $callback();
+        } finally {
+            $this->membership = $previous;
+        }
+    }
+
     public function has(): bool
     {
         return $this->membership !== null;

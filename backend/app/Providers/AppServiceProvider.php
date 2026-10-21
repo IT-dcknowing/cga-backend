@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Domain\Audit\AuditLogger;
 use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
+use App\Domain\Imports\Models\ImportBatch;
+use App\Domain\Imports\Policies\ImportBatchPolicy;
 use App\Domain\Notifications\Channels\SmsChannel;
 use App\Domain\Notifications\Contracts\SmsProvider;
 use App\Domain\Notifications\Listeners\LogNotificationActivity;
@@ -31,6 +33,7 @@ use App\Support\Tenancy\Tenancy;
 use App\Support\Tenancy\TenantContext;
 use App\Support\Validation\Rules\NotCommonPassword;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Foundation\DevCommands;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
@@ -89,6 +92,13 @@ class AppServiceProvider extends ServiceProvider
 
         // Registre des CGA et fiche du CGA de l'espace actif (PRD §3.3).
         Gate::policy(Organization::class, OrganizationPolicy::class);
+
+        // Imports de fichiers Excel (M17).
+        Gate::policy(ImportBatch::class, ImportBatchPolicy::class);
+
+        // Développement (php artisan dev) : un seul processus écoute les files des workers de production
+        // (infra/supervisor : default, documents, notifications, imports).
+        DevCommands::artisan('queue:listen --queue=default,documents,notifications,imports --tries=1 --timeout=0', 'queue');
 
         // Lien d'invitation : l'invitation est désignée par son jeton secret (F-AUTH-02).
         Route::bind('invitationToken', static fn (string $token): InvitationToken => InvitationToken::resolve($token));

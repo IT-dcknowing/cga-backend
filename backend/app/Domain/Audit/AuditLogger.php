@@ -36,7 +36,8 @@ class AuditLogger
     {
         $log = new AuditLog;
         $log->organization_id = $this->organizationIdFor($subject);
-        $log->user_id = $this->auth->guard()->id();
+        // Hors session (Job lancé par un utilisateur), l'auteur est l'utilisateur de l'espace repris.
+        $log->user_id = $this->auth->guard()->id() ?? ($this->tenant->has() ? $this->tenant->userId() : null);
         $log->membership_id = $this->tenant->has() ? $this->tenant->membership()->id : null;
         $log->event = $event;
         $log->subject_type = $subject?->getMorphClass();
