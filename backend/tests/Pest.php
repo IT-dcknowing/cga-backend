@@ -29,3 +29,25 @@ function inSpace(Membership $membership): TestCase
         ->withHeaders(Spa::headers())
         ->withSession([TenantContext::SESSION_KEY => $membership->id]);
 }
+
+/**
+ * Parties XML d'un modèle (corps, en-têtes, pieds de page, propriétés, feuilles, chaînes partagées…).
+ *
+ * @return array<string, string>
+ */
+function templateParts(string $path): array
+{
+    $zip = new ZipArchive;
+    expect($zip->open($path))->toBeTrue();
+    $parts = [];
+    for ($i = 0; $i < $zip->numFiles; $i++) {
+        $name = (string) $zip->getNameIndex($i);
+        if (preg_match('/\.(xml|rels)$/', $name) === 1) {
+            // Les espaces de noms XML de Microsoft contiennent des années (…/2018/wordml) : retirés.
+            $parts[$name] = (string) preg_replace('/xmlns(:\w+)?="[^"]*"|mc:Ignorable="[^"]*"/', '', (string) $zip->getFromName($name));
+        }
+    }
+    $zip->close();
+
+    return $parts;
+}

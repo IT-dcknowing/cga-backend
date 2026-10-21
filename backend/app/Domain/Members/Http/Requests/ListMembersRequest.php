@@ -9,6 +9,7 @@ use App\Domain\Members\Enums\TaxRegime;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Support\Ncc;
 use App\Support\Http\ListRequest;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
@@ -44,7 +45,8 @@ class ListMembersRequest extends ListRequest
             'sector_id' => ['string', 'max:26'],
             'tax_office_id' => ['string', 'max:26'],
             'pieces_status' => [Rule::enum(PiecesStatus::class)],
-            'referrer_id' => ['string', 'max:26'],
+            // L'apporteur ne se devine pas par la liste sans le droit de le voir (RG-PTF-06).
+            'referrer_id' => app(TenantContext::class)->allows('members.referrers.view') ? ['string', 'max:26'] : ['prohibited'],
             'adhesion_from' => ['date_format:Y-m-d'],
             'adhesion_to' => ['date_format:Y-m-d'],
         ];

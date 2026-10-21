@@ -2,10 +2,12 @@
 
 namespace App\Domain\Organizations\Http\Resources;
 
+use App\Domain\Members\Support\RegulatoryMemberCounts;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Organizations\Models\OrganizationStatusEvent;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 
 /**
@@ -53,8 +55,8 @@ class OrganizationResource extends JsonResource
                 'ended_at' => $organization->subscription_ended_at?->toDateString(),
                 'data_deletion_due_at' => $organization->data_deletion_due_at?->toDateString(),
             ],
-            // Toujours calculé, jamais saisi (RG-ORG-02) : compté sur la table des adhérents (étape 2.1).
-            'members_count' => 0,
+            // Toujours calculé, jamais saisi (RG-ORG-02) : portefeuille CGA seulement (RG-SEC-08), préchargé pour une liste.
+            'members_count' => $this->membersCount($organization),
             'profile_completed_at' => $organization->profile_completed_at?->toIso8601ZuluString(),
             'data_status' => $organization->data_status->value,
             'created_at' => $organization->created_at?->toIso8601ZuluString(),
@@ -87,5 +89,14 @@ class OrganizationResource extends JsonResource
                 'invite_manager' => Gate::allows('inviteManager', $organization),
             ],
         ];
+    }
+
+    private function membersCount(Organization $organization): int
+    {
+        if ($organization->getAttribute('members_count') === null) {
+            app(RegulatoryMemberCounts::class)->load(new Collection([$organization]));
+        }
+
+        return (int) $organization->getAttribute('members_count');
     }
 }

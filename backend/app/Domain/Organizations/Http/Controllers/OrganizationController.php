@@ -3,6 +3,7 @@
 namespace App\Domain\Organizations\Http\Controllers;
 
 use App\Domain\Auth\Support\DevMessages;
+use App\Domain\Members\Support\RegulatoryMemberCounts;
 use App\Domain\Organizations\Actions\CreateCga;
 use App\Domain\Organizations\Actions\UpdateCgaRegistration;
 use App\Domain\Organizations\Enums\OrganizationType;
@@ -26,14 +27,15 @@ use Spatie\QueryBuilder\QueryBuilder;
  */
 class OrganizationController extends BaseApiController
 {
-    public function index(ListOrganizationsRequest $request, SettingsService $settings): AnonymousResourceCollection|JsonResponse
+    public function index(ListOrganizationsRequest $request, SettingsService $settings, RegulatoryMemberCounts $counts): AnonymousResourceCollection|JsonResponse
     {
-        return $this->handle(function () use ($request, $settings): AnonymousResourceCollection {
+        return $this->handle(function () use ($request, $settings, $counts): AnonymousResourceCollection {
             $organizations = QueryBuilder::for(Organization::query()->where('type', OrganizationType::Cga)->with('regionalDirectorate'), $request->listQuery())
                 ->allowedFilters(...$request->queryFilters())
                 ->allowedSorts(...$request->sorts())
                 ->defaultSort('name')
                 ->paginate($request->perPage($settings), ['*'], 'page', $request->page());
+            $counts->load($organizations->getCollection());
 
             return OrganizationResource::collection($organizations);
         }, action: 'organizations.index');
