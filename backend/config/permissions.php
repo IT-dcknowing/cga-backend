@@ -122,4 +122,25 @@ return [
 
     ],
 
+    /*
+     * Modules de l'interface d'un rôle (F-ADM-05) : chaque droit y est rangé d'après le début de son
+     * code. Libellés : lang/fr/permission_modules.php.
+     */
+    'modules' => [
+        'network' => ['organizations', 'network_users', 'network_user_permissions', 'network_permissions', 'network_settings', 'referentials'],
+        'centre' => ['cga', 'cga_users', 'cga_permissions', 'cga_user_permissions', 'integrations', 'internal'],
+        'members' => ['members'],
+        'documents' => ['documents', 'attestations'],
+        'payments' => ['member_payments', 'fees', 'invoices'],
+        'obligations' => ['obligations', 'closing'],
+        'reports' => ['reports', 'statistics', 'exports'],
+        'dues' => ['dues'],
+        'concerns' => ['concerns', 'network_concerns'],
+        'trainings' => ['trainings'],
+        'communications' => ['communications', 'announcements'],
+        'banking' => ['banking'],
+        'member_space' => ['member'],
+        'platform' => ['platform'],
+    ],
+
 ];

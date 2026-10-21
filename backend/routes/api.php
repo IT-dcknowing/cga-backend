@@ -18,6 +18,7 @@ use App\Domain\Referentials\Http\Controllers\RegionalDirectorateController;
 use App\Domain\Referentials\Http\Controllers\SectorController;
 use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
 use App\Domain\Users\Http\Controllers\AgentController;
+use App\Domain\Users\Http\Controllers\RolePermissionController;
 use App\Support\Files\StorageService;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -104,6 +105,19 @@ Route::prefix('v1')->group(function (): void {
             Route::post('{agent}/disable', [AgentController::class, 'disable'])->name('disable');
             Route::post('{agent}/enable', [AgentController::class, 'enable'])->name('enable');
             Route::post('{agent}/invitation', [AgentController::class, 'resendInvitation'])->name('invitation');
+        });
+    }
+
+    // Droits par rôle, une interface par rôle (F-ADM-05, 02-TRD §6.2) : le réseau par l'administrateur de la
+    // plateforme, chaque CGA par son gérant. La modification remplace la liste des droits accordés : PUT.
+    Route::middleware(['auth', 'tenant'])->get('permissions/catalog', [RolePermissionController::class, 'catalog'])->name('permissions.catalog');
+    foreach (['network', 'cga'] as $level) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$level}/roles")->name("{$level}.roles.")->group(function (): void {
+            Route::get('/', [RolePermissionController::class, 'roles'])->name('index');
+            Route::get('{role}/permissions', [RolePermissionController::class, 'show'])->name('show');
+            Route::put('{role}/permissions', [RolePermissionController::class, 'update'])->name('update');
+            Route::post('{role}/permissions/reset', [RolePermissionController::class, 'reset'])->name('reset');
+            Route::get('{role}/impact', [RolePermissionController::class, 'impact'])->name('impact');
         });
     }
 

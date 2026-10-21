@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "3f0c6a51-7d2e-4b8a-9c41-5e2f8a7b6c10",
         "name": "CGA Connect — plateforme",
-        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
+        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --folder \"10. Étape 1.8 — Droits par rôle\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -15287,6 +15287,1214 @@
             ]
         },
         {
+            "name": "10. Étape 1.8 — Droits par rôle",
+            "description": "F-ADM-05, RG-ROLE-01 à 06 : catalogue, une interface par rôle au réseau (administratrice de la plateforme) et dans un CGA (gérant DC-KNOWING) — droits groupés par module, aperçu, enregistrement de la liste complète (verrous ignorés), retour aux valeurs par défaut. Chaque modification est annulée par le retour aux valeurs par défaut : le dossier se rejoue.",
+            "item": [
+                {
+                    "name": "Catalogue des droits",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Modules et droits\", () => { pm.expect(data.modules.length).to.be.above(5); pm.expect(data.permissions.length).to.be.above(50); });",
+                                    "    pm.test(\"Verrou expliqué\", () => pm.expect(data.locked_explanation).to.include(\"RG-ROLE-04\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/permissions/catalog",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "permissions",
+                                "catalog"
+                            ]
+                        },
+                        "description": "Catalogue des droits (05-BACKEND-SCHEMA §2) : code, libellé, module de l'écran, verrou, rôles qui l'ont par défaut. Lu par ceux qui paramètrent des droits."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Catalogue — refusé au comptable",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/permissions/catalog",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "permissions",
+                                "catalog"
+                            ]
+                        },
+                        "description": "403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — rôles",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    const roles = data.map(r => r.role);",
+                                    "    pm.test(\"Tous les rôles sauf platform_admin\", () => { pm.expect(roles).to.include(\"cga_manager\"); pm.expect(roles).to.include(\"member_owner\"); pm.expect(roles).to.not.include(\"platform_admin\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles"
+                            ]
+                        },
+                        "description": "Rôles paramétrables au réseau (RG-ROLE-02) par l'administratrice de la plateforme : tous sauf le sien, avec le nombre d'utilisateurs et de droits accordés."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — droits du comptable",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    const rights = data.modules.flatMap(m => m.permissions);",
+                                    "    pm.collectionVariables.set(\"network_rights\", JSON.stringify(rights.filter(p => p.granted && !p.locked).map(p => p.code)));",
+                                    "    pm.test(\"Droits groupés par module\", () => pm.expect(data.modules.length).to.be.above(0));",
+                                    "    pm.test(\"Droits verrouillés signalés\", () => pm.expect(rights.some(p => p.locked)).to.be.true);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles/cga_accountant/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles",
+                                "cga_accountant",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Interface du rôle « Comptable » au réseau : ses droits groupés par module, valeur, valeur par défaut (`reference`), verrou, écart (`customized`)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — aperçu avant d'enregistrer",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    const current = JSON.parse(pm.collectionVariables.get(\"network_rights\") || \"[]\");",
+                                    "    const wanted = current.filter(c => ![].includes(c)).concat([\"attestations.block\"]);",
+                                    "    pm.collectionVariables.set(\"rights_body\", JSON.stringify({ permissions: wanted }));",
+                                    "    if (pm.request.method === \"GET\") { pm.request.url.query.clear(); wanted.forEach(c => pm.request.url.query.add({ key: \"permissions[]\", value: c })); }",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Un droit ajouté\", () => pm.expect(data.added.map(p => p.code)).to.eql([\"attestations.block\"]));",
+                                    "    pm.test(\"Utilisateurs concernés comptés\", () => pm.expect(data.users_count).to.be.a(\"number\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles/cga_accountant/impact",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles",
+                                "cga_accountant",
+                                "impact"
+                            ]
+                        },
+                        "description": "Aperçu (F-ADM-05) : utilisateurs concernés, droits ajoutés et retirés, sans rien enregistrer."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — enregistrement",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    const current = JSON.parse(pm.collectionVariables.get(\"network_rights\") || \"[]\");",
+                                    "    const wanted = current.filter(c => ![].includes(c)).concat([\"attestations.block\", \"members.radiation.cancel\", \"code.inconnu\"]);",
+                                    "    pm.collectionVariables.set(\"rights_body\", JSON.stringify({ permissions: wanted }));",
+                                    "    if (pm.request.method === \"GET\") { pm.request.url.query.clear(); wanted.forEach(c => pm.request.url.query.add({ key: \"permissions[]\", value: c })); }",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    const right = code => data.modules.flatMap(m => m.permissions).find(p => p.code === code);",
+                                    "    pm.test(\"Droit ajouté\", () => pm.expect(right(\"attestations.block\").granted).to.be.true);",
+                                    "    pm.test(\"Droit verrouillé inchangé\", () => pm.expect(right(\"members.radiation.cancel\").granted).to.be.false);",
+                                    "    pm.test(\"Écart à la matrice signalé\", () => pm.expect(right(\"attestations.block\").customized).to.be.true);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles/cga_accountant/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles",
+                                "cga_accountant",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Liste complète des droits accordés au rôle : un droit ajouté (`attestations.block`) ; le droit verrouillé `members.radiation.cancel` et un code inconnu, envoyés aussi, sont ignorés (RG-ROLE-04). Journalisé, effet immédiat (RG-ROLE-05).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{{rights_body}}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — retour aux droits par défaut",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    const right = code => data.modules.flatMap(m => m.permissions).find(p => p.code === code);",
+                                    "    pm.test(\"Plus aucun écart\", () => pm.expect(data.modules.flatMap(m => m.permissions).some(p => p.customized)).to.be.false);",
+                                    "    pm.test(\"Droit retiré\", () => pm.expect(right(\"attestations.block\").granted).to.be.false);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles/cga_accountant/permissions/reset",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles",
+                                "cga_accountant",
+                                "permissions",
+                                "reset"
+                            ]
+                        },
+                        "description": "« Revenir aux droits par défaut » (RG-ROLE-06) : la matrice du PRD §3.3. Rend la base de démo dans son état initial."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — rôle de l'administrateur refusé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles/platform_admin/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles",
+                                "platform_admin",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Les droits de l'administrateur ne se paramètrent pas : 403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — rôle inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles/inconnu/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles",
+                                "inconnu",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Rôle hors liste : 404 `not_found`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Réseau — refusé au gérant",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/network/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "network",
+                                "roles"
+                            ]
+                        },
+                        "description": "Le gérant ne paramètre que son centre : 403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — rôles",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    const roles = data.map(r => r.role);",
+                                    "    pm.test(\"Rôles du centre, sans le gérant\", () => { pm.expect(roles).to.include(\"cga_accountant\"); pm.expect(roles).to.not.include(\"cga_manager\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles"
+                            ]
+                        },
+                        "description": "Rôles du centre paramétrables par le gérant (RG-ROLE-03), hors gérant ; « personnalisé » si le centre s'écarte du réseau."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — droits du comptable",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    const rights = data.modules.flatMap(m => m.permissions);",
+                                    "    pm.collectionVariables.set(\"cga_rights\", JSON.stringify(rights.filter(p => p.granted && !p.locked).map(p => p.code)));",
+                                    "    pm.test(\"Droits groupés par module\", () => pm.expect(data.modules.length).to.be.above(0));",
+                                    "    pm.test(\"Droits verrouillés signalés\", () => pm.expect(rights.some(p => p.locked)).to.be.true);",
+                                    "    pm.test(\"Comptables du centre listés\", () => pm.expect(data.users).to.be.an(\"array\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles/cga_accountant/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles",
+                                "cga_accountant",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Interface du rôle « Comptable » pour DC-KNOWING : valeur du centre, valeur du réseau (`reference`), écart, et les comptables du centre."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — aperçu avant d'enregistrer",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    const current = JSON.parse(pm.collectionVariables.get(\"cga_rights\") || \"[]\");",
+                                    "    const wanted = current.filter(c => ![\"members.update\"].includes(c)).concat([]);",
+                                    "    pm.collectionVariables.set(\"rights_body\", JSON.stringify({ permissions: wanted }));",
+                                    "    if (pm.request.method === \"GET\") { pm.request.url.query.clear(); wanted.forEach(c => pm.request.url.query.add({ key: \"permissions[]\", value: c })); }",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Un droit retiré\", () => pm.expect(data.removed.map(p => p.code)).to.eql([\"members.update\"]));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles/cga_accountant/impact",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles",
+                                "cga_accountant",
+                                "impact"
+                            ]
+                        },
+                        "description": "Aperçu : un droit retiré (`members.update`)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — enregistrement",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    const current = JSON.parse(pm.collectionVariables.get(\"cga_rights\") || \"[]\");",
+                                    "    const wanted = current.filter(c => ![\"members.update\"].includes(c)).concat([]);",
+                                    "    pm.collectionVariables.set(\"rights_body\", JSON.stringify({ permissions: wanted }));",
+                                    "    if (pm.request.method === \"GET\") { pm.request.url.query.clear(); wanted.forEach(c => pm.request.url.query.add({ key: \"permissions[]\", value: c })); }",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    const right = code => data.modules.flatMap(m => m.permissions).find(p => p.code === code);",
+                                    "    pm.test(\"Droit retiré pour le centre\", () => { pm.expect(right(\"members.update\").granted).to.be.false; pm.expect(right(\"members.update\").customized).to.be.true; });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles/cga_accountant/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles",
+                                "cga_accountant",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Ajustement du centre : `members.update` retiré aux comptables de DC-KNOWING seulement ; seul cet écart au réseau est gardé (« personnalisé pour votre centre »).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{{rights_body}}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — retour au paramétrage du réseau",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Plus aucun écart\", () => pm.expect(data.modules.flatMap(m => m.permissions).some(p => p.customized)).to.be.false);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles/cga_accountant/permissions/reset",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles",
+                                "cga_accountant",
+                                "permissions",
+                                "reset"
+                            ]
+                        },
+                        "description": "Les ajustements du centre pour ce rôle sont supprimés : le paramétrage réseau s'applique (RG-ROLE-06)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — rôle du gérant refusé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles/cga_manager/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles",
+                                "cga_manager",
+                                "permissions"
+                            ]
+                        },
+                        "description": "Le gérant ne modifie pas ses propres droits (RG-ROLE-03) : 403 `forbidden`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur permissions\", () => pm.expect(pm.response.json().errors).to.have.property(\"permissions\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles/cga_accountant/permissions",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles",
+                                "cga_accountant",
+                                "permissions"
+                            ]
+                        },
+                        "description": "La liste `permissions` est obligatoire (vide : tout retirer) : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — refusé au comptable",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/roles/cga_accountant/permissions/reset",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "roles",
+                                "cga_accountant",
+                                "permissions",
+                                "reset"
+                            ]
+                        },
+                        "description": "403 `forbidden`."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -15642,6 +16850,22 @@
         },
         {
             "key": "network_agent_id",
+            "value": ""
+        },
+        {
+            "key": "network_rights",
+            "value": ""
+        },
+        {
+            "key": "cga_rights",
+            "value": ""
+        },
+        {
+            "key": "rights_body",
+            "value": ""
+        },
+        {
+            "key": "impact_query",
             "value": ""
         }
     ]

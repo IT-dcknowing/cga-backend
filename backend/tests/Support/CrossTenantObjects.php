@@ -91,7 +91,17 @@ final class CrossTenantObjects
     {
         $invitationToken = 'Jeton secret du lien d\'invitation (route publique, F-AUTH-02) : il désigne l\'invitation sans identifiant ; un jeton inconnu répond 404.';
 
+        $role = 'Rôle de la plateforme (valeur de la liste des rôles) : la route ne désigne aucun objet d\'une organisation ; un rôle inconnu répond 404.';
+
         return [
+            'network.roles.show:role' => $role,
+            'network.roles.update:role' => $role,
+            'network.roles.reset:role' => $role,
+            'network.roles.impact:role' => $role,
+            'cga.roles.show:role' => $role,
+            'cga.roles.update:role' => $role,
+            'cga.roles.reset:role' => $role,
+            'cga.roles.impact:role' => $role,
             'auth.invitations.show:invitationToken' => $invitationToken,
             'auth.invitations.accept:invitationToken' => $invitationToken,
             'cga.profile.images.store:kind' => 'Type d\'image (logo, signature, cachet) de la fiche du CGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',

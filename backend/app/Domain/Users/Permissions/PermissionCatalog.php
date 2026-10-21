@@ -58,6 +58,33 @@ class PermissionCatalog
         return explode('.', $code, 2)[0];
     }
 
+    /**
+     * Module de l'interface d'un rôle où le droit est rangé (config permissions.modules, F-ADM-05).
+     *
+     * @throws UnknownPermissionException code ou module inconnu
+     */
+    public function screenModule(string $code): string
+    {
+        $prefix = $this->module($code);
+        foreach ($this->screenModules() as $module => $prefixes) {
+            if (in_array($prefix, $prefixes, true)) {
+                return $module;
+            }
+        }
+
+        throw new UnknownPermissionException($code);
+    }
+
+    /**
+     * Modules de l'interface d'un rôle, dans l'ordre d'affichage : module => débuts de code.
+     *
+     * @return array<string, list<string>>
+     */
+    public function screenModules(): array
+    {
+        return $this->config->array('permissions.modules');
+    }
+
     public function label(string $code): string
     {
         $this->entry($code);
