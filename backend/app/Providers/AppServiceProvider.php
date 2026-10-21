@@ -7,8 +7,10 @@ use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Imports\Policies\ImportBatchPolicy;
+use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Policies\MemberPolicy;
+use App\Domain\Members\Policies\ReferrerPolicy;
 use App\Domain\Notifications\Channels\SmsChannel;
 use App\Domain\Notifications\Contracts\SmsProvider;
 use App\Domain\Notifications\Listeners\LogNotificationActivity;
@@ -109,6 +111,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Dossiers des adhérents (M04).
         Gate::policy(Member::class, MemberPolicy::class);
+        Gate::policy(BusinessReferrer::class, ReferrerPolicy::class);
 
         // Imports de fichiers Excel (M17).
         Gate::policy(ImportBatch::class, ImportBatchPolicy::class);

@@ -28,7 +28,8 @@ use Tests\Support\RealTransactions;
 
 /*
  * Import d'un portefeuille existant (06-IMPLEMENTATION-PLAN étape 2.6, F-IMP-02, RG-IMP-01 à 03) :
- * modèle, analyse et aperçu, import en file « imports », double numérotation, rapport.
+ * modèle, analyse et aperçu, import en file « imports », double numérotation, rapport. La durée de
+ * l'import de 1 000 lignes (groupe « performance ») se mesure seule : composer test:performance.
  */
 
 beforeEach(function () {

@@ -12,7 +12,9 @@ use App\Domain\Members\Http\Controllers\MemberAccessController;
 use App\Domain\Members\Http\Controllers\MemberController;
 use App\Domain\Members\Http\Controllers\MemberTransferController;
 use App\Domain\Members\Http\Controllers\PieceController;
+use App\Domain\Members\Http\Controllers\PortfolioController;
 use App\Domain\Members\Http\Controllers\RadiationController;
+use App\Domain\Members\Http\Controllers\ReferrerController;
 use App\Domain\Members\Http\Controllers\RegimeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
@@ -189,6 +191,7 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{member}/radiation', [RadiationController::class, 'store'])->name('radiation.store');
         Route::post('{member}/radiation/validate', [RadiationController::class, 'validate'])->name('radiation.validate');
         Route::post('{member}/radiation/cancel', [RadiationController::class, 'cancel'])->name('radiation.cancel');
+        Route::post('{member}/portfolio/cga', [PortfolioController::class, 'moveToCga'])->name('portfolio.cga');
         Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
         Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
         Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
@@ -198,6 +201,14 @@ Route::prefix('v1')->group(function (): void {
             Route::post('{member}/accesses/{access}/disable', [MemberAccessController::class, 'disable'])->name('accesses.disable');
             Route::post('{member}/accesses/{access}/enable', [MemberAccessController::class, 'enable'])->name('accesses.enable');
         });
+    });
+
+    // Apporteurs d'affaires du centre (sous-portefeuille « Accessoires », RG-PTF-06).
+    Route::middleware(['auth', 'tenant'])->prefix('cga/referrers')->name('cga.referrers.')->group(function (): void {
+        Route::get('/', [ReferrerController::class, 'index'])->name('index');
+        Route::post('/', [ReferrerController::class, 'store'])->name('store');
+        Route::put('{referrer}', [ReferrerController::class, 'update'])->name('update');
+        Route::delete('{referrer}', [ReferrerController::class, 'destroy'])->name('destroy');
     });
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).

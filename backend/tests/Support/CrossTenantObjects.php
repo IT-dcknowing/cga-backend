@@ -6,6 +6,7 @@ use App\Domain\Documents\Models\File;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
 use App\Domain\Imports\Models\ImportBatch;
+use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Referentials\Models\Commune;
@@ -50,6 +51,7 @@ final class CrossTenantObjects
             },
             Organization::class => static fn (Organization $other): Organization => $other,
             Member::class => static fn (Organization $other): Member => Member::factory()->create(['organization_id' => $other->id]),
+            BusinessReferrer::class => static fn (Organization $other): BusinessReferrer => BusinessReferrer::factory()->create(['organization_id' => $other->id]),
             Membership::class => static fn (Organization $other): Membership => Membership::factory()->role(Role::MemberOwner)->create(['organization_id' => $other->id]),
             User::class => static fn (Organization $other): User => Membership::factory()->create(['organization_id' => $other->id])->user,
             ImportBatch::class => static fn (Organization $other): ImportBatch => Tenancy::bypass(static function () use ($other): ImportBatch {

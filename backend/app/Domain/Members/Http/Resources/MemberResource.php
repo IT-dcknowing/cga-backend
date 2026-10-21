@@ -2,6 +2,7 @@
 
 namespace App\Domain\Members\Http\Resources;
 
+use App\Domain\Members\Actions\CancelRadiation;
 use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
@@ -95,7 +96,7 @@ class MemberResource extends JsonResource
             'pieces_status' => $member->pieces_status->value,
             'attestation_blocked' => $member->attestation_blocked,
             'alerts' => $this->alerts($member),
-            'radiation' => $member->relationLoaded('currentRadiation') && $member->currentRadiation !== null ? new RadiationResource($member->currentRadiation, $member) : null,
+            'radiation' => $this->radiation($member),
             'reference_revenue' => $revenue instanceof MemberRevenue ? ['year' => $revenue->year, 'amount' => $revenue->amount, 'kind' => $revenue->kind->value, 'source' => $revenue->source->value] : null,
             // Ce qui manque encore pour valider l'adhésion (RG-ADH-02) : brouillon seulement.
             'missing_for_validation' => $member->status->value === 'draft' ? app(MembershipReadiness::class)->missing($member) : [],
@@ -106,8 +107,20 @@ class MemberResource extends JsonResource
                 'delete' => Gate::allows('delete', $member) && $member->status->value === 'draft',
                 'change_regime' => Gate::allows('changeRegime', $member) && in_array($member->status, [MemberStatus::Active, MemberStatus::RadiationPending], true),
                 'request_radiation' => Gate::allows('requestRadiation', $member) && $member->portfolio === Portfolio::Cga && $member->status === MemberStatus::Active,
+                'move_to_cga' => Gate::allows('moveToCga', $member) && $member->portfolio === Portfolio::Cabinet && $member->status === MemberStatus::Active && ! $member->regime->isReal(),
             ],
         ];
+    }
+
+    /**
+     * Radiation en vigueur : demandée, ou validée tant que le dossier n'est pas revenu au portefeuille
+     * CGA après une bascule vers le Cabinet.
+     */
+    private function radiation(Member $member): ?RadiationResource
+    {
+        $radiation = $member->relationLoaded('currentRadiation') ? $member->currentRadiation : null;
+
+        return $radiation !== null && app(CancelRadiation::class)->inForce($member, $radiation) ? new RadiationResource($radiation, $member) : null;
     }
 
     /**

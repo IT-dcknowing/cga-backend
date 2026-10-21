@@ -127,6 +127,14 @@ class MemberPolicy
         return $this->inCga() && $this->context->allows('members.portfolio.move') && $this->seesPortfolio(Portfolio::Cabinet);
     }
 
+    /**
+     * « Basculer vers le portefeuille CGA » un dossier du Cabinet (RG-PTF-03) : le droit de basculer.
+     */
+    public function moveToCga(User $user, Member $member): bool
+    {
+        return $this->inCga() && $this->context->allows('members.portfolio.move') && $this->seesPortfolio($member->portfolio);
+    }
+
     public function seesPortfolio(Portfolio $portfolio): bool
     {
         return $portfolio === Portfolio::Cga || $this->context->allows('members.cabinet.view');

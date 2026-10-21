@@ -55,8 +55,8 @@ class ValidateRadiation
     {
         return DB::transaction(function () use ($member, $outcome, $reference, $actor): Radiation {
             $member = Member::query()->lockForUpdate()->findOrFail($member->id);
-            $radiation = Radiation::query()->where('member_id', $member->id)->whereNull('cancelled_at')->lockForUpdate()->first();
-            if ($radiation === null || $radiation->status !== RadiationStatus::Requested || $member->status !== MemberStatus::RadiationPending) {
+            $radiation = Radiation::query()->where('member_id', $member->id)->where('status', RadiationStatus::Requested)->lockForUpdate()->first();
+            if ($radiation === null || $member->status !== MemberStatus::RadiationPending) {
                 throw new BusinessRuleException('radiation_not_requested');
             }
 

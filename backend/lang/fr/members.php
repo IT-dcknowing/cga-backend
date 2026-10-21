@@ -18,6 +18,11 @@ return [
         'radiation_required' => 'Radiation requise — reclassement au régime réel',
     ],
 
+    'move' => [
+        'regime_not_cga' => 'Régime :regime : seul un dossier au RME ou au TEE entre au portefeuille CGA.',
+        'default_reason' => 'Signature du contrat CGA',
+    ],
+
     'transfer' => [
         'invalid' => 'Ce réimport est inconnu ou a déjà servi à une inscription.',
         'ncc_mismatch' => 'Le NCC saisi n\'est pas celui du dossier réimporté.',

@@ -18,6 +18,12 @@
             <directory>tests/Tooling</directory>
         </testsuite>
     </testsuites>
+    <!-- Les durées (02-TRD §12) se mesurent seules, sans couverture ni tests en parallèle : composer test:performance. -->
+    <groups>
+        <exclude>
+            <group>performance</group>
+        </exclude>
+    </groups>
     <source>
         <include>
             <directory>app</directory>

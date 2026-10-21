@@ -103,6 +103,9 @@ jobs:
       - name: Tests et couverture globale (Pest, PostgreSQL réel)
         run: composer test -- --coverage-clover=build/logs/clover.xml
 
+      - name: Durées (02-TRD §12, seules et sans couverture)
+        run: composer test:performance
+
       - name: Fichiers PHP modifiés par la demande de fusion
         if: github.event_name == 'pull_request'
         run: |

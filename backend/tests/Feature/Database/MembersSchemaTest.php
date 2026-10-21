@@ -74,14 +74,17 @@ it('RG-PTF-06 et RG-PTF-08 : apporteur et contrat CGA réservés au portefeuille
     expect(DB::table('members')->where('ncc', '3333333A')->exists())->toBeTrue();
 });
 
-it('RG-ADH-17 n\'ouvre qu\'une radiation en vigueur par dossier', function () {
+// Décision 0003 : une seule radiation en cours par dossier (et non plus une seule non annulée), pour
+// qu'un dossier revenu au portefeuille CGA après une bascule vers le Cabinet puisse être de nouveau radié.
+it('RG-ADH-17 n\'ouvre qu\'une radiation en cours par dossier', function () {
     $member = Member::factory()->active()->create();
     $row = static fn (array $overrides = []): array => [
         'id' => strtolower((string) Str::ulid()), 'organization_id' => $member->organization_id, 'member_id' => $member->id,
         'initiator' => RadiationInitiator::Member->value, 'reason' => RadiationReason::Dissatisfaction->value, 'effective_date' => '2026-06-30',
         'observation' => 'x', 'requested_by' => Membership::factory()->create()->user_id, 'requested_at' => now(), ...$overrides,
     ];
-    DB::table('radiations')->insert($row(['cancelled_at' => now()]));
+    DB::table('radiations')->insert($row(['status' => 'cancelled', 'cancelled_at' => now()]));
+    DB::table('radiations')->insert($row(['status' => 'validated', 'validated_at' => now(), 'outcome' => 'moved_to_cabinet']));
     DB::table('radiations')->insert($row());
 
     refusedBySchema(fn () => DB::table('radiations')->insert($row()));

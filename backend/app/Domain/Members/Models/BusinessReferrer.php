@@ -8,6 +8,7 @@ use Database\Factories\BusinessReferrerFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Apporteur d'affaires du centre (sous-portefeuille « Accessoires », RG-PTF-06) : information de gestion
@@ -45,5 +46,15 @@ class BusinessReferrer extends Model
     protected static function newFactory(): BusinessReferrerFactory
     {
         return BusinessReferrerFactory::new();
+    }
+
+    /**
+     * Dossiers du portefeuille CGA rattachés à cet apporteur (« Accessoire n »).
+     *
+     * @return HasMany<Member, $this>
+     */
+    public function members(): HasMany
+    {
+        return $this->hasMany(Member::class, 'referrer_id');
     }
 }

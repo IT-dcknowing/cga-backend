@@ -58,6 +58,10 @@
             "@php artisan config:clear --ansi @no_additional_args",
             "@php vendor/bin/pest --parallel --coverage --min=80"
         ],
+        "test:performance": [
+            "@php artisan config:clear --ansi @no_additional_args",
+            "@php vendor/bin/pest --group=performance --no-coverage"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

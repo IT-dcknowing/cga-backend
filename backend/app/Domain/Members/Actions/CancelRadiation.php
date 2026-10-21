@@ -58,8 +58,10 @@ class CancelRadiation
     {
         return DB::transaction(function () use ($member, $reason, $actor): Radiation {
             $member = Member::query()->lockForUpdate()->findOrFail($member->id);
-            $radiation = Radiation::query()->where('member_id', $member->id)->whereNull('cancelled_at')->lockForUpdate()->first()
-                ?? throw new BusinessRuleException('radiation_not_found');
+            $radiation = Radiation::query()->where('member_id', $member->id)->whereNull('cancelled_at')->latest('requested_at')->lockForUpdate()->first();
+            if ($radiation === null || ! $this->inForce($member, $radiation)) {
+                throw new BusinessRuleException('radiation_not_found');
+            }
             $deadline = $this->deadline($radiation);
             if ($deadline !== null && now()->greaterThan($deadline)) {
                 throw new BusinessRuleException('radiation_cancel_expired', details: ['deadline' => $deadline->toIso8601ZuluString()]);
@@ -84,6 +86,15 @@ class CancelRadiation
 
             return $radiation->refresh();
         });
+    }
+
+    /**
+     * La radiation est toujours celle qui a fait sortir le dossier du portefeuille CGA : une bascule
+     * dont le dossier est depuis revenu au portefeuille CGA ne s'annule plus (RG-PTF-03).
+     */
+    public function inForce(Member $member, Radiation $radiation): bool
+    {
+        return $radiation->outcome !== RadiationOutcome::MovedToCabinet || $member->portfolio === Portfolio::Cabinet;
     }
 
     /**
