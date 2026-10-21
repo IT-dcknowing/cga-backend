@@ -15,6 +15,9 @@ return [
     // Partitions mensuelles des journaux, préparées à l'avance.
     'logs_partitions' => env('SCHEDULE_LOGS_PARTITIONS', '00:05'),
 
+    // Statuts datés : pièces expirées (RG-PJ-01), puis honoraires impayés et rapports en retard.
+    'statuses_refresh' => env('SCHEDULE_STATUSES_REFRESH', '01:30'),
+
     // Fin de la consultation seule des adhérents radiés (RG-ADH-12).
     'radiation_expiry' => env('SCHEDULE_RADIATION_EXPIRY', '03:30'),
 

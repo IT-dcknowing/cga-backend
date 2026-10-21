@@ -7,6 +7,7 @@ use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Notifications\AccessGrantedNotification;
 use App\Domain\Auth\Notifications\InvitationNotification;
 use App\Domain\Auth\Support\ActivationLink;
+use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Data\AgentIdentity;
 use App\Domain\Users\Data\InvitedAgent;
@@ -22,10 +23,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Invitation d'un agent dans une organisation (F-ORG-09, F-ORG-10), un rattachement par rôle. Un
- * compte unique par personne (RG-ACC-01) : le téléphone d'un compte existant lui ajoute l'accès. Le
- * premier accès passe toujours par le lien d'activation (RG-ACC-03), envoyé par SMS, e-mail ou les
- * deux ; un compte déjà actif reçoit seulement l'avis de son nouvel accès.
+ * Invitation d'un agent dans une organisation (F-ORG-09, F-ORG-10), un rattachement par rôle, ou d'un
+ * accès en ligne d'un adhérent du CGA (F-ADH-09, rôles member_owner et member_user, rattachés au
+ * dossier). Un compte unique par personne (RG-ACC-01) : le téléphone d'un compte existant lui ajoute
+ * l'accès. Le premier accès passe toujours par le lien d'activation (RG-ACC-03), envoyé par SMS,
+ * e-mail ou les deux ; un compte déjà actif reçoit seulement l'avis de son nouvel accès.
  */
 class InviteAgent
 {
@@ -38,13 +40,14 @@ class InviteAgent
 
     /**
      * @param  non-empty-list<Role>  $roles
+     * @param  Member|null  $member  dossier de l'adhérent, pour un accès en ligne
      *
-     * @throws BusinessRuleException agent_already_member, user_disabled
+     * @throws BusinessRuleException agent_already_member, member_access_exists, user_disabled
      * @throws ValidationException e-mail déjà pris, ou absent pour un envoi par e-mail
      */
-    public function execute(Organization $organization, AgentIdentity $identity, array $roles, InvitationChannel $channel, User $inviter): InvitedAgent
+    public function execute(Organization $organization, AgentIdentity $identity, array $roles, InvitationChannel $channel, User $inviter, ?Member $member = null): InvitedAgent
     {
-        return DB::transaction(function () use ($organization, $identity, $roles, $channel, $inviter): InvitedAgent {
+        return DB::transaction(function () use ($organization, $identity, $roles, $channel, $inviter, $member): InvitedAgent {
             $phone = $this->phones->e164OrFail($identity->phone);
             $user = User::query()->where('phone', $phone)->lockForUpdate()->first();
 
@@ -52,8 +55,10 @@ class InviteAgent
                 $user = $this->createUser($identity, $phone);
             } elseif (! in_array($user->status, [UserStatus::Invited, UserStatus::Active], true)) {
                 throw new BusinessRuleException('user_disabled');
-            } elseif ($user->memberships()->where('organization_id', $organization->id)->whereNull('member_id')->exists()) {
+            } elseif ($member === null && $user->memberships()->where('organization_id', $organization->id)->whereNull('member_id')->exists()) {
                 throw new BusinessRuleException('agent_already_member');
+            } elseif ($member !== null && $user->memberships()->where('member_id', $member->id)->exists()) {
+                throw new BusinessRuleException('member_access_exists');
             }
 
             if ($channel !== InvitationChannel::Sms && $user->email === null) {
@@ -61,7 +66,7 @@ class InviteAgent
             }
 
             $active = $user->status === UserStatus::Active;
-            $memberships = array_map(fn (Role $role): Membership => $this->membership($user, $organization, $role, $active, $inviter), $roles);
+            $memberships = array_map(fn (Role $role): Membership => $this->membership($user, $organization, $role, $active, $inviter, $member), $roles);
 
             if ($active) {
                 $user->notify(new AccessGrantedNotification($organization->name, implode(', ', array_map(static fn (Role $role): string => $role->label(), $roles))));
@@ -92,11 +97,12 @@ class InviteAgent
         return $user;
     }
 
-    private function membership(User $user, Organization $organization, Role $role, bool $active, User $inviter): Membership
+    private function membership(User $user, Organization $organization, Role $role, bool $active, User $inviter, ?Member $member): Membership
     {
         $membership = new Membership;
         $membership->user_id = $user->id;
         $membership->organization_id = $organization->id;
+        $membership->member_id = $member?->id;
         $membership->role = $role;
         $membership->status = $active ? MembershipStatus::Active : MembershipStatus::Invited;
         $membership->activated_at = $active ? now() : null;

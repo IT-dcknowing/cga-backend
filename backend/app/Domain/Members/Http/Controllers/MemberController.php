@@ -57,7 +57,7 @@ class MemberController extends BaseApiController
     {
         return $this->handle(function () use ($request, $create): MemberResource {
             Gate::authorize('create', [Member::class, $request->portfolio()]);
-            $member = $create->execute($this->context->organizationId(), $request->portfolio(), $request->fields(), $request->revenue(), (bool) $request->contractConfirmed(), $this->currentUser());
+            $member = $create->execute($this->context->organizationId(), $request->portfolio(), $request->fields(), $request->revenue(), (bool) $request->contractConfirmed(), $this->currentUser(), $request->transferId());
             $this->logSubject($member);
 
             return new MemberResource($member->load(self::WITH));

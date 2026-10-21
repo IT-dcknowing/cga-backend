@@ -31,7 +31,18 @@ class StoreMemberRequest extends MemberRequest
         return [
             'portfolio' => ['required', Rule::enum(Portfolio::class)],
             ...parent::rules($phones, $context),
+            'transfer_id' => ['nullable', 'string', 'max:26'],
         ];
+    }
+
+    /**
+     * Réimport depuis un autre CGA dont l'inscription reprend l'identité (RG-ADH-15).
+     */
+    public function transferId(): ?string
+    {
+        $transfer = $this->validated('transfer_id');
+
+        return is_string($transfer) ? $transfer : null;
     }
 
     public function portfolio(): Portfolio

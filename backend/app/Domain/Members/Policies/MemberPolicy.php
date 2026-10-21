@@ -63,6 +63,30 @@ class MemberPolicy
     }
 
     /**
+     * « Déposer » une pièce du dossier (F-PJ-01) : ceux qui modifient le dossier.
+     */
+    public function managePieces(User $user, Member $member): bool
+    {
+        return $this->update($user, $member);
+    }
+
+    /**
+     * Accès en ligne de l'adhérent (F-ADH-09) : invitation, renvoi, désactivation par le gérant.
+     */
+    public function manageAccesses(User $user, Member $member): bool
+    {
+        return $this->inCga() && $this->context->allows('members.access.manage') && $this->seesPortfolio($member->portfolio);
+    }
+
+    /**
+     * « Réimporter depuis un autre CGA » (RG-ADH-15) : ceux qui inscrivent les adhérents.
+     */
+    public function reimport(User $user): bool
+    {
+        return $this->inCga() && $this->context->allows('members.create');
+    }
+
+    /**
      * « Changer de régime » (F-ADH-05) : gérant, expert-comptable, comptables, comme la modification.
      */
     public function changeRegime(User $user, Member $member): bool

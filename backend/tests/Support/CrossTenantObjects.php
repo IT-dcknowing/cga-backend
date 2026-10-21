@@ -14,6 +14,7 @@ use App\Domain\Referentials\Models\NationalReference;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Tenancy\Tenancy;
@@ -49,6 +50,7 @@ final class CrossTenantObjects
             },
             Organization::class => static fn (Organization $other): Organization => $other,
             Member::class => static fn (Organization $other): Member => Member::factory()->create(['organization_id' => $other->id]),
+            Membership::class => static fn (Organization $other): Membership => Membership::factory()->role(Role::MemberOwner)->create(['organization_id' => $other->id]),
             User::class => static fn (Organization $other): User => Membership::factory()->create(['organization_id' => $other->id])->user,
             ImportBatch::class => static fn (Organization $other): ImportBatch => Tenancy::bypass(static function () use ($other): ImportBatch {
                 $batch = new ImportBatch;
@@ -111,6 +113,7 @@ final class CrossTenantObjects
             'reference-data.validate:dataset' => $dataset,
             'auth.invitations.show:invitationToken' => $invitationToken,
             'auth.invitations.accept:invitationToken' => $invitationToken,
+            'cga.members.pieces.store:pieceType' => 'Type de pièce du dossier (F-PJ-01) : il ne désigne aucun objet, le dossier est contrôlé par {member} ; une valeur inconnue répond 404.',
             'cga.profile.images.store:kind' => 'Type d\'image (logo, signature, cachet) de la fiche du CGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',
         ];
     }

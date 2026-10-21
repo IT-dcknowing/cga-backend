@@ -7,7 +7,10 @@ use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Imports\Http\Controllers\ImportController;
+use App\Domain\Members\Http\Controllers\MemberAccessController;
 use App\Domain\Members\Http\Controllers\MemberController;
+use App\Domain\Members\Http\Controllers\MemberTransferController;
+use App\Domain\Members\Http\Controllers\PieceController;
 use App\Domain\Members\Http\Controllers\RadiationController;
 use App\Domain\Members\Http\Controllers\RegimeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
@@ -156,13 +159,15 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{agent}/permissions/reset', [UserPermissionController::class, 'reset'])->name('permissions.reset');
     });
 
-    // Dossiers des adhérents du centre (F-ADH-01 à 07) : fiche, régime, radiation en deux temps. La modification
-    // remplace la fiche : PUT (multipart avec _method=PUT quand elle porte un justificatif, RG-ADH-06b).
+    // Dossiers des adhérents du centre (F-ADH-01 à 10, F-PJ-01) : fiche, régime, radiation en deux temps, pièces,
+    // accès en ligne, réimport depuis un autre CGA. La modification remplace la fiche : PUT (multipart avec
+    // _method=PUT quand elle porte un justificatif, RG-ADH-06b).
     Route::middleware(['auth', 'tenant'])->prefix('cga/members')->name('cga.members.')->group(function (): void {
         Route::get('/', [MemberController::class, 'index'])->name('index');
         Route::post('/', [MemberController::class, 'store'])->name('store');
         Route::get('ncc-check', [MemberController::class, 'nccCheck'])->name('ncc-check');
         Route::get('radiation-options', [RadiationController::class, 'options'])->name('radiation-options');
+        Route::post('transfers', [MemberTransferController::class, 'store'])->name('transfers.store');
         Route::get('{member}', [MemberController::class, 'show'])->name('show');
         Route::put('{member}', [MemberController::class, 'update'])->name('update');
         Route::delete('{member}', [MemberController::class, 'destroy'])->name('destroy');
@@ -172,6 +177,15 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{member}/radiation', [RadiationController::class, 'store'])->name('radiation.store');
         Route::post('{member}/radiation/validate', [RadiationController::class, 'validate'])->name('radiation.validate');
         Route::post('{member}/radiation/cancel', [RadiationController::class, 'cancel'])->name('radiation.cancel');
+        Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
+        Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
+        Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
+        Route::post('{member}/accesses', [MemberAccessController::class, 'store'])->name('accesses.store');
+        Route::scopeBindings()->group(function (): void {
+            Route::post('{member}/accesses/{access}/resend', [MemberAccessController::class, 'resend'])->name('accesses.resend');
+            Route::post('{member}/accesses/{access}/disable', [MemberAccessController::class, 'disable'])->name('accesses.disable');
+            Route::post('{member}/accesses/{access}/enable', [MemberAccessController::class, 'enable'])->name('accesses.enable');
+        });
     });
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).

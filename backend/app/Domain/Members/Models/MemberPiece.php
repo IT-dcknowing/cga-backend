@@ -3,6 +3,7 @@
 namespace App\Domain\Members\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
+use App\Domain\Documents\Models\File;
 use App\Domain\Members\Enums\PieceStatus;
 use App\Domain\Members\Enums\PieceType;
 use App\Support\Tenancy\BelongsToOrganization;
@@ -24,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonInterface|null $expires_at
  * @property CarbonInterface|null $last_reminder_at
  * @property-read Member $member
+ * @property-read File|null $file
  */
 class MemberPiece extends Model
 {
@@ -56,5 +58,13 @@ class MemberPiece extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    /**
+     * @return BelongsTo<File, $this>
+     */
+    public function file(): BelongsTo
+    {
+        return $this->belongsTo(File::class);
     }
 }

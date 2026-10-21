@@ -20,15 +20,7 @@ class CreateExpectedPieces
 {
     public function execute(Member $member): void
     {
-        $types = [PieceType::Rccm, PieceType::Dfe, PieceType::IdDocument, PieceType::LocationPlan];
-        if ($member->entity_type === EntityType::Company) {
-            $types[] = PieceType::Statutes;
-        }
-        if ($member->portfolio === Portfolio::Cga) {
-            $types[] = PieceType::SignedCgaContract;
-        }
-
-        foreach ($types as $type) {
+        foreach ($this->types($member) as $type) {
             $piece = MemberPiece::query()->where('member_id', $member->id)->where('piece_type', $type)->first() ?? new MemberPiece;
             if ($piece->exists) {
                 continue;
@@ -45,6 +37,25 @@ class CreateExpectedPieces
         }
 
         $this->refreshStatus($member);
+    }
+
+    /**
+     * Pièces attendues pour ce dossier (F-PJ-01) : statuts pour une personne morale, contrat CGA signé au
+     * portefeuille CGA.
+     *
+     * @return list<PieceType>
+     */
+    public function types(Member $member): array
+    {
+        $types = [PieceType::Rccm, PieceType::Dfe, PieceType::IdDocument, PieceType::LocationPlan];
+        if ($member->entity_type === EntityType::Company) {
+            $types[] = PieceType::Statutes;
+        }
+        if ($member->portfolio === Portfolio::Cga) {
+            $types[] = PieceType::SignedCgaContract;
+        }
+
+        return $types;
     }
 
     /**

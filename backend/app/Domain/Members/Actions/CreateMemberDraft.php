@@ -6,17 +6,21 @@ use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Enums\TaxRegime;
 use App\Domain\Members\Models\Member;
+use App\Domain\Members\Models\MemberTransfer;
 use App\Domain\Members\Support\MemberFields;
 use App\Domain\Members\Support\MembershipExclusivity;
 use App\Domain\Users\Models\User;
 use App\Support\Http\Exceptions\BusinessRuleException;
+use App\Support\Tenancy\Tenancy;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Inscription d'un adhérent, enregistrée comme brouillon (F-ADH-02, RG-ADH-01) : sans numéro, dans
  * le portefeuille choisi (RG-PTF-02). Un NCC n'a qu'un dossier ouvert dans le centre (RG-ADH-05) ;
  * inscrit au portefeuille CGA d'un autre CGA, il ne s'inscrit pas au portefeuille CGA (409 sans nom de
- * CGA). Les montants non saisis viennent du barème du CGA.
+ * CGA). Les montants non saisis viennent du barème du CGA. Un dossier pré-rempli par un réimport depuis
+ * un autre CGA (RG-ADH-15) y est relié.
  */
 class CreateMemberDraft
 {
@@ -29,16 +33,19 @@ class CreateMemberDraft
     /**
      * @param  array<string, mixed>  $attributes  saisie validée de la fiche
      * @param  array{year: int, amount: int, kind: string}|null  $revenue  chiffre d'affaires de référence
+     * @param  string|null  $transferId  réimport depuis un autre CGA dont l'inscription reprend l'identité
      *
      * @throws BusinessRuleException ncc_already_registered, membership_exclusive
+     * @throws ValidationException réimport inconnu, déjà utilisé ou d'un autre NCC
      */
-    public function execute(string $organizationId, Portfolio $portfolio, array $attributes, ?array $revenue, bool $contractConfirmed, User $actor): Member
+    public function execute(string $organizationId, Portfolio $portfolio, array $attributes, ?array $revenue, bool $contractConfirmed, User $actor, ?string $transferId = null): Member
     {
         $attributes = $this->fields->prepare($attributes);
         $ncc = (string) $attributes['ncc'];
 
-        return DB::transaction(function () use ($organizationId, $portfolio, $attributes, $revenue, $contractConfirmed, $actor, $ncc): Member {
+        return DB::transaction(function () use ($organizationId, $portfolio, $attributes, $revenue, $contractConfirmed, $actor, $ncc, $transferId): Member {
             AssertNccAvailable::here($ncc);
+            $transfer = $transferId === null ? null : $this->transfer($transferId, $organizationId, $ncc);
             if ($portfolio === Portfolio::Cga && $this->exclusivity->enrolledElsewhere($ncc, $organizationId)) {
                 throw new BusinessRuleException('membership_exclusive');
             }
@@ -57,8 +64,31 @@ class CreateMemberDraft
             if ($revenue !== null) {
                 $this->revenue->execute($member, $revenue);
             }
+            if ($transfer !== null) {
+                $transfer->to_member_id = $member->id;
+                $transfer->save();
+            }
 
             return $member->refresh();
         });
+    }
+
+    /**
+     * Réimport du centre, pas encore utilisé, du même NCC.
+     *
+     * @throws ValidationException
+     */
+    private function transfer(string $transferId, string $organizationId, string $ncc): MemberTransfer
+    {
+        $transfer = MemberTransfer::query()->whereKey($transferId)->where('to_organization_id', $organizationId)->whereNull('to_member_id')->lockForUpdate()->first();
+        if ($transfer === null) {
+            throw ValidationException::withMessages(['transfer_id' => __('members.transfer.invalid')]);
+        }
+        $sourceNcc = Tenancy::bypass(static fn (): mixed => Member::query()->whereKey($transfer->from_member_id)->value('ncc'), 'Réimport depuis un autre CGA (RG-ADH-15) : NCC du dossier d\'origine.');
+        if ($sourceNcc !== $ncc) {
+            throw ValidationException::withMessages(['transfer_id' => __('members.transfer.ncc_mismatch')]);
+        }
+
+        return $transfer;
     }
 }

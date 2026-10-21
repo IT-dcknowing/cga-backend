@@ -18,6 +18,11 @@ return [
         'radiation_required' => 'Radiation requise — reclassement au régime réel',
     ],
 
+    'transfer' => [
+        'invalid' => 'Ce réimport est inconnu ou a déjà servi à une inscription.',
+        'ncc_mismatch' => 'Le NCC saisi n\'est pas celui du dossier réimporté.',
+    ],
+
     'radiation' => [
         'reason_not_allowed' => 'Ce motif n\'est pas prévu pour une radiation à l\'initiative de : :initiator.',
         'proof_required' => 'Joignez la pièce exigée pour ce motif : :proof.',

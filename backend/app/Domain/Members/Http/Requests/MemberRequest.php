@@ -99,7 +99,7 @@ abstract class MemberRequest extends FormRequest
      */
     public function fields(): array
     {
-        return array_diff_key($this->validated(), ['reference_revenue' => true, 'cga_contract_confirmed' => true, 'portfolio' => true, 'justification' => true]);
+        return array_diff_key($this->validated(), ['reference_revenue' => true, 'cga_contract_confirmed' => true, 'portfolio' => true, 'justification' => true, 'transfer_id' => true]);
     }
 
     /**

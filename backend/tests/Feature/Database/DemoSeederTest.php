@@ -1,6 +1,7 @@
 <?php
 
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Referentials\Models\TaxOffice;
@@ -28,6 +29,7 @@ it('crée les CGA et les comptes de démonstration, rejouable sans doublon', fun
         ->and(TaxOffice::query()->whereIn('code', ['DEMO-PLT', 'DEMO-BKE'])->distinct()->count('regional_directorate_id'))->toBe(2)
         ->and(User::query()->where('phone', 'like', '+2250700000%')->count())->toBe(10)
         ->and(Membership::query()->whereHas('user', fn ($q) => $q->where('phone', '+2250700000003'))->count())->toBe(3)
+        ->and(Member::query()->withoutGlobalScopes()->where('ncc', '9000001T')->where('status', 'radiated')->count())->toBe(1)
         ->and(Invitation::query()->count())->toBe(2)
         ->and(Invitation::query()->whereNotNull('revoked_at')->count())->toBe(1)
         ->and(app(SettingsService::class)->get('rate_limit.otp'))->toBe(['max_attempts' => 3, 'decay_minutes' => 1]);

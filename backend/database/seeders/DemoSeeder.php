@@ -5,6 +5,13 @@ namespace Database\Seeders;
 use App\Domain\Auth\Actions\IssueInvitation;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Members\Enums\EntityType;
+use App\Domain\Members\Enums\FeesPeriodicity;
+use App\Domain\Members\Enums\LegalForm;
+use App\Domain\Members\Enums\MemberStatus;
+use App\Domain\Members\Enums\Portfolio;
+use App\Domain\Members\Enums\TaxRegime;
+use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Enums\AgreementStatus;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
@@ -18,6 +25,8 @@ use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
+use App\Support\Tenancy\Tenancy;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 
 /**
@@ -30,7 +39,8 @@ use Illuminate\Database\Seeder;
  * DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé ·
  * 0700000006 invité (lien cga.seed.demo.invitation_token, l'ancien lien révoqué) · 0700000007 profil
  * (profil@cga-connect.demo) · 0700000008 mot de passe oublié · 0700000009 administrateur de la
- * plateforme · 0700000010 gérant du CGA suspendu (consultation seule, RG-ORG-08).
+ * plateforme · 0700000010 gérant du CGA suspendu (consultation seule, RG-ORG-08). Un ancien adhérent
+ * radié du CGA de Bouaké (NCC 9000001T) permet de rejouer le réimport d'identité (RG-ADH-15).
  */
 class DemoSeeder extends Seeder
 {
@@ -63,6 +73,7 @@ class DemoSeeder extends Seeder
         $this->account('0700000009', 'Awa', 'Administratrice', [[$platform, Role::PlatformAdmin]]);
         $this->account('0700000010', 'Salif', 'Suspendu', [[$suspended, Role::CgaManager]]);
         $this->invitee($dck);
+        $this->formerMember($bouake);
 
         // Fenêtre des demandes de code ramenée à une minute : la collection Postman se rejoue.
         $this->settings->set('rate_limit.otp', ['max_attempts' => 3, 'decay_minutes' => (int) config('cga.seed.demo.otp_decay_minutes')]);
@@ -125,6 +136,36 @@ class DemoSeeder extends Seeder
             $organization->agreement_status = AgreementStatus::Granted;
             $organization->save();
         }
+    }
+
+    /**
+     * Ancien adhérent radié du CGA de Bouaké : DC-KNOWING peut réimporter son identité (RG-ADH-15).
+     */
+    private function formerMember(Organization $organization): void
+    {
+        Tenancy::bypass(static function () use ($organization): void {
+            if (Member::query()->where('organization_id', $organization->id)->where('ncc', '9000001T')->exists()) {
+                return;
+            }
+
+            $member = new Member([
+                'entity_type' => EntityType::Company, 'company_name' => 'ETS DÉMO ANCIEN ADHÉRENT', 'legal_form' => LegalForm::Sarl,
+                'owner_last_name' => 'Konan', 'owner_first_names' => 'Serge', 'ncc' => '9000001T', 'rccm' => 'CI-BKE-2024-B-0001',
+                'regime' => TaxRegime::Tee, 'regime_since' => '2025-01-15', 'main_activity' => 'Commerce de détail',
+                'address' => 'Bouaké, quartier Commerce', 'phone' => '+2250707000011', 'entry_fee_amount' => 25_000,
+                'fees_amount' => 15_000, 'fees_periodicity' => FeesPeriodicity::Monthly,
+            ]);
+            $member->organization_id = $organization->id;
+            $member->portfolio = Portfolio::Cga;
+            $member->status = MemberStatus::Radiated;
+            $member->membership_number = '2025-DEMOB-0001';
+            $member->membership_seq = 1;
+            $member->adhesion_date = CarbonImmutable::parse('2025-01-15');
+            $member->cga_contract_signed_on = CarbonImmutable::parse('2025-01-15');
+            $member->cga_contract_ended_on = CarbonImmutable::parse('2026-06-30');
+            $member->validated_at = CarbonImmutable::parse('2025-01-15 10:00:00');
+            $member->save();
+        }, 'Jeu de démonstration : ancien adhérent du CGA de Bouaké.');
     }
 
     /**

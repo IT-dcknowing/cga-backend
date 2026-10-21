@@ -11,6 +11,11 @@ Schedule::command('logs:partitions')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('statuses:refresh')
+    ->dailyAt(config('schedule.statuses_refresh'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('members:radiation-expiry')
     ->dailyAt(config('schedule.radiation_expiry'))
     ->withoutOverlapping()
