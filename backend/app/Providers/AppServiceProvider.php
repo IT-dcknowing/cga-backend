@@ -17,6 +17,8 @@ use App\Domain\Notifications\Listeners\LogNotificationActivity;
 use App\Domain\Notifications\Providers\LogSmsProvider;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Organizations\Policies\OrganizationPolicy;
+use App\Domain\Payments\Models\MemberPayment;
+use App\Domain\Payments\Policies\PaymentPolicy;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
 use App\Domain\Referentials\Models\NationalReference;
@@ -112,6 +114,7 @@ class AppServiceProvider extends ServiceProvider
         // Dossiers des adhérents (M04).
         Gate::policy(Member::class, MemberPolicy::class);
         Gate::policy(BusinessReferrer::class, ReferrerPolicy::class);
+        Gate::policy(MemberPayment::class, PaymentPolicy::class);
 
         // Imports de fichiers Excel (M17).
         Gate::policy(ImportBatch::class, ImportBatchPolicy::class);

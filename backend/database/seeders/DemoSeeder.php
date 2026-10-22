@@ -12,11 +12,13 @@ use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Enums\TaxRegime;
 use App\Domain\Members\Models\Member;
+use App\Domain\Members\Support\MemberNumbering;
 use App\Domain\Organizations\Enums\AgreementStatus;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Enums\SubscriptionStatus;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Users\Enums\MembershipStatus;
@@ -25,9 +27,11 @@ use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
+use App\Support\Numbering\SequenceService;
 use App\Support\Tenancy\Tenancy;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Jeu de démonstration (SEED_DEMO=true) : trois CGA fictifs (dont un suspendu), les quatre autres CGA
@@ -40,13 +44,17 @@ use Illuminate\Database\Seeder;
  * 0700000006 invité (lien cga.seed.demo.invitation_token, l'ancien lien révoqué) · 0700000007 profil
  * (profil@cga-connect.demo) · 0700000008 mot de passe oublié · 0700000009 administrateur de la
  * plateforme · 0700000010 gérant du CGA suspendu (consultation seule, RG-ORG-08). Un ancien adhérent
- * radié du CGA de Bouaké (NCC 9000001T) permet de rejouer le réimport d'identité (RG-ADH-15).
+ * radié du CGA de Bouaké (NCC 9000001T) permet de rejouer le réimport d'identité (RG-ADH-15) ;
+ * 0700000011 est l'accès principal en ligne d'un adhérent actif de DC-KNOWING (espace adhérent).
  */
 class DemoSeeder extends Seeder
 {
     public function __construct(
         private readonly IssueInvitation $issueInvitation,
         private readonly SettingsService $settings,
+        private readonly SequenceService $sequences,
+        private readonly MemberNumbering $numbering,
+        private readonly SyncEntryFee $entryFee,
     ) {}
 
     public function run(): void
@@ -74,6 +82,7 @@ class DemoSeeder extends Seeder
         $this->account('0700000010', 'Salif', 'Suspendu', [[$suspended, Role::CgaManager]]);
         $this->invitee($dck);
         $this->formerMember($bouake);
+        $this->onlineMember($dck);
 
         // Fenêtre des demandes de code ramenée à une minute : la collection Postman se rejoue.
         $this->settings->set('rate_limit.otp', ['max_attempts' => 3, 'decay_minutes' => (int) config('cga.seed.demo.otp_decay_minutes')]);
@@ -135,6 +144,51 @@ class DemoSeeder extends Seeder
             $organization->type = OrganizationType::Cga;
             $organization->agreement_status = AgreementStatus::Granted;
             $organization->save();
+        }
+    }
+
+    /**
+     * Adhérent actif de DC-KNOWING et son accès principal en ligne (0700000011) : espace adhérent,
+     * honoraires, déclaration d'un paiement (F-PAY-03). Son droit d'adhésion reste à payer.
+     */
+    private function onlineMember(Organization $organization): void
+    {
+        $member = Tenancy::bypass(fn (): Member => DB::transaction(function () use ($organization): Member {
+            $existing = Member::query()->where('organization_id', $organization->id)->where('ncc', '9300001D')->first();
+            if ($existing !== null) {
+                return $existing;
+            }
+
+            $member = new Member([
+                'entity_type' => EntityType::Company, 'company_name' => 'ETS DÉMO ADHÉRENT EN LIGNE', 'legal_form' => LegalForm::Sarl,
+                'ncc' => '9300001D', 'regime' => TaxRegime::Tee, 'regime_since' => '2026-01-01', 'main_activity' => 'Commerce de détail',
+                'address' => 'Plateau, avenue Franchet d\'Espérey', 'phone' => '+2250707000021', 'signatory_name' => 'Aïcha Diabaté',
+                'signatory_title' => 'Gérante', 'entry_fee_amount' => 25_000, 'fees_amount' => 15_000, 'fees_periodicity' => FeesPeriodicity::Monthly,
+            ]);
+            $member->organization_id = $organization->id;
+            $member->portfolio = Portfolio::Cga;
+            $member->status = MemberStatus::Active;
+            $member->adhesion_date = CarbonImmutable::parse('2026-01-15');
+            $member->cga_contract_signed_on = CarbonImmutable::parse('2026-01-15');
+            $member->validated_at = CarbonImmutable::parse('2026-01-15 10:00:00');
+            $member->membership_seq = $this->sequences->next($organization->id, MemberNumbering::MEMBERSHIP);
+            $member->membership_number = $this->numbering->membershipNumber($member->membership_seq, 2026, $organization->numbering_abbreviation);
+            $member->save();
+            $this->entryFee->execute($member);
+
+            return $member;
+        }), 'Jeu de démonstration : adhérent en ligne de DC-KNOWING.');
+
+        $user = $this->account('0700000011', 'Aïcha', 'Adhérente', []);
+        if (! Membership::query()->where('user_id', $user->id)->where('member_id', $member->id)->exists()) {
+            $access = new Membership;
+            $access->user_id = $user->id;
+            $access->organization_id = $organization->id;
+            $access->member_id = $member->id;
+            $access->role = Role::MemberOwner;
+            $access->status = MembershipStatus::Active;
+            $access->activated_at = now();
+            $access->save();
         }
     }
 

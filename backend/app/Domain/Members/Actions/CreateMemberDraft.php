@@ -9,6 +9,7 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberTransfer;
 use App\Domain\Members\Support\MemberFields;
 use App\Domain\Members\Support\MembershipExclusivity;
+use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Users\Models\User;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use App\Support\Tenancy\Tenancy;
@@ -19,7 +20,8 @@ use Illuminate\Validation\ValidationException;
  * Inscription d'un adhérent, enregistrée comme brouillon (F-ADH-02, RG-ADH-01) : sans numéro, dans
  * le portefeuille choisi (RG-PTF-02). Un NCC n'a qu'un dossier ouvert dans le centre (RG-ADH-05) ;
  * inscrit au portefeuille CGA d'un autre CGA, il ne s'inscrit pas au portefeuille CGA (409 sans nom de
- * CGA). Les montants non saisis viennent du barème du CGA. Un dossier pré-rempli par un réimport depuis
+ * CGA). Les montants non saisis viennent du barème du CGA ; le droit d'adhésion du portefeuille CGA est
+ * ouvert comme somme due (F-PAY-02). Un dossier pré-rempli par un réimport depuis
  * un autre CGA (RG-ADH-15) y est relié.
  */
 class CreateMemberDraft
@@ -28,6 +30,7 @@ class CreateMemberDraft
         private readonly MemberFields $fields,
         private readonly MembershipExclusivity $exclusivity,
         private readonly SaveReferenceRevenue $revenue,
+        private readonly SyncEntryFee $entryFee,
     ) {}
 
     /**
@@ -68,6 +71,7 @@ class CreateMemberDraft
                 $transfer->to_member_id = $member->id;
                 $transfer->save();
             }
+            $this->entryFee->execute($member);
 
             return $member->refresh();
         });

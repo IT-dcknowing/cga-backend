@@ -70,6 +70,7 @@ return [
     'transfer_source_not_found' => 'Aucun dossier de ce NCC dans un autre CGA abonné : inscrivez l\'adhérent normalement.',
     'portfolio_already_cga' => 'Ce dossier est déjà au portefeuille CGA.',
     'referrer_in_use' => 'Cet apporteur est rattaché à des dossiers : désactivez-le plutôt que de le supprimer.',
+    'payment_not_pending' => 'Ce paiement n\'attend plus de confirmation.',
     'radiation_cancel_expired' => 'Le délai d\'annulation de cette radiation est dépassé.',
     'member_closed' => 'Ce dossier est radié ou clos : il ne se modifie plus. Un retour est une nouvelle adhésion.',
     'source_locked' => 'Cette valeur vient de Compta Flow, qui fait foi : elle se corrige dans Compta Flow.',

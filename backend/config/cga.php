@@ -157,6 +157,14 @@ return [
             ],
         ],
 
+        // Barème (F-PAY-01) : droit d'adhésion proposé tant que le CGA n'a pas saisi le sien.
+        'fees' => [
+            'default_entry_fee' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 25_000, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:0', 'max:100000000']],
+            ],
+        ],
+
         // Adhérent du portefeuille CGA reclassé au régime réel (RG-ADH-08, 09) : alerte au gérant passé ce délai
         // sans radiation, jamais de blocage ni de radiation automatique (CR-04, RG-ADH-18).
         'rsi' => [
@@ -217,6 +225,13 @@ return [
             'client' => [
                 'pattern' => [
                     'type' => 'string', 'level' => 'platform', 'default' => 'CAB-{ABR}-{N:5}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
+            // Reçus de paiement : séquence par CGA et par année, sans trou (RG-PAY-02).
+            'receipt' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => 'REC-{ABR}-{YYYY}-{N:5}', 'permission' => $platform,
                     'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
                 ],
             ],

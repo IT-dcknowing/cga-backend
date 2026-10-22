@@ -2,7 +2,7 @@
     "info": {
         "_postman_id": "3f0c6a51-7d2e-4b8a-9c41-5e2f8a7b6c10",
         "name": "CGA Connect — plateforme",
-        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --folder \"10. Étape 1.8 — Droits par rôle\" --folder \"11. Étape 1.10 — Données de référence\" --folder \"12. Étape 1.11 — Habilitations par utilisateur\" --folder \"13. Étape 2.2 — Dossiers des adhérents\" --folder \"14. Étape 2.3 — Validation de l'adhésion\" --folder \"15. Étape 2.4 — Régime et radiation\" --folder \"16. Étape 2.5 — Pièces, accès en ligne, réimport\" --folder \"17. Étape 2.6 — Import du portefeuille\" --folder \"18. Étape 2.14 — Bascules et apporteurs\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
+        "description": "Requêtes et jeux de données de chaque route de l'API CGA Connect (`/api/v1`), avec des tests automatiques sur chaque réponse.\n\n**Avant de lancer**\n1. `backend/.env` : `APP_ENV=local`, `SEED_DEMO=true`, `AUTH_ECHO_DEV_MESSAGES=true`, `SESSION_SECURE_COOKIE=false` (le serveur local est en http).\n2. `php artisan migrate:fresh --seed` : recrée la base locale avec les comptes de démo.\n3. `php artisan dev` (ou `php artisan serve` et `php artisan queue:work --queue=default,documents,notifications,imports`) : l'API écoute sur `http://127.0.0.1:8000` (sinon, ajuster `base_url` et `api_root` de l'environnement) et les fichiers importés sont traités.\n4. Importez cette collection et l'environnement `CGA Connect — local`, puis sélectionnez l'environnement.\n\n**Session par cookie** (02-TRD §6.1) : l'API n'émet aucun jeton. Le cookie de session et le cookie `XSRF-TOKEN` sont gardés par le gestionnaire de cookies de Postman ; chaque requête envoie `Origin`/`Referer` du SPA (`spa_origin`, déclaré dans `SANCTUM_STATEFUL_DOMAINS`) et l'en-tête `X-XSRF-TOKEN`.\n\n**Comptes** : chaque requête nomme son compte de démo dans l'en-tête `X-Demo-Account` (« aucun » : sans session) ; le script de la collection ouvre la session de ce compte si besoin, obtient le jeton CSRF et charge les identifiants des rattachements et des référentiels de démo (DR et CDI `DEMO-…`) s'ils manquent. Un simple Send fonctionne donc sur n'importe quelle requête. Si la base a été réinitialisée, un envoi peut répondre 401 ou 419 et effacer l'état : renvoyez la requête.\n\n**Ordre** : chaque dossier fonctionne seul ; à l'intérieur d'un dossier, lancez les requêtes dans l'ordre. Exécution complète (sans le dossier manuel) :\n`npx --yes newman@6.2.1 run postman/CGA-Connect.postman_collection.json -e postman/CGA-Connect-local.postman_environment.json --folder \"0. Démarrage — session et identifiants de démo\" --folder \"1. Étape 0.9 — Connexion, session et espaces\" --folder \"2. Étape 0.9 — Mot de passe oublié (code par SMS ou e-mail)\" --folder \"3. Étape 0.9 — Activation par invitation\" --folder \"4. Étape 0.9 — Mon profil\" --folder \"5. Étape 0.7 — Téléchargement par lien signé\" --folder \"6. Étape 1.1 — Référentiels\" --folder \"7. Étape 1.2 — Organisations\" --folder \"8. Étape 1.3 — Import du registre des CGA\" --folder \"9. Étape 1.4 — Utilisateurs\" --folder \"10. Étape 1.8 — Droits par rôle\" --folder \"11. Étape 1.10 — Données de référence\" --folder \"12. Étape 1.11 — Habilitations par utilisateur\" --folder \"13. Étape 2.2 — Dossiers des adhérents\" --folder \"14. Étape 2.3 — Validation de l'adhésion\" --folder \"15. Étape 2.4 — Régime et radiation\" --folder \"16. Étape 2.5 — Pièces, accès en ligne, réimport\" --folder \"17. Étape 2.6 — Import du portefeuille\" --folder \"18. Étape 2.14 — Bascules et apporteurs\" --folder \"19. Étape 3.2 — Barème et paiements\" --working-dir .` (depuis `backend/` : les images téléversées viennent de `postman/files/`)\n\n**Comptes de démo** (mot de passe `demo_password`) : 0700000001 Présidente CNCGA · 0700000002 gérant DC-KNOWING · 0700000003 multi-rôles (CNCGA, DC-KNOWING, Bouaké) · 0700000004 comptable DC-KNOWING · 0700000005 compte désactivé · 0700000006 invitée (lien `demo_invitation_token`) · 0700000007 profil (profil@cga-connect.demo) · 0700000008 mot de passe oublié (motdepasse@cga-connect.demo) · 0700000009 administratrice de la plateforme · 0700000010 gérant du CGA de démonstration suspendu (consultation seule).\n\n**Codes en local** : aucun SMS ne part (pilote `log` : `storage/logs/sms.log`), les e-mails vont dans `storage/logs/laravel.log` ; avec `AUTH_ECHO_DEV_MESSAGES=true`, le code envoyé est aussi recopié dans `dev_message` de la réponse.\n\n**Limites** : 5 échecs de connexion en 15 minutes par identifiant et adresse IP (les essais visent des numéros tirés au hasard) ; 3 demandes de code par identifiant dans la fenêtre — une minute sur la base de démo (`SEED_DEMO_OTP_DECAY_MINUTES`) : attendez une minute entre deux exécutions complètes.\n\n**Mise à jour** : chaque nouvelle route s'ajoute ici avec son cas nominal et ses cas d'erreur ; le test `tests/Feature/Routing/PostmanCollectionTest.php` échoue sinon.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "item": [
@@ -131,6 +131,76 @@
                         "body": {
                             "mode": "raw",
                             "raw": "{\n    \"identifier\": \"0700000002\",\n    \"password\": \"{{demo_password}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Connexion — adhérent en ligne",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"connected_account\", \"adherent\");",
+                                    "    pm.test(\"Espace ouvert d'office\", () => pm.expect(data.active_membership_id).to.be.a(\"string\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/auth/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Accès principal en ligne de l'adhérent de démonstration de DC-KNOWING (0700000011) : espace adhérent, honoraires, déclaration d'un paiement (F-PAY-03). La collection le connecte d'elle-même quand une requête porte « adherent ».",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"identifier\": \"0700000011\",\n    \"password\": \"{{demo_password}}\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -26605,6 +26675,1826 @@
             ]
         },
         {
+            "name": "19. Étape 3.2 — Barème et paiements",
+            "description": "F-PAY-01 à 03, RG-PAY-01, 02 : barème, droit d'adhésion ouvert à l'inscription, paiement saisi par le CGA (confirmé d'office, ventilé, reçu numéroté), déclaration par l'adhérent (0700000011, preuve obligatoire), confirmation ou rejet par le CGA. Chaque envoi inscrit un nouveau brouillon ; l'adhérent de démonstration déclare 100 F à chaque envoi : le dossier se rejoue.",
+            "item": [
+                {
+                    "name": "Barème — consultation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Droit d'adhésion\", () => pm.expect(data.entry_fee.amount).to.be.a(\"number\"));",
+                                    "    pm.test(\"Lecture seule\", () => pm.expect(data.can.update).to.be.false);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/fee-schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "fee-schedule"
+                            ]
+                        },
+                        "description": "Barème du CGA (F-PAY-01) : droit d'adhésion, honoraires et périodicité par régime ; il pré-remplit les montants de l'inscription."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Barème — modification",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Honoraires TEE\", () => { pm.expect(data.fees.TEE.amount).to.eql(15000); pm.expect(data.fees.RME.periodicity).to.eql(\"quarterly\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/fee-schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "fee-schedule"
+                            ]
+                        },
+                        "description": "Le gérant modifie le barème : le nouveau montant vaut pour les inscriptions suivantes ; les adhérents inscrits gardent leur montant contractuel (RG-PAY-01).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"entry_fee\": 25000,\n    \"fees\": {\n        \"RME\": {\n            \"amount\": 10000,\n            \"periodicity\": \"quarterly\"\n        },\n        \"TEE\": {\n            \"amount\": 15000,\n            \"periodicity\": \"monthly\"\n        }\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Barème — refusé au comptable",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/fee-schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "fee-schedule"
+                            ]
+                        },
+                        "description": "Modifier le barème revient au gérant : 403.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"entry_fee\": 25000,\n    \"fees\": {\n        \"RME\": {\n            \"amount\": 10000,\n            \"periodicity\": \"quarterly\"\n        },\n        \"TEE\": {\n            \"amount\": 15000,\n            \"periodicity\": \"monthly\"\n        }\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Barème — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur entry_fee\", () => pm.expect(pm.response.json().errors).to.have.property(\"entry_fee\"));",
+                                    "    pm.test(\"Erreur de validation sur fees.RME\", () => pm.expect(pm.response.json().errors).to.have.property(\"fees.RME\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/fee-schedule",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "fee-schedule"
+                            ]
+                        },
+                        "description": "422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"entry_fee\": -1,\n    \"fees\": {\n        \"TEE\": {\n            \"amount\": 1,\n            \"periodicity\": \"monthly\"\n        }\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Préparation — brouillon",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"pay_ncc\", String(Math.floor(Math.random() * 1e7)).padStart(7, \"0\") + \"P\");",
+                                    "    pm.collectionVariables.set(\"today\", new Date().toISOString().slice(0, 10));",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"pay_member_id\", data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Brouillon du portefeuille CGA : son droit d'adhésion est ouvert comme somme due (F-PAY-02).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Paiements Postman\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{pay_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce\",\n    \"phone\": \"0707070707\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Sommes dues — liste",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"pay_charge_id\", data[0].id);",
+                                    "    pm.test(\"Droit d'adhésion à payer\", () => { pm.expect(data[0].kind).to.eql(\"entry_fee\"); pm.expect(data[0].status).to.eql(\"due\"); pm.expect(data[0].balance).to.eql(25000); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{pay_member_id}}/charges",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{pay_member_id}}",
+                                "charges"
+                            ]
+                        },
+                        "description": "Onglet « Honoraires et paiements » : sommes dues (droit d'adhésion, échéances), payé, reste, état."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — saisie partielle",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Reçu numéroté\", () => pm.expect(data.receipt_number).to.match(/^REC-DCK-\\d{4}-\\d{5}$/));",
+                                    "    pm.test(\"Confirmé\", () => pm.expect(data.status).to.eql(\"confirmed\"));",
+                                    "    pm.test(\"Ventilé\", () => pm.expect(data.allocations[0].amount).to.eql(10000));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{pay_member_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{pay_member_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "« Enregistrer un paiement » (F-PAY-02) : confirmé d'office, ventilé sur le droit d'adhésion, reçu numéroté REC-ABR-AAAA-NNNNN (RG-PAY-02).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 10000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\",\n    \"reference\": \"CAISSE-001\",\n    \"charge_ids\": [\n        \"{{pay_charge_id}}\"\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — au-delà du reste dû",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur amount\", () => pm.expect(pm.response.json().errors).to.have.property(\"amount\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{pay_member_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{pay_member_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "Le paiement ne dépasse pas le reste dû : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 20000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — solde",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Reçu numéroté\", () => pm.expect(data.receipt_number).to.match(/^REC-DCK-\\d{4}-\\d{5}$/));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{pay_member_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{pay_member_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "Le comptable enregistre le solde : le droit d'adhésion est payé.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 15000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"transfer\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Sommes dues — droit d'adhésion payé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Payé\", () => { pm.expect(data[0].status).to.eql(\"paid\"); pm.expect(data[0].balance).to.eql(0); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{pay_member_id}}/charges",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{pay_member_id}}",
+                                "charges"
+                            ]
+                        },
+                        "description": "Reste dû nul."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiements — liste du dossier",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Deux paiements\", () => pm.expect(data).to.have.lengthOf(2));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{pay_member_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{pay_member_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "Paiements du dossier, avec leur reçu."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — saisie invalide",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur amount\", () => pm.expect(pm.response.json().errors).to.have.property(\"amount\"));",
+                                    "    pm.test(\"Erreur de validation sur method\", () => pm.expect(pm.response.json().errors).to.have.property(\"method\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{pay_member_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{pay_member_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 0,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"troc\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — dossier inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/01HZZZZZZZZZZZZZZZZZZZZZZZ/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "payments"
+                            ]
+                        },
+                        "description": "404.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 1000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Espace adhérent — sommes dues",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Droit d'adhésion\", () => pm.expect(data.map(c => c.kind)).to.include(\"entry_fee\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/charges",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "charges"
+                            ]
+                        },
+                        "description": "L'adhérent voit ses sommes dues (/adherent/honoraires)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Espace adhérent — déclaration sans preuve",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur proof\", () => pm.expect(pm.response.json().errors).to.have.property(\"proof\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "payments"
+                            ]
+                        },
+                        "description": "La preuve (photo ou PDF) est obligatoire (F-PAY-03) : 422.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "amount",
+                                    "value": "100",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "paid_on",
+                                    "value": "{{today}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "method",
+                                    "value": "mobile_money",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "reference",
+                                    "value": "OM-DEMO-778899",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Espace adhérent — déclaration",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"declared_payment_id\", data.id);",
+                                    "    pm.test(\"À confirmer\", () => { pm.expect(data.status).to.eql(\"pending_confirmation\"); pm.expect(data.receipt_number).to.eql(null); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "payments"
+                            ]
+                        },
+                        "description": "« Déclarer un paiement » (F-PAY-03) : montant, date, mode, référence, preuve. Le paiement attend la confirmation du CGA.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "amount",
+                                    "value": "100",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "paid_on",
+                                    "value": "{{today}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "method",
+                                    "value": "mobile_money",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "reference",
+                                    "value": "OM-DEMO-778899",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "proof",
+                                    "type": "file",
+                                    "src": "postman/files/justificatif-demo.pdf"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Espace adhérent — paiements",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Déclaration listée\", () => pm.expect(data.map(p => p.id)).to.include(pm.collectionVariables.get(\"declared_payment_id\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "payments"
+                            ]
+                        },
+                        "description": "Ses paiements, dont la déclaration en attente."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Déclarations — à examiner",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const json = pm.response.json();",
+                                    "    const row = json.data.find(p => p.id === pm.collectionVariables.get(\"declared_payment_id\"));",
+                                    "    pm.test(\"Déclaration à examiner\", () => { pm.expect(row).to.be.an(\"object\"); pm.expect(row.can.confirm).to.be.true; });",
+                                    "    if (row) { pm.collectionVariables.set(\"online_member_id\", row.member.id); }",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/payments?filter[status]=pending_confirmation&per_page=100",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "payments"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[status]",
+                                    "value": "pending_confirmation"
+                                },
+                                {
+                                    "key": "per_page",
+                                    "value": "100"
+                                }
+                            ]
+                        },
+                        "description": "Paiements du centre déclarés par les adhérents, à confirmer ou rejeter."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Déclaration — confirmation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Reçu numéroté\", () => pm.expect(data.receipt_number).to.match(/^REC-DCK-\\d{4}-\\d{5}$/));",
+                                    "    pm.test(\"Confirmé\", () => pm.expect(data.status).to.eql(\"confirmed\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{online_member_id}}/payments/{{declared_payment_id}}/confirm",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{online_member_id}}",
+                                "payments",
+                                "{{declared_payment_id}}",
+                                "confirm"
+                            ]
+                        },
+                        "description": "Le CGA confirme la déclaration : ventilée sur les plus anciennes sommes dues, reçu numéroté.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Déclaration — déjà confirmée",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur payment_not_pending\", () => pm.expect(pm.response.json().code).to.eql(\"payment_not_pending\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{online_member_id}}/payments/{{declared_payment_id}}/confirm",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{online_member_id}}",
+                                "payments",
+                                "{{declared_payment_id}}",
+                                "confirm"
+                            ]
+                        },
+                        "description": "409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Espace adhérent — seconde déclaration",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"rejected_payment_id\", data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "payments"
+                            ]
+                        },
+                        "description": "Déclaration à rejeter.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "amount",
+                                    "value": "100",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "paid_on",
+                                    "value": "{{today}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "method",
+                                    "value": "mobile_money",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "reference",
+                                    "value": "OM-DEMO-778899",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "proof",
+                                    "type": "file",
+                                    "src": "postman/files/justificatif-demo.pdf"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Déclaration — rejet sans motif",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur reason\", () => pm.expect(pm.response.json().errors).to.have.property(\"reason\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{online_member_id}}/payments/{{rejected_payment_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{online_member_id}}",
+                                "payments",
+                                "{{rejected_payment_id}}",
+                                "reject"
+                            ]
+                        },
+                        "description": "Le motif est obligatoire : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Déclaration — rejet",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Rejeté\", () => { pm.expect(data.status).to.eql(\"rejected\"); pm.expect(data.rejection_reason).to.eql(\"Preuve illisible\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{online_member_id}}/payments/{{rejected_payment_id}}/reject",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{online_member_id}}",
+                                "payments",
+                                "{{rejected_payment_id}}",
+                                "reject"
+                            ]
+                        },
+                        "description": "Rejet avec motif, notifié à l'adhérent (F-PAY-03).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"Preuve illisible\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Espace adhérent — refusé à un agent",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "payments"
+                            ]
+                        },
+                        "description": "Un agent du CGA n'a pas d'espace adhérent : 403."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiements — sans session",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 401\", () => pm.response.to.have.status(401));",
+                                    "    pm.test(\"Code d'erreur unauthenticated\", () => pm.expect(pm.response.json().code).to.eql(\"unauthenticated\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "payments"
+                            ]
+                        },
+                        "description": "401."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiements — CGA suspendu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur organization_suspended\", () => pm.expect(pm.response.json().code).to.eql(\"organization_suspended\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "suspendu",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/01HZZZZZZZZZZZZZZZZZZZZZZZ/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "payments"
+                            ]
+                        },
+                        "description": "Un CGA suspendu ne fait que consulter : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 1000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -26693,7 +28583,7 @@
                     "// désigne le compte de démo de la requête (« aucun » : sans session) ; le script ouvre sa session si",
                     "// besoin, charge les identifiants des rattachements et des référentiels de démo s'ils manquent et obtient le jeton CSRF.",
                     "(function () {",
-                    "    const ACCOUNTS = { presidente: \"0700000001\", gerant: \"0700000002\", multi: \"0700000003\", comptable: \"0700000004\", profil: \"profil@cga-connect.demo\", oubli: \"0700000008\", admin: \"0700000009\", suspendu: \"0700000010\" };",
+                    "    const ACCOUNTS = { presidente: \"0700000001\", gerant: \"0700000002\", multi: \"0700000003\", comptable: \"0700000004\", profil: \"profil@cga-connect.demo\", oubli: \"0700000008\", admin: \"0700000009\", suspendu: \"0700000010\", adherent: \"0700000011\" };",
                     "    const IDS = [\"membership_gerant\", \"membership_multi_cncga\", \"membership_multi_dck\", \"membership_multi_bouake\"];",
                     "    const REFS = [\"demo_dr_id\", \"demo_cdi_id\", \"demo_other_cdi_id\", \"demo_sector_id\"];",
                     "    const baseUrl = pm.variables.replaceIn(\"{{base_url}}\");",
@@ -27148,6 +29038,30 @@
         },
         {
             "key": "wrong_referrer_id",
+            "value": ""
+        },
+        {
+            "key": "pay_ncc",
+            "value": ""
+        },
+        {
+            "key": "pay_member_id",
+            "value": ""
+        },
+        {
+            "key": "pay_charge_id",
+            "value": ""
+        },
+        {
+            "key": "declared_payment_id",
+            "value": ""
+        },
+        {
+            "key": "rejected_payment_id",
+            "value": ""
+        },
+        {
+            "key": "online_member_id",
             "value": ""
         }
     ]

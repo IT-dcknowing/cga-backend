@@ -5,6 +5,7 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
@@ -29,7 +30,8 @@ it('crée les CGA et les comptes de démonstration, rejouable sans doublon', fun
         ->and(Organization::query()->where('numbering_abbreviation', 'DEMOS')->value('status'))->toBe(OrganizationStatus::Suspended)
         ->and(Organization::query()->where('agreement_number', 'like', '%/SEPMBPE/DGI')->count())->toBe(4)
         ->and(TaxOffice::query()->whereIn('code', ['DEMO-PLT', 'DEMO-BKE'])->distinct()->count('regional_directorate_id'))->toBe(2)
-        ->and(User::query()->where('phone', 'like', '+2250700000%')->count())->toBe(10)
+        ->and(User::query()->where('phone', 'like', '+225070000001_')->orWhere('phone', 'like', '+225070000000_')->count())->toBe(11)
+        ->and(Membership::query()->whereHas('user', fn ($q) => $q->where('phone', '+2250700000011'))->value('role'))->toBe(Role::MemberOwner)
         ->and(Membership::query()->whereHas('user', fn ($q) => $q->where('phone', '+2250700000003'))->count())->toBe(3)
         ->and(Member::query()->withoutGlobalScopes()->where('ncc', '9000001T')->where('status', 'radiated')->count())->toBe(1)
         ->and(Invitation::query()->count())->toBe(2)

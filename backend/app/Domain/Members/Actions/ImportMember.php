@@ -5,6 +5,7 @@ namespace App\Domain\Members\Actions;
 use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
+use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Users\Models\User;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use Carbon\CarbonImmutable;
@@ -24,6 +25,7 @@ class ImportMember
         private readonly CreateMemberDraft $create,
         private readonly CreateExpectedPieces $pieces,
         private readonly AssertMembershipExclusivity $exclusivity,
+        private readonly SyncEntryFee $entryFee,
     ) {}
 
     /**
@@ -48,6 +50,7 @@ class ImportMember
             $member->validated_by = $actor->id;
             $member->save();
             $this->pieces->execute($member);
+            $this->entryFee->execute($member, settled: true);
 
             return $member;
         });

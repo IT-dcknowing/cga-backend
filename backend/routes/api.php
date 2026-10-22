@@ -19,6 +19,10 @@ use App\Domain\Members\Http\Controllers\RegimeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
 use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
+use App\Domain\Payments\Http\Controllers\FeeScheduleController;
+use App\Domain\Payments\Http\Controllers\MemberPaymentController;
+use App\Domain\Payments\Http\Controllers\MemberSpacePaymentController;
+use App\Domain\Payments\Http\Controllers\PaymentController;
 use App\Domain\Platform\Http\Controllers\HealthController;
 use App\Domain\Referentials\Http\Controllers\CommuneController;
 use App\Domain\Referentials\Http\Controllers\HolidayController;
@@ -192,6 +196,9 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{member}/radiation/validate', [RadiationController::class, 'validate'])->name('radiation.validate');
         Route::post('{member}/radiation/cancel', [RadiationController::class, 'cancel'])->name('radiation.cancel');
         Route::post('{member}/portfolio/cga', [PortfolioController::class, 'moveToCga'])->name('portfolio.cga');
+        Route::get('{member}/charges', [MemberPaymentController::class, 'charges'])->name('charges.index');
+        Route::get('{member}/payments', [MemberPaymentController::class, 'index'])->name('payments.index');
+        Route::post('{member}/payments', [MemberPaymentController::class, 'store'])->name('payments.store');
         Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
         Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
         Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
@@ -200,7 +207,23 @@ Route::prefix('v1')->group(function (): void {
             Route::post('{member}/accesses/{access}/resend', [MemberAccessController::class, 'resend'])->name('accesses.resend');
             Route::post('{member}/accesses/{access}/disable', [MemberAccessController::class, 'disable'])->name('accesses.disable');
             Route::post('{member}/accesses/{access}/enable', [MemberAccessController::class, 'enable'])->name('accesses.enable');
+            Route::post('{member}/payments/{payment}/confirm', [MemberPaymentController::class, 'confirm'])->name('payments.confirm');
+            Route::post('{member}/payments/{payment}/reject', [MemberPaymentController::class, 'reject'])->name('payments.reject');
         });
+    });
+
+    // Barème du CGA (F-PAY-01) et paiements du centre, dont les déclarations des adhérents à examiner (F-PAY-03).
+    Route::middleware(['auth', 'tenant'])->prefix('cga')->name('cga.')->group(function (): void {
+        Route::get('fee-schedule', [FeeScheduleController::class, 'show'])->name('fee-schedule.show');
+        Route::put('fee-schedule', [FeeScheduleController::class, 'update'])->name('fee-schedule.update');
+        Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+    });
+
+    // Espace de l'adhérent : ses honoraires et la déclaration d'un paiement (F-PAY-03).
+    Route::middleware(['auth', 'tenant'])->prefix('member')->name('member.')->group(function (): void {
+        Route::get('charges', [MemberSpacePaymentController::class, 'charges'])->name('charges.index');
+        Route::get('payments', [MemberSpacePaymentController::class, 'index'])->name('payments.index');
+        Route::post('payments', [MemberSpacePaymentController::class, 'store'])->name('payments.store');
     });
 
     // Apporteurs d'affaires du centre (sous-portefeuille « Accessoires », RG-PTF-06).

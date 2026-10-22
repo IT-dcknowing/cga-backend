@@ -2,10 +2,8 @@
 
 namespace App\Domain\Members\Support;
 
-use App\Domain\Members\Enums\FeeKind;
-use App\Domain\Members\Enums\FeesPeriodicity;
 use App\Domain\Members\Enums\TaxRegime;
-use App\Domain\Members\Models\FeeSchedule;
+use App\Domain\Payments\Support\FeeScale;
 use App\Support\Phones\PhoneNormalizer;
 use Illuminate\Support\Str;
 
@@ -16,14 +14,10 @@ use Illuminate\Support\Str;
  */
 class MemberFields
 {
-    /**
-     * Barème en vigueur déjà lu, par nature et régime (import d'un portefeuille : une lecture par lot).
-     *
-     * @var array<string, FeeSchedule|null>
-     */
-    private array $schedules = [];
-
-    public function __construct(private readonly PhoneNormalizer $phones) {}
+    public function __construct(
+        private readonly PhoneNormalizer $phones,
+        private readonly FeeScale $scale,
+    ) {}
 
     /**
      * @param  array<string, mixed>  $attributes  saisie validée
@@ -57,21 +51,9 @@ class MemberFields
      */
     public function withSchedule(array $attributes, TaxRegime $regime): array
     {
-        $current = fn (FeeKind $kind, ?TaxRegime $forRegime): ?FeeSchedule => array_key_exists($key = $kind->value.'|'.$forRegime?->value.'|'.today()->toDateString(), $this->schedules)
-            ? $this->schedules[$key]
-            : $this->schedules[$key] = FeeSchedule::query()
-                ->where('kind', $kind)
-                ->where('regime', $forRegime)
-                ->where('valid_from', '<=', today())
-                ->orderByDesc('valid_from')
-                ->first();
-
-        $entry = $current(FeeKind::EntryFee, null);
-        $fees = in_array($regime, [TaxRegime::Rme, TaxRegime::Tee], true) ? $current(FeeKind::Fees, $regime) : null;
-
-        $attributes['entry_fee_amount'] ??= $entry->amount ?? 0;
-        $attributes['fees_amount'] ??= $fees->amount ?? 0;
-        $attributes['fees_periodicity'] ??= $fees?->periodicity->value ?? FeesPeriodicity::Monthly->value;
+        $attributes['entry_fee_amount'] ??= $this->scale->entryFee();
+        $attributes['fees_amount'] ??= $this->scale->fees($regime);
+        $attributes['fees_periodicity'] ??= $this->scale->periodicity($regime)->value;
 
         return $attributes;
     }

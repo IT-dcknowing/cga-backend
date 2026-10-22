@@ -9,6 +9,7 @@ use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
 use App\Domain\Referentials\Models\NationalReference;
@@ -52,6 +53,7 @@ final class CrossTenantObjects
             Organization::class => static fn (Organization $other): Organization => $other,
             Member::class => static fn (Organization $other): Member => Member::factory()->create(['organization_id' => $other->id]),
             BusinessReferrer::class => static fn (Organization $other): BusinessReferrer => BusinessReferrer::factory()->create(['organization_id' => $other->id]),
+            MemberPayment::class => static fn (Organization $other): MemberPayment => MemberPayment::factory()->create(['member_id' => Member::factory()->active()->create(['organization_id' => $other->id])->id]),
             Membership::class => static fn (Organization $other): Membership => Membership::factory()->role(Role::MemberOwner)->create(['organization_id' => $other->id]),
             User::class => static fn (Organization $other): User => Membership::factory()->create(['organization_id' => $other->id])->user,
             ImportBatch::class => static fn (Organization $other): ImportBatch => Tenancy::bypass(static function () use ($other): ImportBatch {

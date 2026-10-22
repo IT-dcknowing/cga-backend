@@ -8,6 +8,7 @@ use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Support\MemberFields;
 use App\Domain\Members\Support\MembershipExclusivity;
+use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Users\Models\User;
 use App\Support\Files\StorageService;
 use App\Support\Http\Exceptions\BusinessRuleException;
@@ -33,6 +34,7 @@ class UpdateMember
         private readonly MembershipExclusivity $exclusivity,
         private readonly SaveReferenceRevenue $revenue,
         private readonly StorageService $storage,
+        private readonly SyncEntryFee $entryFee,
     ) {}
 
     /**
@@ -86,6 +88,7 @@ class UpdateMember
             if ($revenue !== null) {
                 $this->revenue->execute($member, $revenue);
             }
+            $this->entryFee->execute($member);
 
             return $member->refresh();
         });

@@ -4,6 +4,7 @@ namespace App\Domain\Members\Actions;
 
 use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Models\Member;
+use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use Illuminate\Support\Facades\DB;
 
@@ -14,18 +15,21 @@ use Illuminate\Support\Facades\DB;
  */
 class DeleteDraft
 {
+    public function __construct(private readonly SyncEntryFee $entryFee) {}
+
     /**
      * @throws BusinessRuleException member_not_draft
      */
     public function execute(Member $member): void
     {
-        DB::transaction(static function () use ($member): void {
+        DB::transaction(function () use ($member): void {
             $member = Member::query()->lockForUpdate()->findOrFail($member->id);
             if ($member->status !== MemberStatus::Draft) {
                 throw new BusinessRuleException('member_not_draft');
             }
 
             $member->delete();
+            $this->entryFee->execute($member);
         });
     }
 }
