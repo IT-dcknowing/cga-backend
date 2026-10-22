@@ -2,7 +2,8 @@
 
 namespace App\Domain\Payments\Actions;
 
-use App\Domain\Organizations\Models\Organization;
+use App\Domain\Documents\Enums\DocumentType;
+use App\Domain\Documents\Support\DocumentNumbering;
 use App\Domain\Payments\Enums\ChargeStatus;
 use App\Domain\Payments\Enums\PaymentStatus;
 use App\Domain\Payments\Events\PaymentConfirmed;
@@ -10,10 +11,7 @@ use App\Domain\Payments\Models\MemberCharge;
 use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Payments\Models\PaymentAllocation;
 use App\Domain\Users\Models\User;
-use App\Support\Config\SettingsService;
 use App\Support\Http\Exceptions\BusinessRuleException;
-use App\Support\Numbering\NumberFormatter;
-use App\Support\Numbering\SequenceService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -27,10 +25,7 @@ use Illuminate\Validation\ValidationException;
  */
 class ConfirmPayment
 {
-    public function __construct(
-        private readonly SequenceService $sequences,
-        private readonly SettingsService $settings,
-    ) {}
+    public function __construct(private readonly DocumentNumbering $numbering) {}
 
     /**
      * @param  list<string>  $chargeIds  sommes dues à régler ; vide : les plus anciennes encore ouvertes
@@ -56,7 +51,7 @@ class ConfirmPayment
             $payment->status = PaymentStatus::Confirmed;
             $payment->confirmed_by = $actor->id;
             $payment->confirmed_at = now()->toImmutable();
-            $payment->receipt_number = $this->receiptNumber($payment);
+            $payment->receipt_number = $this->numbering->next($payment->organization_id, DocumentType::Receipt);
             $payment->save();
 
             PaymentConfirmed::dispatch($payment);
@@ -114,19 +109,5 @@ class ConfirmPayment
             $charge->overdue_since = $charge->balance() === 0 ? null : $charge->overdue_since;
             $charge->save();
         }
-    }
-
-    /**
-     * @throws BusinessRuleException abbreviation_missing
-     */
-    private function receiptNumber(MemberPayment $payment): string
-    {
-        $abbreviation = Organization::query()->whereKey($payment->organization_id)->value('numbering_abbreviation');
-        if (! is_string($abbreviation) || $abbreviation === '') {
-            throw new BusinessRuleException('abbreviation_missing');
-        }
-        $year = today()->year;
-
-        return NumberFormatter::format((string) $this->settings->get('numbering.receipt.pattern'), $this->sequences->next($payment->organization_id, 'receipt', $year), $year, $abbreviation);
     }
 }

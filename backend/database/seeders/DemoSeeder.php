@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Domain\Auth\Actions\IssueInvitation;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Documents\Samples\SampleDocumentData;
 use App\Domain\Members\Enums\EntityType;
 use App\Domain\Members\Enums\FeesPeriodicity;
 use App\Domain\Members\Enums\LegalForm;
@@ -27,11 +28,14 @@ use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
+use App\Support\Files\StorageService;
 use App\Support\Numbering\SequenceService;
 use App\Support\Tenancy\Tenancy;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 /**
  * Jeu de démonstration (SEED_DEMO=true) : trois CGA fictifs (dont un suspendu), les quatre autres CGA
@@ -46,6 +50,7 @@ use Illuminate\Support\Facades\DB;
  * plateforme · 0700000010 gérant du CGA suspendu (consultation seule, RG-ORG-08). Un ancien adhérent
  * radié du CGA de Bouaké (NCC 9000001T) permet de rejouer le réimport d'identité (RG-ADH-15) ;
  * 0700000011 est l'accès principal en ligne d'un adhérent actif de DC-KNOWING (espace adhérent).
+ * La fiche de DC-KNOWING est complète (images de remplacement) : ses documents se produisent.
  */
 class DemoSeeder extends Seeder
 {
@@ -55,6 +60,8 @@ class DemoSeeder extends Seeder
         private readonly SequenceService $sequences,
         private readonly MemberNumbering $numbering,
         private readonly SyncEntryFee $entryFee,
+        private readonly StorageService $storage,
+        private readonly SampleDocumentData $samples,
     ) {}
 
     public function run(): void
@@ -65,6 +72,7 @@ class DemoSeeder extends Seeder
         $bouake = $this->cga('CGA Démo Bouaké', 'DEMOB', 'Bouaké', '+2252731630102', 'contact@cga-bouake.demo');
         $suspended = $this->suspended($this->cga('CGA Démo Suspendu', 'DEMOS', 'Korhogo', '+2252722445502', 'contact@cga-suspendu.demo'));
         $this->referentials();
+        $this->completeProfile($dck);
         $this->mockupRegistry();
 
         $this->account('0700000001', 'Aminata', 'Présidente', [[$cncga, Role::CncgaPresident]]);
@@ -220,6 +228,47 @@ class DemoSeeder extends Seeder
             $member->validated_at = CarbonImmutable::parse('2025-01-15 10:00:00');
             $member->save();
         }, 'Jeu de démonstration : ancien adhérent du CGA de Bouaké.');
+    }
+
+    /**
+     * Fiche complète de DC-KNOWING (F-ORG-03, RG-ORG-04) : identité fictive et images de remplacement
+     * (logo, signature, cachet), pour que ses documents se produisent dès l'installation (F-DOC-01).
+     * Seuls les champs encore vides sont remplis.
+     */
+    private function completeProfile(Organization $organization): void
+    {
+        if ($organization->missingProfileFields() === []) {
+            return;
+        }
+
+        $office = TaxOffice::query()->where('code', 'DEMO-PLT')->sole();
+        $identity = [
+            'legal_form' => 'SARL', 'share_capital' => 5_000_000, 'ncc' => '9900001K', 'rccm' => 'CI-ABJ-2020-B-00001',
+            'agreement_number' => 'AGR-DEMO-0001', 'agreement_date' => '2020-01-06', 'regional_directorate_id' => $office->regional_directorate_id,
+            'tax_office_id' => $office->id, 'address' => 'Plateau, avenue Chardy, immeuble Démo', 'manager_name' => 'Koffi Gérant',
+            'expert_name' => 'Yao Multi-rôles', 'signatory_name' => 'Koffi Gérant', 'signatory_title' => 'Le Gérant',
+        ];
+        foreach ($identity as $field => $value) {
+            if (blank($organization->getAttribute($field))) {
+                $organization->setAttribute($field, $value);
+            }
+        }
+
+        $directory = storage_path('framework/documents/demo-'.Str::lower((string) Str::ulid()));
+        File::ensureDirectoryExists($directory);
+        try {
+            $images = $this->samples->images($directory, (string) config('documents.verification_url'));
+            foreach (['logo_file_id' => 'cga_logo', 'signature_file_id' => 'cga_signature', 'stamp_file_id' => 'cga_stamp'] as $column => $image) {
+                if ($organization->getAttribute($column) === null) {
+                    $organization->setAttribute($column, $this->storage->store(File::get($images[$image]), basename($images[$image]), 'branding', $organization->id)->id);
+                }
+            }
+        } finally {
+            File::deleteDirectory($directory);
+        }
+
+        $organization->profile_completed_at = now()->toImmutable();
+        $organization->save();
     }
 
     /**

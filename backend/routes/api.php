@@ -5,7 +5,9 @@ use App\Domain\Auth\Http\Controllers\MeController;
 use App\Domain\Auth\Http\Controllers\PasswordResetController;
 use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
+use App\Domain\Documents\Http\Controllers\DocumentController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
+use App\Domain\Documents\Http\Controllers\MemberDocumentController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
 use App\Domain\Members\Http\Controllers\MemberAccessController;
@@ -199,6 +201,8 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{member}/charges', [MemberPaymentController::class, 'charges'])->name('charges.index');
         Route::get('{member}/payments', [MemberPaymentController::class, 'index'])->name('payments.index');
         Route::post('{member}/payments', [MemberPaymentController::class, 'store'])->name('payments.store');
+        Route::get('{member}/documents', [MemberDocumentController::class, 'index'])->name('documents.index');
+        Route::post('{member}/documents', [MemberDocumentController::class, 'store'])->name('documents.store');
         Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
         Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
         Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
@@ -217,6 +221,12 @@ Route::prefix('v1')->group(function (): void {
         Route::get('fee-schedule', [FeeScheduleController::class, 'show'])->name('fee-schedule.show');
         Route::put('fee-schedule', [FeeScheduleController::class, 'update'])->name('fee-schedule.update');
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+    });
+
+    // Documents du centre (M08) : état de la production (asynchrone, RG-DOC-05), liens signés, relance d'un échec.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/documents')->name('cga.documents.')->group(function (): void {
+        Route::get('{document}', [DocumentController::class, 'show'])->name('show');
+        Route::post('{document}/retry', [DocumentController::class, 'retry'])->name('retry');
     });
 
     // Espace de l'adhérent : ses honoraires et la déclaration d'un paiement (F-PAY-03).

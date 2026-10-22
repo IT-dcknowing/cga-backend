@@ -7,8 +7,11 @@ use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Enums\SubscriptionStatus;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Referentials\Models\TaxOffice;
+use App\Support\Files\StorageService;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 /**
  * @extends Factory<Organization>
@@ -79,5 +82,49 @@ class OrganizationFactory extends Factory
             'suspended_at' => now(),
             'suspension_reason' => 'Suspension de test',
         ]);
+    }
+
+    /**
+     * Fiche complète (RG-ORG-04) : identité, rattachements et images du logo, de la signature et du
+     * cachet, rangées par StorageService ; les documents du centre se produisent.
+     */
+    public function profileComplete(): static
+    {
+        return $this->state(fn (): array => [
+            'legal_form' => 'SARL',
+            'share_capital' => 1_000_000,
+            'ncc' => fake()->unique()->numerify('#######').'C',
+            'rccm' => 'CI-ABJ-2020-B-'.fake()->unique()->numerify('#####'),
+            'tax_office_id' => TaxOffice::factory(),
+            'regional_directorate_id' => fn (array $attributes): ?string => TaxOffice::query()->whereKey($attributes['tax_office_id'])->value('regional_directorate_id'),
+            'address' => 'Plateau, rue du Commerce',
+            'manager_name' => 'Koffi Kouadio',
+            'expert_name' => 'Cabinet Expert',
+            'signatory_name' => 'Koffi Kouadio',
+            'signatory_title' => 'Le Gérant',
+        ])->afterCreating(function (Organization $organization): void {
+            $storage = app(StorageService::class);
+            foreach (['logo_file_id', 'signature_file_id', 'stamp_file_id'] as $column) {
+                $organization->setAttribute($column, $storage->store(self::png(), 'image.png', 'branding', $organization->id)->id);
+            }
+            $organization->profile_completed_at = now()->toImmutable();
+            $organization->save();
+        });
+    }
+
+    /**
+     * Petite image PNG unie.
+     */
+    private static function png(): string
+    {
+        $image = imagecreatetruecolor(40, 20);
+        if ($image === false) {
+            throw new RuntimeException('Image de test impossible à créer.');
+        }
+        imagefill($image, 0, 0, (int) imagecolorallocate($image, 30, 106, 78));
+        ob_start();
+        imagepng($image);
+
+        return (string) ob_get_clean();
     }
 }

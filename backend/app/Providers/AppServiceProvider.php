@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Domain\Audit\AuditLogger;
 use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
+use App\Domain\Documents\Models\GeneratedDocument;
+use App\Domain\Documents\Policies\DocumentPolicy;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Imports\Policies\ImportBatchPolicy;
 use App\Domain\Members\Models\BusinessReferrer;
@@ -115,6 +117,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Member::class, MemberPolicy::class);
         Gate::policy(BusinessReferrer::class, ReferrerPolicy::class);
         Gate::policy(MemberPayment::class, PaymentPolicy::class);
+
+        // Documents officiels produits ou déposés (M08).
+        Gate::policy(GeneratedDocument::class, DocumentPolicy::class);
 
         // Imports de fichiers Excel (M17).
         Gate::policy(ImportBatch::class, ImportBatchPolicy::class);

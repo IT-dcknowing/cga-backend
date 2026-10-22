@@ -3,6 +3,7 @@
 namespace Tests\Support;
 
 use App\Domain\Documents\Models\File;
+use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
 use App\Domain\Imports\Models\ImportBatch;
@@ -53,6 +54,7 @@ final class CrossTenantObjects
             Organization::class => static fn (Organization $other): Organization => $other,
             Member::class => static fn (Organization $other): Member => Member::factory()->create(['organization_id' => $other->id]),
             BusinessReferrer::class => static fn (Organization $other): BusinessReferrer => BusinessReferrer::factory()->create(['organization_id' => $other->id]),
+            GeneratedDocument::class => static fn (Organization $other): GeneratedDocument => GeneratedDocument::factory()->create(['member_id' => Member::factory()->active()->create(['organization_id' => $other->id])->id]),
             MemberPayment::class => static fn (Organization $other): MemberPayment => MemberPayment::factory()->create(['member_id' => Member::factory()->active()->create(['organization_id' => $other->id])->id]),
             Membership::class => static fn (Organization $other): Membership => Membership::factory()->role(Role::MemberOwner)->create(['organization_id' => $other->id]),
             User::class => static fn (Organization $other): User => Membership::factory()->create(['organization_id' => $other->id])->user,

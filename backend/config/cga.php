@@ -235,6 +235,20 @@ return [
                     'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
                 ],
             ],
+            // Attestations d'adhésion (F-DOC-01) : séquence « attestation » par CGA et par année.
+            'certificate' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => 'ATT-{ABR}-{YYYY}-{N:5}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
+            // Courriers de notification de radiation au CDI (F-DOC-01) : séquence « notification_letter ».
+            'radiation_notice' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => 'NOT-{ABR}-{YYYY}-{N:5}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
         ],
 
     ],

@@ -11,10 +11,14 @@
 | et les remplace (F-ADM-02). Pour chaque modèle : ses variables, ses images
 | (insérées à la place d'une variable, ou « encadrées » : une image neutre du
 | modèle, word/media/{variable}.jpeg, remplacée en gardant son cadre) et les
-| lignes répétées (cloneRow) avec leur variable de ligne.
+| lignes répétées (cloneRow) avec leur variable de ligne, et la classe qui
+| rassemble les données d'un document de ce type (chaîne de production,
+| 02-TRD §8.2).
 | Un test vérifie que chaque fichier porte exactement ces variables.
 |
 */
+
+use App\Domain\Documents\Composers\MembershipContractComposer;
 
 $cga = ['cga_name', 'cga_ncc', 'cga_agreement'];
 $signature = ['cga_signature', 'cga_stamp', 'qr_code'];
@@ -27,6 +31,7 @@ return [
             'label' => 'Contrat d\'adhésion',
             'format' => 'docx',
             'path' => resource_path('templates/membership_contract.docx'),
+            'composer' => MembershipContractComposer::class,
             'images' => $signature,
             'rows' => [],
             'variables' => [
@@ -119,6 +124,15 @@ return [
 
     // Dossier des fichiers temporaires de PhpWord, un sous-dossier par rendu.
     'temporary_path' => storage_path('framework/phpword'),
+
+    // Dossier de travail de la chaîne de production (modèle, images, DOCX), un sous-dossier jetable par document.
+    'work_path' => storage_path('framework/documents'),
+
+    // Page publique de vérification (F-DOC-04) : le QR code d'un document mène à cette adresse suivie de son jeton.
+    'verification_url' => rtrim((string) (env('DOCUMENT_VERIFICATION_URL') ?: env('FRONTEND_URL', env('APP_URL', 'http://localhost')).'/verifier'), '/'),
+
+    // QR code de vérification (RG-DOC-02) : taille et marge de l'image produite (pixels).
+    'qr' => ['size' => 240, 'margin' => 8],
 
     // Taille des images insérées (pixels) : logo, signature et cachet du signataire, QR de vérification (RG-DOC-02).
     'images' => [

@@ -70,6 +70,15 @@ describe('téléphones', function () {
             ->and(fn () => $phones->e164OrFail('12'))->toThrow(InvalidArgumentException::class);
     });
 
+    it('présente les numéros pour les documents : paires de chiffres pour le pays, format international sinon', function () {
+        $phones = app(PhoneNormalizer::class);
+
+        expect($phones->display('+2252722445501'))->toBe('+225 27 22 44 55 01')
+            ->and($phones->display('+2250707000099'))->toBe('+225 07 07 00 00 99')
+            ->and($phones->display('+33612345678'))->toBe('+33 6 12 34 56 78')
+            ->and($phones->display('pas un numéro'))->toBe('pas un numéro');
+    });
+
     it('accepte le numéro libre ou celui du compte lui-même', function () {
         $user = User::factory()->create(['phone' => '+2250700000001']);
         $rule = fn (?string $except) => ['phone' => [new AvailablePhone(app(PhoneNormalizer::class), $except)]];

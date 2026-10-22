@@ -75,6 +75,13 @@ return [
     'member_closed' => 'Ce dossier est radié ou clos : il ne se modifie plus. Un retour est une nouvelle adhésion.',
     'source_locked' => 'Cette valeur vient de Compta Flow, qui fait foi : elle se corrige dans Compta Flow.',
 
+    // Documents officiels (M08)
+    'cga_profile_incomplete' => 'Complétez la fiche du centre pour produire vos documents.',
+    'template_missing' => 'Aucun modèle actif pour ce document : le CNCGA doit en activer un.',
+    'contract_unavailable' => 'Le contrat d\'adhésion se produit pour un dossier validé du portefeuille CGA.',
+    'contract_already_issued' => 'Le contrat de ce dossier est déjà émis : régénérez-le, ou relancez sa production si elle a échoué.',
+    'document_not_failed' => 'Seule une production en échec se relance.',
+
     // Référentiels (RG-DATA-05)
     'merge_same_value' => 'Une valeur ne se fusionne pas avec elle-même.',
     'merge_other_directorate' => 'Un CDI ne se fusionne que dans un CDI de la même direction régionale.',

@@ -36,6 +36,26 @@ class PhoneNormalizer
     }
 
     /**
+     * Numéro enregistré présenté pour les documents : ceux du pays par défaut en paires de chiffres,
+     * comme on les écrit (+225 27 22 44 55 01), les autres au format international ; une valeur qui
+     * n'est pas un numéro valide reste telle quelle.
+     */
+    public function display(string $phone): string
+    {
+        $number = new PhoneNumber($phone, $this->country());
+        if (! $number->isValid()) {
+            return $phone;
+        }
+        if (! $number->isOfCountry($this->country())) {
+            return $number->formatInternational();
+        }
+
+        $prefix = '+'.$number->toLibPhoneObject()->getCountryCode();
+
+        return $prefix.' '.implode(' ', str_split(substr($number->formatE164(), strlen($prefix)), 2));
+    }
+
+    /**
      * Saisie validée dont les champs téléphone donnés passent au format E.164 ; un champ absent ou
      * vide reste tel quel.
      *
