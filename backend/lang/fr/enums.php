@@ -271,4 +271,63 @@ return [
         'validated' => 'Validé',
     ],
 
+    'charge_kind' => [
+        'entry_fee' => 'Droit d\'adhésion',
+        'fees' => 'Honoraires',
+        'training' => 'Formation',
+    ],
+
+    'charge_status' => [
+        'due' => 'À payer',
+        'partial' => 'Payée en partie',
+        'paid' => 'Payée',
+        'overdue' => 'Impayée',
+        'cancelled' => 'Annulée',
+    ],
+
+    'payment_method' => [
+        'cash' => 'Espèces',
+        'cheque' => 'Chèque',
+        'transfer' => 'Virement',
+        'mobile_money' => 'Mobile money',
+        'other' => 'Autre',
+    ],
+
+    'payment_source' => [
+        'cga_entry' => 'Saisi par le CGA',
+        'member_declaration' => 'Déclaré par l\'adhérent',
+        'import' => 'Importé',
+    ],
+
+    'payment_status' => [
+        'pending_confirmation' => 'À confirmer',
+        'confirmed' => 'Confirmé',
+        'rejected' => 'Rejeté',
+    ],
+
+    'document_type' => [
+        'membership_contract' => 'Contrat d\'adhésion',
+        'membership_certificate' => 'Attestation d\'adhésion',
+        'receipt' => 'Reçu',
+        'invoice' => 'Facture',
+        'credit_note' => 'Avoir',
+        'radiation_notice' => 'Courrier de radiation',
+        'quarterly_report_docx' => 'Rapport trimestriel (Word)',
+        'quarterly_report_modern' => 'Rapport trimestriel modernisé',
+        'quarterly_report_xlsx' => 'Rapport trimestriel (classeur officiel)',
+        'report_transmission_slip' => 'Bordereau de transmission du rapport',
+        'dues_receipt' => 'Reçu de cotisation',
+        'dues_invoice' => 'Facture de cotisation',
+        'training_certificate' => 'Attestation de formation',
+        'banking_file' => 'Dossier de bancabilité',
+        'uploaded' => 'Document déposé',
+    ],
+
+    'document_status' => [
+        'generating' => 'En production',
+        'valid' => 'Valide',
+        'cancelled' => 'Annulé',
+        'failed' => 'Production en échec',
+    ],
+
 ];

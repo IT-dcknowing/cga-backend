@@ -3,6 +3,7 @@
 namespace App\Domain\Members\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
+use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Members\Enums\EntityType;
 use App\Domain\Members\Enums\FeesPeriodicity;
 use App\Domain\Members\Enums\LegalForm;
@@ -10,6 +11,8 @@ use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\PiecesStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Enums\TaxRegime;
+use App\Domain\Payments\Models\MemberCharge;
+use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Referentials\Models\ActivityCode;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Sector;
@@ -278,6 +281,34 @@ class Member extends Model
     public function activityCode(): BelongsTo
     {
         return $this->belongsTo(ActivityCode::class);
+    }
+
+    /**
+     * Sommes dues au CGA : droit d'adhésion, honoraires, formations (F-PAY-02).
+     *
+     * @return HasMany<MemberCharge, $this>
+     */
+    public function charges(): HasMany
+    {
+        return $this->hasMany(MemberCharge::class);
+    }
+
+    /**
+     * @return HasMany<MemberPayment, $this>
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(MemberPayment::class);
+    }
+
+    /**
+     * Documents produits ou déposés pour ce dossier (F-DOC-01, 05).
+     *
+     * @return HasMany<GeneratedDocument, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(GeneratedDocument::class);
     }
 
     protected static function newFactory(): MemberFactory

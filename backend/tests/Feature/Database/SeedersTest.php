@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Documents\Models\DocumentTemplate;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Platform\Models\Setting;
@@ -13,6 +14,7 @@ use App\Support\Config\SettingsService;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\PlatformSeeder;
 use Database\Seeders\SettingsSeeder;
+use Illuminate\Support\Facades\Storage;
 
 /*
  * Seeders du socle (06-IMPLEMENTATION-PLAN étape 0.6) : rejouables sans doublon.
@@ -21,6 +23,11 @@ use Database\Seeders\SettingsSeeder;
 /**
  * Paramètres réseau et plateforme du registre, ceux que SettingsSeeder enregistre.
  */
+beforeEach(function () {
+    // Les modèles de documents chargés par TemplateSeeder sont rangés par StorageService.
+    Storage::fake();
+});
+
 function seededSettingsCount(): int
 {
     return collect(app(SettingsService::class)->definitions())
@@ -71,6 +78,7 @@ it('peut être rejoué sans rien créer deux fois', function () {
     expect(Organization::query()->count())->toBe(2)
         ->and(User::query()->count())->toBe(1)
         ->and(Membership::query()->count())->toBe(1)
+        ->and(DocumentTemplate::query()->count())->toBe(count(config('documents.templates')))
         ->and(Setting::query()->count())->toBe(seededSettingsCount());
 });
 

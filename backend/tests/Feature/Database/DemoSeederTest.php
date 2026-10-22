@@ -9,6 +9,7 @@ use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
 use Database\Seeders\DatabaseSeeder;
+use Illuminate\Support\Facades\Storage;
 use Tests\Support\Spa;
 
 /*
@@ -17,6 +18,7 @@ use Tests\Support\Spa;
 
 beforeEach(function () {
     config(['cga.seed.demo.enabled' => true]);
+    Storage::fake();
 });
 
 it('crée les CGA et les comptes de démonstration, rejouable sans doublon', function () {

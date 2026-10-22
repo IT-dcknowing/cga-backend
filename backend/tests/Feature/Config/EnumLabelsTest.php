@@ -2,6 +2,8 @@
 
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Enums\OtpPurpose;
+use App\Domain\Documents\Enums\DocumentStatus;
+use App\Domain\Documents\Enums\DocumentType;
 use App\Domain\Imports\Enums\ImportRowStatus;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
@@ -29,6 +31,11 @@ use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Enums\OrganizationStatusEvent;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Enums\SubscriptionStatus;
+use App\Domain\Payments\Enums\ChargeKind;
+use App\Domain\Payments\Enums\ChargeStatus;
+use App\Domain\Payments\Enums\PaymentMethod;
+use App\Domain\Payments\Enums\PaymentSource;
+use App\Domain\Payments\Enums\PaymentStatus;
 use App\Domain\Referentials\Enums\DataStatus;
 use App\Domain\Referentials\Enums\SectorStatus;
 use App\Domain\Referentials\ReferenceData\ImportMode;
@@ -52,6 +59,7 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
     PreferenceChannel::class, SectorStatus::class, OrganizationStatusEvent::class, CgaImageKind::class,
     ImportType::class, ImportStatus::class, ImportRowStatus::class, ReferenceDataset::class, ImportMode::class, Removal::class,
     Portfolio::class, MemberStatus::class, EntityType::class, LegalForm::class, TaxRegime::class, FeesPeriodicity::class, PiecesStatus::class, PieceType::class, PieceStatus::class, RadiationInitiator::class, RadiationReason::class, RadiationStatus::class, RadiationOutcome::class, RevenueKind::class, RevenueSource::class, MovementDirection::class, FeeKind::class,
+    ChargeKind::class, ChargeStatus::class, PaymentMethod::class, PaymentSource::class, PaymentStatus::class, DocumentType::class, DocumentStatus::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {
