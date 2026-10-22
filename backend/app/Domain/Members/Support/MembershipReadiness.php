@@ -5,21 +5,21 @@ namespace App\Domain\Members\Support;
 use App\Domain\Members\Enums\EntityType;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
-use App\Support\Config\SettingsService;
+use App\Domain\Payments\Enums\ChargeKind;
+use App\Domain\Payments\Enums\ChargeStatus;
+use App\Domain\Payments\Models\MemberCharge;
 
 /**
  * Ce qui manque pour valider une adhésion (RG-ADH-02) : champs obligatoires de la fiche
  * (F-ADH-02), dirigeant d'une entreprise individuelle, chiffre d'affaires de référence ; au
- * portefeuille CGA, date de signature et confirmation du contrat (RG-PTF-08), droit d'adhésion et,
- * une fois les paiements branchés, son paiement confirmé. Les pièces ne bloquent pas (RG-PJ-02).
+ * portefeuille CGA, date de signature et confirmation du contrat (RG-PTF-08), droit d'adhésion
+ * entièrement payé, paiements confirmés (F-PAY-02). Les pièces ne bloquent pas (RG-PJ-02).
  */
 class MembershipReadiness
 {
     private const REQUIRED = ['tax_office_id', 'sector_id', 'main_activity', 'address', 'phone', 'signatory_name', 'signatory_title'];
 
     private const OWNER = ['owner_last_name', 'owner_first_names', 'owner_nationality', 'owner_id_document_type', 'owner_id_document_number'];
-
-    public function __construct(private readonly SettingsService $settings) {}
 
     /**
      * @return list<string> champs ou conditions manquants
@@ -41,11 +41,24 @@ class MembershipReadiness
             if ($member->cga_contract_confirmed_by === null) {
                 $missing[] = 'cga_contract_confirmed';
             }
-            if ((bool) $this->settings->get('members.require_entry_fee_payment')) {
+            if ($this->entryFeeDue($member)) {
                 $missing[] = 'entry_fee_payment';
             }
         }
 
         return $missing;
+    }
+
+    /**
+     * Le droit d'adhésion du dossier n'est pas encore entièrement payé (RG-ADH-02) ; un droit à zéro
+     * n'ouvre aucune somme due.
+     */
+    private function entryFeeDue(Member $member): bool
+    {
+        return MemberCharge::query()
+            ->where('member_id', $member->id)
+            ->where('kind', ChargeKind::EntryFee)
+            ->whereIn('status', [ChargeStatus::Due, ChargeStatus::Partial, ChargeStatus::Overdue])
+            ->exists();
     }
 }

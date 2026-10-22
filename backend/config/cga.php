@@ -139,8 +139,8 @@ return [
 
         // Dossiers des adhérents (M04).
         'members' => [
-            // Contrôle « droit d'adhésion payé et confirmé » à la validation (RG-ADH-02) : branché avec les
-            // paiements (Lot 3) ; d'ici là, désactivé.
+            // Contrôle « droit d'adhésion payé » à la bascule Cabinet → CGA (RG-PTF-03) : branché à l'étape 3.15 ;
+            // d'ici là, désactivé. La validation de l'adhésion le contrôle déjà, sur la somme due (RG-ADH-02).
             'require_entry_fee_payment' => [
                 'type' => 'boolean', 'level' => 'platform', 'default' => false, 'permission' => $platform,
                 'rules' => ['' => ['boolean']],

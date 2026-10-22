@@ -8,6 +8,7 @@ use App\Domain\Members\Enums\PieceType;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberRevenue;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Payments\Models\MemberCharge;
 use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Users\Enums\Role;
@@ -137,11 +138,31 @@ it('suit les formats de numérotation paramétrés', function () {
     validateMember($manager, readyDraft($manager))->assertJsonPath('data.membership_number', 'ADH/ABC/2026/000001');
 });
 
-it('exige le paiement du droit d\'adhésion quand les paiements sont branchés', function () {
+it('RG-ADH-02 exige le droit d\'adhésion entièrement payé, paiements confirmés', function () {
     $manager = centreManager();
-    app(SettingsService::class)->set('members.require_entry_fee_payment', true);
+    $member = readyDraft($manager);
+    $charge = MemberCharge::factory()->create(['member_id' => $member->id, 'amount' => 25_000]);
+    $pay = fn (int $amount) => inSpace($manager)->postJson("/api/v1/cga/members/{$member->id}/payments", ['amount' => $amount, 'paid_on' => today()->toDateString(), 'method' => 'cash'])->assertCreated();
 
-    validateMember($manager, readyDraft($manager))->assertStatus(409)->assertJsonPath('details.missing', ['entry_fee_payment']);
+    validateMember($manager, $member)->assertStatus(409)->assertJsonPath('details.missing', ['entry_fee_payment']);
+    $pay(10_000);
+    validateMember($manager, $member)->assertStatus(409)->assertJsonPath('details.missing', ['entry_fee_payment']);
+    inSpace($manager)->getJson("/api/v1/cga/members/{$member->id}")->assertJsonPath('data.missing_for_validation', ['entry_fee_payment']);
+    $pay(15_000);
+
+    validateMember($manager, $member)->assertOk()->assertJsonPath('data.status', 'active');
+    expect($charge->fresh()?->status->value)->toBe('paid');
+});
+
+it('RG-ADH-02 n\'attend aucun paiement pour un droit d\'adhésion à zéro', function () {
+    $manager = centreManager();
+    $free = inSpace($manager)->postJson('/api/v1/cga/members', [
+        'portfolio' => 'cga', 'entity_type' => 'company', 'company_name' => 'Gratuit', 'legal_form' => 'SARL', 'ncc' => '1212121G',
+        'regime' => 'TEE', 'main_activity' => 'Commerce', 'phone' => '0707070707', 'entry_fee_amount' => 0,
+    ])->assertCreated()->json('data');
+
+    expect($free['missing_for_validation'])->not->toContain('entry_fee_payment')
+        ->and(MemberCharge::query()->withoutGlobalScopes()->where('member_id', $free['id'])->exists())->toBeFalse();
 });
 
 it('refuse un dossier déjà validé, un centre sans abréviation, un adhérent d\'un autre CGA, et un rôle sans le droit', function () {
