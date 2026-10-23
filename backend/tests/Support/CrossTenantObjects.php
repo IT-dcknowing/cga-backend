@@ -119,6 +119,7 @@ final class CrossTenantObjects
             'reference-data.validate:dataset' => $dataset,
             'auth.invitations.show:invitationToken' => $invitationToken,
             'auth.invitations.accept:invitationToken' => $invitationToken,
+            'public.verify:verificationCode' => 'Code aléatoire du QR d\'un document (page publique, F-DOC-04) : il désigne le document sans identifiant ; un code inconnu répond 404.',
             'cga.members.pieces.store:pieceType' => 'Type de pièce du dossier (F-PJ-01) : il ne désigne aucun objet, le dossier est contrôlé par {member} ; une valeur inconnue répond 404.',
             'cga.profile.images.store:kind' => 'Type d\'image (logo, signature, cachet) de la fiche du CGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',
         ];

@@ -34,6 +34,11 @@ class LogActivity
      */
     public const SUBJECT = 'activity.subject';
 
+    /**
+     * Acteur sans compte nommé par l'action (public:verification).
+     */
+    public const ACTOR_LABEL = 'activity.actor_label';
+
     private const STARTED_AT = 'activity.started_at';
 
     public function __construct(
@@ -60,6 +65,7 @@ class LogActivity
         $subject = $this->subject($request);
         $result = $request->attributes->get(self::RESULT);
         $userId = $request->attributes->get(self::USER_ID);
+        $actorLabel = $request->attributes->get(self::ACTOR_LABEL);
 
         $this->logger->record(
             (string) ($request->attributes->get(self::ACTION) ?? $routeName ?? "{$request->method()} /{$uri}"),
@@ -74,6 +80,7 @@ class LogActivity
                 'duration_ms' => $this->durationMs($request),
                 'error_code' => $request->attributes->get(self::ERROR_CODE),
                 ...(is_string($userId) ? ['user_id' => $userId] : []),
+                ...(is_string($actorLabel) ? ['actor_label' => $actorLabel] : []),
             ],
         );
     }

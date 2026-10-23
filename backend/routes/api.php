@@ -9,6 +9,7 @@ use App\Domain\Documents\Http\Controllers\DocumentController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Documents\Http\Controllers\MemberDocumentController;
 use App\Domain\Documents\Http\Controllers\MemberSpaceDocumentController;
+use App\Domain\Documents\Http\Controllers\VerificationController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
 use App\Domain\Members\Http\Controllers\MemberAccessController;
@@ -261,4 +262,11 @@ Route::prefix('v1')->group(function (): void {
     Route::get('files/{file}/download', FileDownloadController::class)
         ->middleware('signed')
         ->name(StorageService::DOWNLOAD_ROUTE);
+
+    // Page publique de vérification d'un document par son QR code (F-DOC-04, 02-TRD §6.6), sans compte ;
+    // nombre de consultations par minute limité par VerifyDocument (rate_limit.verification). Un code qui
+    // n'a pas la forme d'un code de vérification répond 404 comme un code inconnu.
+    Route::get('public/verify/{verificationCode}', [VerificationController::class, 'show'])
+        ->where('verificationCode', '[A-Za-z0-9_-]{1,64}')
+        ->name('public.verify');
 });

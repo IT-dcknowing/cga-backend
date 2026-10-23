@@ -32241,6 +32241,355 @@
             ]
         },
         {
+            "name": "22. Étape 3.6 — Vérification publique d'un document",
+            "description": "F-DOC-04, RG-DOC-09 : la page publique /verifier/{code} interroge GET /api/v1/public/verify/{code}, sans compte. Seules cinq informations sortent (état et date d'annulation, type et date du document, CGA émetteur, nom de l'adhérent, n° d'adhésion) ; chaque consultation est enregistrée avec l'adresse IP tronquée ; 30 consultations par minute et par adresse (rate_limit.verification). À rejouer après les dossiers 20 (contrat valide) et 21 (attestation annulée par la radiation).",
+            "item": [
+                {
+                    "name": "Préparation — adresse du QR du contrat",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const url = pm.response.json().data.verification_url;",
+                                    "    pm.test(\"Adresse de vérification\", () => pm.expect(url).to.match(/\\/verifier\\/[A-Za-z0-9_-]+$/));",
+                                    "    pm.collectionVariables.set(\"verify_code\", url.split(\"/\").pop());",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/documents/{{contract_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "documents",
+                                "{{contract_id}}"
+                            ]
+                        },
+                        "description": "Le CGA lit l'adresse imprimée dans le QR code du document émis (verification_url) ; le code est sa dernière partie."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Vérification — document valide, sans compte",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Document valide\", () => pm.expect(data.status).to.eql(\"valid\"));",
+                                    "    pm.test(\"Cinq informations seulement\", () => pm.expect(Object.keys(data).sort()).to.eql([\"cancelled_on\", \"issued_on\", \"issuer\", \"member_name\", \"membership_number\", \"status\", \"status_label\", \"type\", \"type_label\"]));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/public/verify/{{verify_code}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "public",
+                                "verify",
+                                "{{verify_code}}"
+                            ]
+                        },
+                        "description": "Bandeau vert « Document authentique et valide » (03-APPFLOW) : les cinq informations, rien d'autre."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Préparation — adresse du QR de l'attestation radiée",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Attestation annulée\", () => pm.expect(data.status).to.eql(\"cancelled\"));",
+                                    "    pm.collectionVariables.set(\"verify_cancelled_code\", data.verification_url.split(\"/\").pop());",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/documents/{{certificate_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "documents",
+                                "{{certificate_id}}"
+                            ]
+                        },
+                        "description": "Attestation du dossier 21, annulée par la validation de la radiation (RG-DOC-08)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Vérification — document annulé, avec sa date",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Document annulé avec sa date\", () => { pm.expect(data.status).to.eql(\"cancelled\"); pm.expect(data.cancelled_on).to.match(/^\\d{4}-\\d{2}-\\d{2}$/); });",
+                                    "    pm.test(\"Sans motif\", () => pm.expect(data).to.not.have.property(\"cancel_reason\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/public/verify/{{verify_cancelled_code}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "public",
+                                "verify",
+                                "{{verify_cancelled_code}}"
+                            ]
+                        },
+                        "description": "Bandeau rouge « Document ANNULÉ le jj/mm/aaaa » : état et date d'annulation, jamais le motif."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Vérification — code inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/public/verify/code-inconnu",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "public",
+                                "verify",
+                                "code-inconnu"
+                            ]
+                        },
+                        "description": "« Aucun document ne correspond à ce code » : 404, sans dire si le code a existé."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Vérification — code mal formé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/public/verify/code%20invalide!",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "public",
+                                "verify",
+                                "code%20invalide!"
+                            ]
+                        },
+                        "description": "Un code qui n'a pas la forme d'un code de vérification répond 404 comme un code inconnu."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -32880,6 +33229,14 @@
         },
         {
             "key": "online_upload_id",
+            "value": ""
+        },
+        {
+            "key": "verify_code",
+            "value": ""
+        },
+        {
+            "key": "verify_cancelled_code",
             "value": ""
         }
     ]

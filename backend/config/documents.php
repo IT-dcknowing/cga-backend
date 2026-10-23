@@ -173,6 +173,13 @@ return [
     // Page publique de vérification (F-DOC-04) : le QR code d'un document mène à cette adresse suivie de son jeton.
     'verification_url' => rtrim((string) (env('DOCUMENT_VERIFICATION_URL') ?: env('FRONTEND_URL', env('APP_URL', 'http://localhost')).'/verifier'), '/'),
 
+    // Consultation de la page publique (RG-DOC-09, 02-TRD §6.6) : l'adresse IP n'est gardée que tronquée à
+    // son réseau (longueur du préfixe en bits).
+    'verification_ip_prefix' => [
+        'ipv4' => (int) env('DOCUMENT_VERIFICATION_IPV4_PREFIX', 24),
+        'ipv6' => (int) env('DOCUMENT_VERIFICATION_IPV6_PREFIX', 48),
+    ],
+
     // QR code de vérification (RG-DOC-02) : taille et marge de l'image produite (pixels).
     'qr' => ['size' => 240, 'margin' => 8],
 

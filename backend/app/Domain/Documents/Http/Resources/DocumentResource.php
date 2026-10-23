@@ -6,6 +6,7 @@ use App\Domain\Documents\Actions\RegenerateDocument;
 use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
+use App\Domain\Documents\Support\VerificationCode;
 use App\Support\Files\StorageService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -14,8 +15,8 @@ use Illuminate\Support\Facades\Gate;
 /**
  * Document d'un dossier vu par le CGA (F-DOC-01, RG-DOC-03) : type, titre, catégorie d'un dépôt,
  * numéro, version et document remplacé, état, dates d'émission, de validité et d'annulation, empreinte
- * SHA-256 du PDF, fichiers PDF et Word (liens de téléchargement signés, 02-TRD §6.4) une fois produits,
- * actions permises.
+ * SHA-256 du PDF, adresse de vérification publique du QR code d'un document émis (F-DOC-04), fichiers
+ * PDF et Word (liens de téléchargement signés, 02-TRD §6.4) une fois produits, actions permises.
  *
  * @property GeneratedDocument $resource
  */
@@ -52,6 +53,7 @@ class DocumentResource extends JsonResource
             'cancel_reason' => $document->cancel_reason,
             'visible_to_member' => $document->visible_to_member,
             'sha256' => $document->sha256,
+            'verification_url' => $this->verificationUrl($document),
             'files' => [
                 'pdf' => $this->whenLoaded('pdf', fn (): ?array => self::file($document->pdf)),
                 'docx' => $this->whenLoaded('docx', fn (): ?array => self::file($document->docx)),
@@ -63,6 +65,16 @@ class DocumentResource extends JsonResource
                 'cancel' => $valid && Gate::allows('cancel', $document),
             ],
         ];
+    }
+
+    /**
+     * Adresse imprimée dans le QR code, une fois le document émis (valide ou annulé).
+     */
+    private function verificationUrl(GeneratedDocument $document): ?string
+    {
+        $issued = in_array($document->status, [DocumentStatus::Valid, DocumentStatus::Cancelled], true);
+
+        return $issued && $document->verification_token !== null ? app(VerificationCode::class)->url($document->verification_token) : null;
     }
 
     /**

@@ -56,6 +56,14 @@ abstract class BaseApiController extends Controller
     }
 
     /**
+     * Acteur sans compte de l'action dans le journal d'activité (page publique de vérification).
+     */
+    protected function logActor(string $label): void
+    {
+        request()->attributes->set(LogActivity::ACTOR_LABEL, $label);
+    }
+
+    /**
      * Utilisateur connecté (routes protégées par le middleware « auth »).
      *
      * @throws AuthenticationException sans session

@@ -7,6 +7,7 @@ use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Enums\DocumentType;
 use App\Domain\Documents\Enums\UploadedDocumentCategory;
 use App\Domain\Members\Models\Member;
+use App\Domain\Organizations\Models\Organization;
 use App\Support\Tenancy\BelongsToOrganization;
 use Carbon\CarbonInterface;
 use Database\Factories\GeneratedDocumentFactory;
@@ -47,6 +48,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $source_type
  * @property string|null $source_id
  * @property string|null $generated_by
+ * @property-read Organization $organization
  * @property-read Member|null $member
  * @property-read DocumentTemplate|null $template
  * @property-read File|null $pdf
@@ -96,6 +98,16 @@ class GeneratedDocument extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    /**
+     * Organisation émettrice (CGA, ou CNCGA pour les cotisations).
+     *
+     * @return BelongsTo<Organization, $this>
+     */
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
     }
 
     /**
