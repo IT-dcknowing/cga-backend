@@ -95,6 +95,8 @@ return [
     'attestation_already_blocked' => 'L\'attestation de cet adhérent est déjà bloquée.',
     'attestation_not_blocked' => 'L\'attestation de cet adhérent n\'est pas bloquée.',
     'certificate_campaign_empty' => 'Aucun adhérent n\'attend son attestation de l\'année.',
+    'template_already_active' => 'Cette version du modèle est déjà active.',
+    'template_variables_mismatch' => 'Les variables de cette version ne correspondent pas à celles que la plateforme remplit : corrigez le modèle et déposez-le de nouveau.',
 
     // Référentiels (RG-DATA-05)
     'merge_same_value' => 'Une valeur ne se fusionne pas avec elle-même.',

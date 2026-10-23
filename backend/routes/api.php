@@ -8,6 +8,7 @@ use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Documents\Http\Controllers\AttestationBlockController;
 use App\Domain\Documents\Http\Controllers\CertificateCampaignController;
 use App\Domain\Documents\Http\Controllers\DocumentController;
+use App\Domain\Documents\Http\Controllers\DocumentTemplateController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Documents\Http\Controllers\MemberDocumentController;
 use App\Domain\Documents\Http\Controllers\MemberSpaceDocumentController;
@@ -238,6 +239,15 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{document}/retry', [DocumentController::class, 'retry'])->name('retry');
         Route::post('{document}/regenerate', [DocumentController::class, 'regenerate'])->name('regenerate');
         Route::post('{document}/cancel', [DocumentController::class, 'cancel'])->name('cancel');
+    });
+
+    // Modèles de documents du réseau (F-ADM-02, RG-DATA-03) : versions, dépôt avec contrôle des variables,
+    // aperçu avec des données de test, activation après validation du CNCGA ; administrateur de la plateforme.
+    Route::middleware(['auth', 'tenant'])->prefix('platform/document-templates')->name('platform.document-templates.')->group(function (): void {
+        Route::get('/', [DocumentTemplateController::class, 'index'])->name('index');
+        Route::post('/', [DocumentTemplateController::class, 'store'])->name('store');
+        Route::post('{template}/preview', [DocumentTemplateController::class, 'preview'])->name('preview');
+        Route::post('{template}/activate', [DocumentTemplateController::class, 'activate'])->name('activate');
     });
 
     // Campagne annuelle d'attestations du centre (RG-DOC-06) : aperçu de l'année, lancement en tâche de fond.

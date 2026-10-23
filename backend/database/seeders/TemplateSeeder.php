@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Domain\Documents\Enums\DocumentType;
 use App\Domain\Documents\Models\DocumentTemplate;
+use App\Domain\Documents\Support\TemplateInspector;
 use App\Support\Files\StorageService;
 use Illuminate\Database\Seeder;
 
@@ -48,16 +49,6 @@ class TemplateSeeder extends Seeder
      */
     public static function variables(array $template): array
     {
-        $rows = array_values((array) ($template['rows'] ?? []));
-        $variables = [
-            ...(array) ($template['variables'] ?? []),
-            ...(array) ($template['images'] ?? []),
-            ...(array) ($template['framed_images'] ?? []),
-            ...array_merge([], ...array_map(static fn (mixed $row): array => (array) $row, $rows)),
-        ];
-        $variables = array_values(array_unique(array_map('strval', $variables)));
-        sort($variables);
-
-        return $variables;
+        return TemplateInspector::expected($template);
     }
 }

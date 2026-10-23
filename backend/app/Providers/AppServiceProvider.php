@@ -9,9 +9,11 @@ use App\Domain\Documents\Listeners\CancelCertificatesOnRadiation;
 use App\Domain\Documents\Listeners\ProduceRadiationNoticeOnValidation;
 use App\Domain\Documents\Listeners\ProduceReceiptOnConfirmation;
 use App\Domain\Documents\Models\AttestationBlock;
+use App\Domain\Documents\Models\DocumentTemplate;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Documents\Policies\AttestationBlockPolicy;
 use App\Domain\Documents\Policies\DocumentPolicy;
+use App\Domain\Documents\Policies\DocumentTemplatePolicy;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Imports\Policies\ImportBatchPolicy;
 use App\Domain\Members\Events\RadiationValidated;
@@ -133,6 +135,7 @@ class AppServiceProvider extends ServiceProvider
         // Documents officiels produits ou déposés (M08).
         Gate::policy(GeneratedDocument::class, DocumentPolicy::class);
         Gate::policy(AttestationBlock::class, AttestationBlockPolicy::class);
+        Gate::policy(DocumentTemplate::class, DocumentTemplatePolicy::class);
 
         // Imports de fichiers Excel (M17).
         Gate::policy(ImportBatch::class, ImportBatchPolicy::class);

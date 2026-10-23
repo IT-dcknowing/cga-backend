@@ -8,6 +8,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Modèle de document versionné (02-TRD §8.1, F-ADM-02) : fichier DOCX ou XLSX balisé ${…}, variables
@@ -22,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property CarbonInterface|null $approved_by_cncga_at
  * @property string|null $notes
  * @property-read File $file
+ * @property-read int|null $documents_count
  */
 class DocumentTemplate extends Model
 {
@@ -53,5 +55,15 @@ class DocumentTemplate extends Model
     public function file(): BelongsTo
     {
         return $this->belongsTo(File::class);
+    }
+
+    /**
+     * Documents émis avec cette version, dans tous les centres (RG-DATA-03 : chacun la garde).
+     *
+     * @return HasMany<GeneratedDocument, $this>
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(GeneratedDocument::class, 'template_id');
     }
 }

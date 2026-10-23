@@ -35,6 +35,10 @@ return [
     // Annulation automatique de l'attestation en cours de validité (RG-DOC-08).
     'radiation_cancel_reason' => 'Radiation validée le :date.',
 
+    // Dépôt d'une version de modèle (F-ADM-02).
+    'template_unreadable' => 'Ce fichier ne peut pas être lu comme modèle de ce document.',
+    'template_version_exists' => 'La version :version de ce modèle existe déjà.',
+
     // Blocage de l'attestation sur une alerte qui n'est pas en retard (RG-DOC-10).
     'block_alert_missing' => 'Cette alerte n\'est pas en retard pour cet adhérent : choisissez « Décision du gérant ».',
 

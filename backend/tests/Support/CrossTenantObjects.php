@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use App\Domain\Documents\Models\DocumentTemplate;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Imports\Enums\ImportStatus;
@@ -89,6 +90,7 @@ final class CrossTenantObjects
             Sector::class => 'Référentiel national ; un secteur proposé n\'est visible que du CGA qui l\'a proposé (RG-REF-01, test dédié).',
             Holiday::class => $referential,
             NationalReference::class => $referential,
+            DocumentTemplate::class => 'Modèle de document du réseau, commun à tous les centres, géré par l\'administrateur de la plateforme (F-ADM-02).',
         ];
     }
 
