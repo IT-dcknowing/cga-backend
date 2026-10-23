@@ -330,4 +330,10 @@ return [
         'failed' => 'Production en échec',
     ],
 
+    'uploaded_document_category' => [
+        'financial_statements' => 'États financiers visés',
+        'certificate' => 'Attestation',
+        'other' => 'Autre document',
+    ],
+
 ];

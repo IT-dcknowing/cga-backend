@@ -5,10 +5,14 @@ namespace App\Providers;
 use App\Domain\Audit\AuditLogger;
 use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
+use App\Domain\Documents\Listeners\CancelCertificatesOnRadiation;
+use App\Domain\Documents\Listeners\ProduceRadiationNoticeOnValidation;
+use App\Domain\Documents\Listeners\ProduceReceiptOnConfirmation;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Documents\Policies\DocumentPolicy;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Imports\Policies\ImportBatchPolicy;
+use App\Domain\Members\Events\RadiationValidated;
 use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Policies\MemberPolicy;
@@ -19,6 +23,7 @@ use App\Domain\Notifications\Listeners\LogNotificationActivity;
 use App\Domain\Notifications\Providers\LogSmsProvider;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Organizations\Policies\OrganizationPolicy;
+use App\Domain\Payments\Events\PaymentConfirmed;
 use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Payments\Policies\PaymentPolicy;
 use App\Domain\Referentials\Models\Commune;
@@ -95,6 +100,11 @@ class AppServiceProvider extends ServiceProvider
         // Jobs, tâches planifiées et commandes au journal d'activité (02-TRD §6.5).
         Event::subscribe(SystemActivityListener::class);
         Event::subscribe(LogNotificationActivity::class);
+
+        // Documents produits ou annulés par les événements d'autres modules (F-DOC-01, RG-DOC-08).
+        Event::listen(PaymentConfirmed::class, ProduceReceiptOnConfirmation::class);
+        Event::listen(RadiationValidated::class, CancelCertificatesOnRadiation::class);
+        Event::listen(RadiationValidated::class, ProduceRadiationNoticeOnValidation::class);
 
         // Canal « sms » des notifications (02-TRD §10).
         Notification::extend('sms', static fn (Application $app): SmsChannel => $app->make(SmsChannel::class));

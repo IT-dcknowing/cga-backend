@@ -6,8 +6,7 @@ use App\Domain\Documents\Data\DocumentRequest;
 use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Enums\DocumentType;
 use App\Domain\Documents\Models\GeneratedDocument;
-use App\Domain\Members\Enums\MemberStatus;
-use App\Domain\Members\Enums\Portfolio;
+use App\Domain\Documents\Support\DocumentEligibility;
 use App\Domain\Members\Models\Member;
 use App\Domain\Users\Models\Membership;
 use App\Support\Http\Exceptions\BusinessRuleException;
@@ -16,8 +15,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * Production du contrat d'adhésion (F-DOC-01, RG-ADH-06) : pour un dossier validé du portefeuille CGA
  * (un client du portefeuille Cabinet n'a pas de contrat CGA), numéroté du n° d'adhésion, signé par le
- * gérant. Un dossier n'a qu'un contrat : un contrat déjà émis se régénère (RG-ADH-07) et une production
- * en échec se relance, sans nouveau contrat.
+ * gérant. Un dossier n'a qu'un contrat en cours : un contrat émis se régénère (RG-ADH-07) et une
+ * production en échec se relance ; seul un contrat annulé laisse produire un nouveau contrat.
  */
 class ProduceContract
 {
@@ -31,9 +30,7 @@ class ProduceContract
         return DB::transaction(function () use ($member, $requester): GeneratedDocument {
             $this->issue->ensureProfileComplete($requester->organization_id);
             $member = Member::query()->lockForUpdate()->findOrFail($member->id);
-            if ($member->portfolio !== Portfolio::Cga || $member->status !== MemberStatus::Active || $member->membership_number === null) {
-                throw new BusinessRuleException('contract_unavailable');
-            }
+            DocumentEligibility::contract($member);
 
             $issued = GeneratedDocument::query()
                 ->where('member_id', $member->id)

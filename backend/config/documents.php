@@ -18,7 +18,10 @@
 |
 */
 
+use App\Domain\Documents\Composers\MembershipCertificateComposer;
 use App\Domain\Documents\Composers\MembershipContractComposer;
+use App\Domain\Documents\Composers\RadiationNoticeComposer;
+use App\Domain\Documents\Composers\ReceiptComposer;
 
 $cga = ['cga_name', 'cga_ncc', 'cga_agreement'];
 $signature = ['cga_signature', 'cga_stamp', 'qr_code'];
@@ -48,6 +51,7 @@ return [
             'label' => 'Attestation d\'adhésion',
             'format' => 'docx',
             'path' => resource_path('templates/membership_certificate.docx'),
+            'composer' => MembershipCertificateComposer::class,
             'images' => $signature,
             // Logo dans le cadre flottant de l'en-tête : image word/media/cga_logo.jpeg du modèle.
             'framed_images' => ['cga_logo'],
@@ -58,6 +62,44 @@ return [
                 'certificate_number', 'certificate_year', 'membership_number', 'membership_date',
                 'member_name', 'member_trade_name', 'member_location', 'member_ncc', 'member_legal_form', 'member_tax_regime',
                 'member_tax_office', 'member_phone',
+                'document_place', 'document_date',
+            ],
+        ],
+
+        // Modèle provisoire (la maquette n'en a pas) : reçu d'un paiement confirmé (F-PAY-02, RG-PAY-02).
+        'receipt' => [
+            'label' => 'Reçu',
+            'format' => 'docx',
+            'path' => resource_path('templates/receipt.docx'),
+            'composer' => ReceiptComposer::class,
+            'images' => $signature,
+            'rows' => [
+                'line_label' => ['line_label', 'line_amount'],
+            ],
+            'variables' => [
+                ...$cga, 'cga_legal_form', 'cga_share_capital', 'cga_address', 'cga_phones', 'cga_email', 'cga_rccm',
+                'cga_signatory_name', 'cga_signatory_title',
+                'receipt_number', 'member_name', 'member_ncc', 'member_number',
+                'payment_amount', 'payment_amount_words', 'payment_date', 'payment_method', 'payment_reference',
+                'document_place', 'document_date',
+            ],
+        ],
+
+        // Modèle provisoire (la maquette n'en a pas) : courrier de notification de la radiation au CDI de
+        // rattachement (F-ADH-06, effet 3), remis par le CGA.
+        'radiation_notice' => [
+            'label' => 'Courrier de radiation',
+            'format' => 'docx',
+            'path' => resource_path('templates/radiation_notice.docx'),
+            'composer' => RadiationNoticeComposer::class,
+            'images' => $signature,
+            'rows' => [],
+            'variables' => [
+                ...$cga, 'cga_legal_form', 'cga_share_capital', 'cga_address', 'cga_phones', 'cga_email', 'cga_rccm',
+                'cga_signatory_name', 'cga_signatory_title',
+                'notice_number', 'tax_office_name', 'member_name', 'member_ncc', 'membership_number', 'adhesion_date',
+                'member_tax_regime', 'radiation_effective_date', 'radiation_initiator', 'radiation_reason',
+                'radiation_validated_on', 'radiation_reference',
                 'document_place', 'document_date',
             ],
         ],

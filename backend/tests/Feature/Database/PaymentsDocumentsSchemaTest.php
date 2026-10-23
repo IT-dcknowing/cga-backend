@@ -91,6 +91,20 @@ it('numérote une seule fois par type et par centre, une attestation d\'origine 
     expect($document->toArray())->not->toHaveKey('verification_token');
 });
 
+it('garde le numéro d\'origine pour la version suivante d\'un document, et ne catégorise que les documents déposés', function () {
+    $document = GeneratedDocument::factory()->create(['number' => '2026-DCK-0002']);
+    $row = static fn (array $overrides = []): array => [
+        'id' => strtolower((string) Str::ulid()), 'organization_id' => $document->organization_id, 'member_id' => $document->member_id,
+        'type' => 'membership_contract', 'title' => 'Contrat', 'status' => 'valid', 'created_at' => now(), 'updated_at' => now(), ...$overrides,
+    ];
+    DB::table('generated_documents')->insert($row(['number' => '2026-DCK-0002', 'version' => 2, 'replaces_document_id' => $document->id]));
+    DB::table('generated_documents')->insert($row(['type' => 'uploaded', 'title' => 'Bilan déposé', 'category' => 'financial_statements']));
+
+    refusedByPaymentsSchema(fn () => DB::table('generated_documents')->insert($row(['number' => '2026-DCK-0002', 'version' => 2])));
+    refusedByPaymentsSchema(fn () => DB::table('generated_documents')->insert($row(['category' => 'financial_statements'])));
+    refusedByPaymentsSchema(fn () => DB::table('generated_documents')->insert($row(['type' => 'uploaded', 'title' => 'Autre', 'category' => 'inconnue'])));
+});
+
 it('n\'active qu\'un modèle par type et refuse « document déposé » comme modèle', function () {
     $file = app(StorageService::class)->store('modèle', 'modele.docx', 'templates');
     $row = static fn (array $overrides = []): array => [
@@ -110,7 +124,7 @@ it('charge chaque modèle de la maquette en version 1 active, avec ses variables
     $this->seed(TemplateSeeder::class);
 
     $templates = DocumentTemplate::query()->with('file')->get()->keyBy(fn (DocumentTemplate $template): string => $template->type->value);
-    expect($templates->keys()->sort()->values()->all())->toBe(['membership_certificate', 'membership_contract', 'quarterly_report_docx', 'quarterly_report_xlsx']);
+    expect($templates->keys()->sort()->values()->all())->toBe(['membership_certificate', 'membership_contract', 'quarterly_report_docx', 'quarterly_report_xlsx', 'radiation_notice', 'receipt']);
 
     $contract = $templates['membership_contract'];
     expect($contract->version)->toBe('1')

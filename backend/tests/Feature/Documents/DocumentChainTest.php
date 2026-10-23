@@ -43,46 +43,9 @@ beforeEach(function () {
     $this->seed(TemplateSeeder::class);
 });
 
-/**
- * Agent d'un CGA dont la fiche est complète (RG-ORG-04).
- */
-function documentAgent(Role $role = Role::CgaManager, ?string $organizationId = null): Membership
-{
-    return Membership::factory()->role($role)->create(['organization_id' => $organizationId ?? Organization::factory()->profileComplete()->create()->id]);
-}
-
-/**
- * Dossier validé du portefeuille CGA du centre de cet agent.
- *
- * @param  array<string, mixed>  $attributes
- */
-function validatedMember(Membership $agent, array $attributes = []): Member
-{
-    return Member::factory()->active()->create(['organization_id' => $agent->organization_id, ...$attributes]);
-}
-
-/**
- * Conversion PDF simulée : un PDF minimal propre au document, sans LibreOffice.
- */
-function fakePdfConverter(): void
-{
-    app()->instance(PdfConverter::class, new class implements PdfConverter
-    {
-        public function convert(string $sourcePath): string
-        {
-            return "%PDF-1.4\n% document de test ".hash_file('sha256', $sourcePath)."\n%%EOF";
-        }
-    });
-}
-
 function produceContract(Membership $agent, Member $member): TestResponse
 {
     return inSpace($agent)->postJson("/api/v1/cga/members/{$member->id}/documents", ['type' => 'membership_contract']);
-}
-
-function storedDocument(string $id): GeneratedDocument
-{
-    return GeneratedDocument::query()->withoutGlobalScopes()->with(['pdf', 'docx'])->findOrFail($id);
 }
 
 it('émet le contrat d\'un dossier validé « en production » : n° d\'adhésion, code de vérification, modèle actif, Job en file « documents »', function () {
@@ -193,7 +156,7 @@ it('ne produit le contrat que pour un dossier validé du portefeuille CGA, et un
     $member = validatedMember($agent);
     produceContract($agent, $member)->assertStatus(202);
     produceContract($agent, $member)->assertStatus(409)->assertJsonPath('code', 'contract_already_issued');
-    inSpace($agent)->postJson("/api/v1/cga/members/{$member->id}/documents", ['type' => 'receipt'])->assertUnprocessable()->assertJsonValidationErrors('type');
+    inSpace($agent)->postJson("/api/v1/cga/members/{$member->id}/documents", ['type' => 'invoice'])->assertUnprocessable()->assertJsonValidationErrors('type');
     inSpace($agent)->postJson("/api/v1/cga/members/{$member->id}/documents", [])->assertUnprocessable()->assertJsonValidationErrors('type');
     Queue::assertPushed(GenerateDocument::class, 1);
 });

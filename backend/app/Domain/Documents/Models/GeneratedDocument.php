@@ -5,6 +5,7 @@ namespace App\Domain\Documents\Models;
 use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Enums\DocumentType;
+use App\Domain\Documents\Enums\UploadedDocumentCategory;
 use App\Domain\Members\Models\Member;
 use App\Support\Tenancy\BelongsToOrganization;
 use Carbon\CarbonInterface;
@@ -17,13 +18,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Document produit ou déposé par une organisation (F-DOC-01 à 05) : numéro, version (régénération,
  * duplicata), modèle utilisé, fichiers, jeton de vérification et empreinte SHA-256 du PDF (RG-DOC-09),
- * validité, annulation (jamais supprimé, RG-DOC-03), visibilité par l'adhérent.
+ * validité, annulation (jamais supprimé, RG-DOC-03), visibilité par l'adhérent, catégorie d'un document
+ * déposé (F-DOC-05).
  *
  * @property string $id
  * @property string $organization_id
  * @property string|null $member_id
  * @property DocumentType $type
  * @property string $title
+ * @property UploadedDocumentCategory|null $category
  * @property string|null $number
  * @property int $version
  * @property string|null $replaces_document_id
@@ -77,6 +80,7 @@ class GeneratedDocument extends Model
         return [
             'type' => DocumentType::class,
             'status' => DocumentStatus::class,
+            'category' => UploadedDocumentCategory::class,
             'version' => 'integer',
             'fiscal_year' => 'integer',
             'issued_at' => 'immutable_datetime',

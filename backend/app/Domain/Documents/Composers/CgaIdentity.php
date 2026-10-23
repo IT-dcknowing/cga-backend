@@ -38,6 +38,7 @@ class CgaIdentity
                 'date' => DocumentFormat::date($organization->agreement_date),
             ]),
             'cga_legal_form' => DocumentFormat::text($organization->legal_form),
+            'cga_legal_form_full' => DocumentFormat::legalForm($organization->legal_form),
             'cga_share_capital' => DocumentFormat::amount($organization->share_capital),
             'cga_address' => DocumentFormat::text(implode(', ', array_filter([$organization->address, $organization->city]))),
             'cga_phones' => DocumentFormat::text(implode(' · ', $phones)),

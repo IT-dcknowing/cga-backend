@@ -67,6 +67,11 @@ return [
                 'type' => 'integer', 'level' => 'platform', 'default' => 1, 'permission' => $platform,
                 'rules' => ['' => ['integer', 'min:1', 'max:16']],
             ],
+            // Validité d'une attestation d'adhésion à compter de son émission (RG-DOC-06).
+            'certificate_validity_months' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 12, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:36']],
+            ],
         ],
 
         'rate_limit' => [

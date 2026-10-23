@@ -2,6 +2,7 @@
 
 namespace App\Domain\Documents\Http\Resources;
 
+use App\Domain\Documents\Actions\RegenerateDocument;
 use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
@@ -11,9 +12,10 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 
 /**
- * Document produit (F-DOC-01, RG-DOC-03) : type, titre, numéro, version, état, dates d'émission et de
- * validité, empreinte SHA-256 du PDF, fichiers PDF et Word (liens de téléchargement signés,
- * 02-TRD §6.4) une fois produits, actions permises.
+ * Document d'un dossier vu par le CGA (F-DOC-01, RG-DOC-03) : type, titre, catégorie d'un dépôt,
+ * numéro, version et document remplacé, état, dates d'émission, de validité et d'annulation, empreinte
+ * SHA-256 du PDF, fichiers PDF et Word (liens de téléchargement signés, 02-TRD §6.4) une fois produits,
+ * actions permises.
  *
  * @property GeneratedDocument $resource
  */
@@ -25,14 +27,18 @@ class DocumentResource extends JsonResource
     public function toArray(Request $request): array
     {
         $document = $this->resource;
+        $valid = $document->status === DocumentStatus::Valid;
 
         return [
             'id' => $document->id,
             'type' => $document->type->value,
             'type_label' => $document->type->label(),
             'title' => $document->title,
+            'category' => $document->category?->value,
+            'category_label' => $document->category?->label(),
             'number' => $document->number,
             'version' => $document->version,
+            'replaces_document_id' => $document->replaces_document_id,
             'status' => $document->status->value,
             'status_label' => $document->status->label(),
             'member' => $this->whenLoaded('member', fn (): ?array => $document->member === null ? null : [
@@ -47,12 +53,14 @@ class DocumentResource extends JsonResource
             'visible_to_member' => $document->visible_to_member,
             'sha256' => $document->sha256,
             'files' => [
-                'pdf' => $this->whenLoaded('pdf', fn (): ?array => $this->file($document->pdf)),
-                'docx' => $this->whenLoaded('docx', fn (): ?array => $this->file($document->docx)),
+                'pdf' => $this->whenLoaded('pdf', fn (): ?array => self::file($document->pdf)),
+                'docx' => $this->whenLoaded('docx', fn (): ?array => self::file($document->docx)),
             ],
             'created_at' => $document->created_at?->toIso8601ZuluString(),
             'can' => [
                 'retry' => $document->status === DocumentStatus::Failed && Gate::allows('retry', $document),
+                'regenerate' => $valid && in_array($document->type, RegenerateDocument::TYPES, true) && Gate::allows('regenerate', $document),
+                'cancel' => $valid && Gate::allows('cancel', $document),
             ],
         ];
     }
@@ -60,7 +68,7 @@ class DocumentResource extends JsonResource
     /**
      * @return array{id: string, name: string, size_bytes: int, url: string}|null
      */
-    private function file(?File $file): ?array
+    public static function file(?File $file): ?array
     {
         return $file === null ? null : [
             'id' => $file->id,

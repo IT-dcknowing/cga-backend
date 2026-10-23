@@ -59,20 +59,41 @@ class SampleDocumentData
             'verification_reference' => 'RPT-EXA-2026-T3-V1',
         ];
 
+        $receipt = [
+            'receipt_number' => 'REC-EXA-2026-00001', 'member_name' => 'ENTREPRISE EXEMPLE', 'member_ncc' => '1111111 B',
+            'member_number' => 'EXA-2026-B00001', 'payment_amount' => '40 000 FCFA', 'payment_amount_words' => 'quarante mille francs CFA',
+            'payment_date' => '20 octobre 2026', 'payment_method' => 'Mobile money', 'payment_reference' => 'OM-000000',
+        ];
+        $notice = [
+            'notice_number' => 'NOT-EXA-2026-00001', 'tax_office_name' => 'CDI Exemple', 'member_name' => 'BOUTIQUE EXEMPLE',
+            'member_ncc' => '2222222 C', 'membership_number' => 'EXA-2026-A00007', 'adhesion_date' => '02/01/2026',
+            'member_tax_regime' => 'TEE — entreprenant', 'radiation_effective_date' => '30 septembre 2026',
+            'radiation_initiator' => 'Contribuable', 'radiation_reason' => 'Cessation d\'activité',
+            'radiation_validated_on' => '15 octobre 2026', 'radiation_reference' => 'REF-000',
+        ];
+
         return match ($type) {
             'membership_contract', 'membership_certificate' => [...$cga, ...$member],
+            'receipt' => [...$cga, ...$receipt],
+            'radiation_notice' => [...$cga, ...$notice],
             'quarterly_report_docx' => [...$cga, ...$report],
             default => throw new RuntimeException("Pas de données d'exemple pour {$type}."),
         };
     }
 
     /**
-     * Lignes répétées du rapport Word : trois dirigeants, deux salariés, un occasionnel, deux mouvements.
+     * Lignes répétées : deux lignes du reçu ; pour le rapport Word, dirigeants, salariés, un occasionnel, deux mouvements.
      *
      * @return array<string, list<array<string, string>>>
      */
     public function rows(string $type): array
     {
+        if ($type === 'receipt') {
+            return ['line_label' => [
+                ['line_label' => 'Droit d\'adhésion', 'line_amount' => '25 000 FCFA'],
+                ['line_label' => 'Honoraires du 01/10/2026 au 31/10/2026', 'line_amount' => '15 000 FCFA'],
+            ]];
+        }
         if ($type !== 'quarterly_report_docx') {
             return [];
         }

@@ -81,6 +81,16 @@ return [
     'contract_unavailable' => 'Le contrat d\'adhésion se produit pour un dossier validé du portefeuille CGA.',
     'contract_already_issued' => 'Le contrat de ce dossier est déjà émis : régénérez-le, ou relancez sa production si elle a échoué.',
     'document_not_failed' => 'Seule une production en échec se relance.',
+    'certificate_unavailable' => 'L\'attestation d\'adhésion se délivre à un adhérent actif du portefeuille CGA : ni radié, ni en radiation.',
+    'attestation_blocked' => 'La délivrance de l\'attestation est bloquée pour cet adhérent.',
+    'certificate_already_issued' => 'L\'attestation de l\'année est déjà émise : rééditez-la (duplicata).',
+    'receipt_unavailable' => 'Seul un paiement confirmé a un reçu.',
+    'receipt_already_issued' => 'Le reçu de ce paiement est déjà émis.',
+    'radiation_notice_unavailable' => 'Le courrier de notification se produit pour une radiation validée.',
+    'radiation_notice_already_issued' => 'Le courrier de notification de cette radiation est déjà émis.',
+    'document_not_regenerable' => 'Seuls le contrat et l\'attestation d\'adhésion se régénèrent.',
+    'document_not_valid' => 'Ce document n\'est pas valide : il est en production, en échec ou déjà annulé.',
+    'document_superseded' => 'Une version plus récente de ce document existe : régénérez la dernière.',
 
     // Référentiels (RG-DATA-05)
     'merge_same_value' => 'Une valeur ne se fusionne pas avec elle-même.',

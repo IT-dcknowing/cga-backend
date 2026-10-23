@@ -2,6 +2,7 @@
 
 namespace App\Domain\Documents\Http\Requests;
 
+use App\Domain\Documents\Actions\ProduceMemberDocument;
 use App\Domain\Documents\Enums\DocumentType;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Members\Http\Requests\Concerns\RouteMember;
@@ -11,17 +12,12 @@ use Illuminate\Validation\Rule;
 
 /**
  * POST /api/v1/cga/members/{member}/documents : « Documents ▾ » de la fiche (F-DOC-01) — production
- * d'un document du dossier à la demande. Les autres documents naissent de leur événement (paiement
- * confirmé, radiation…).
+ * d'un document du dossier à la demande : contrat, attestation, reçu (paiement désigné) ou courrier
+ * de radiation.
  */
 class ProduceDocumentRequest extends FormRequest
 {
     use RouteMember;
-
-    /**
-     * Documents produits à la demande depuis la fiche.
-     */
-    public const ON_DEMAND = [DocumentType::MembershipContract];
 
     public function authorize(): bool
     {
@@ -34,12 +30,20 @@ class ProduceDocumentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type' => ['required', 'string', Rule::in(array_map(static fn (DocumentType $type): string => $type->value, self::ON_DEMAND))],
+            'type' => ['required', 'string', Rule::in(array_map(static fn (DocumentType $type): string => $type->value, ProduceMemberDocument::TYPES))],
+            'payment_id' => ['required_if:type,'.DocumentType::Receipt->value, 'prohibited_unless:type,'.DocumentType::Receipt->value, 'string', 'max:26'],
         ];
     }
 
     public function type(): DocumentType
     {
         return DocumentType::from((string) $this->validated('type'));
+    }
+
+    public function paymentId(): ?string
+    {
+        $id = $this->validated('payment_id');
+
+        return is_string($id) ? $id : null;
     }
 }
