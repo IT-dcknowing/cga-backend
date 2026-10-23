@@ -34,7 +34,7 @@ class MemberController extends BaseApiController
     /**
      * Relations montrées avec la fiche.
      */
-    public const WITH = ['referrer', 'taxOffice', 'sector', 'commune', 'activityCode', 'revenues', 'currentRadiation.proof'];
+    public const WITH = ['referrer', 'taxOffice', 'sector', 'commune', 'activityCode', 'revenues', 'currentRadiation.proof', 'overdueFees', 'currentAttestationBlock'];
 
     public function __construct(private readonly TenantContext $context) {}
 

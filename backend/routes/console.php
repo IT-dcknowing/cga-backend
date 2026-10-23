@@ -11,6 +11,11 @@ Schedule::command('logs:partitions')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('fees:generate')
+    ->dailyAt(config('schedule.fees_generate'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('statuses:refresh')
     ->dailyAt(config('schedule.statuses_refresh'))
     ->withoutOverlapping()

@@ -330,6 +330,12 @@ return [
         'failed' => 'Production en échec',
     ],
 
+    'attestation_block_trigger' => [
+        'fees_overdue' => 'Honoraires impayés',
+        'rsi_overdue' => 'Régime réel non radié',
+        'manual' => 'Décision du gérant',
+    ],
+
     'uploaded_document_category' => [
         'financial_statements' => 'États financiers visés',
         'certificate' => 'Attestation',

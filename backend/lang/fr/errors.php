@@ -91,6 +91,10 @@ return [
     'document_not_regenerable' => 'Seuls le contrat et l\'attestation d\'adhésion se régénèrent.',
     'document_not_valid' => 'Ce document n\'est pas valide : il est en production, en échec ou déjà annulé.',
     'document_superseded' => 'Une version plus récente de ce document existe : régénérez la dernière.',
+    'attestation_block_unavailable' => 'Seule l\'attestation d\'un adhérent validé du portefeuille CGA se bloque.',
+    'attestation_already_blocked' => 'L\'attestation de cet adhérent est déjà bloquée.',
+    'attestation_not_blocked' => 'L\'attestation de cet adhérent n\'est pas bloquée.',
+    'certificate_campaign_empty' => 'Aucun adhérent n\'attend son attestation de l\'année.',
 
     // Référentiels (RG-DATA-05)
     'merge_same_value' => 'Une valeur ne se fusionne pas avec elle-même.',

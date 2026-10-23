@@ -3,6 +3,7 @@
 namespace App\Domain\Members\Models;
 
 use App\Domain\Audit\Concerns\Auditable;
+use App\Domain\Documents\Models\AttestationBlock;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Members\Enums\EntityType;
 use App\Domain\Members\Enums\FeesPeriodicity;
@@ -11,6 +12,8 @@ use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\PiecesStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Enums\TaxRegime;
+use App\Domain\Payments\Enums\ChargeKind;
+use App\Domain\Payments\Enums\ChargeStatus;
 use App\Domain\Payments\Models\MemberCharge;
 use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Referentials\Models\ActivityCode;
@@ -103,6 +106,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property-read Sector|null $sector
  * @property-read Commune|null $commune
  * @property-read ActivityCode|null $activityCode
+ * @property-read Collection<int, MemberCharge> $overdueFees
+ * @property-read AttestationBlock|null $currentAttestationBlock
  */
 class Member extends Model
 {
@@ -291,6 +296,26 @@ class Member extends Model
     public function charges(): HasMany
     {
         return $this->hasMany(MemberCharge::class);
+    }
+
+    /**
+     * Échéances d'honoraires impayées (RG-PAY-03, 04), de la plus ancienne à la plus récente.
+     *
+     * @return HasMany<MemberCharge, $this>
+     */
+    public function overdueFees(): HasMany
+    {
+        return $this->hasMany(MemberCharge::class)->where('kind', ChargeKind::Fees)->where('status', ChargeStatus::Overdue)->orderBy('due_date');
+    }
+
+    /**
+     * Blocage manuel de l'attestation en cours (RG-DOC-10).
+     *
+     * @return HasOne<AttestationBlock, $this>
+     */
+    public function currentAttestationBlock(): HasOne
+    {
+        return $this->hasOne(AttestationBlock::class)->whereNull('unblocked_at');
     }
 
     /**

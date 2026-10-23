@@ -67,6 +67,14 @@ class DocumentPolicy
     }
 
     /**
+     * Campagne annuelle d'attestations du centre (RG-DOC-06) : aperçu et lancement.
+     */
+    public function launchCampaign(User $user): bool
+    {
+        return $this->inCga() && $this->context->allows('documents.produce');
+    }
+
+    /**
      * Documents de l'adhérent dans son espace (RG-DOC-04, RG-ADH-12).
      */
     public function viewOwn(User $user): bool

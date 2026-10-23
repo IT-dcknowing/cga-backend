@@ -5,6 +5,8 @@ use App\Domain\Auth\Http\Controllers\MeController;
 use App\Domain\Auth\Http\Controllers\PasswordResetController;
 use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
+use App\Domain\Documents\Http\Controllers\AttestationBlockController;
+use App\Domain\Documents\Http\Controllers\CertificateCampaignController;
 use App\Domain\Documents\Http\Controllers\DocumentController;
 use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Documents\Http\Controllers\MemberDocumentController;
@@ -206,6 +208,9 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{member}/documents', [MemberDocumentController::class, 'index'])->name('documents.index');
         Route::post('{member}/documents', [MemberDocumentController::class, 'store'])->name('documents.store');
         Route::post('{member}/documents/upload', [MemberDocumentController::class, 'upload'])->name('documents.upload');
+        Route::get('{member}/attestation-blocks', [AttestationBlockController::class, 'index'])->name('attestation-blocks.index');
+        Route::post('{member}/attestation-blocks', [AttestationBlockController::class, 'store'])->name('attestation-blocks.store');
+        Route::post('{member}/attestation-blocks/release', [AttestationBlockController::class, 'release'])->name('attestation-blocks.release');
         Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
         Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
         Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
@@ -233,6 +238,12 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{document}/retry', [DocumentController::class, 'retry'])->name('retry');
         Route::post('{document}/regenerate', [DocumentController::class, 'regenerate'])->name('regenerate');
         Route::post('{document}/cancel', [DocumentController::class, 'cancel'])->name('cancel');
+    });
+
+    // Campagne annuelle d'attestations du centre (RG-DOC-06) : aperçu de l'année, lancement en tâche de fond.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/certificate-campaign')->name('cga.certificate-campaign.')->group(function (): void {
+        Route::get('/', [CertificateCampaignController::class, 'show'])->name('show');
+        Route::post('/', [CertificateCampaignController::class, 'store'])->name('store');
     });
 
     // Espace de l'adhérent : ses honoraires et la déclaration d'un paiement (F-PAY-03), ses documents en PDF (RG-DOC-04).

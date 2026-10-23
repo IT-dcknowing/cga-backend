@@ -16,6 +16,7 @@ return [
 
     'alerts' => [
         'radiation_required' => 'Radiation requise — reclassement au régime réel',
+        'fees_overdue' => 'Honoraires impayés (:periods période(s))',
     ],
 
     'move' => [

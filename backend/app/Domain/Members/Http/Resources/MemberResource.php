@@ -2,13 +2,14 @@
 
 namespace App\Domain\Members\Http\Resources;
 
+use App\Domain\Documents\Models\AttestationBlock;
 use App\Domain\Members\Actions\CancelRadiation;
 use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberRevenue;
+use App\Domain\Members\Support\MemberAlerts;
 use App\Domain\Members\Support\MembershipReadiness;
-use App\Support\Config\SettingsService;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -31,6 +32,7 @@ class MemberResource extends JsonResource
     {
         $member = $this->resource;
         $context = app(TenantContext::class);
+        $alerts = app(MemberAlerts::class);
         $revenue = $member->relationLoaded('revenues') ? $member->revenues->sortByDesc('year')->first() : null;
 
         return [
@@ -95,7 +97,16 @@ class MemberResource extends JsonResource
             'fees_periodicity' => $member->fees_periodicity->value,
             'pieces_status' => $member->pieces_status->value,
             'attestation_blocked' => $member->attestation_blocked,
-            'alerts' => $this->alerts($member),
+            // Blocage manuel en cours et son motif, affiché sur la fiche (RG-DOC-07, 10).
+            'attestation_block' => $this->whenLoaded('currentAttestationBlock', fn (): ?array => $member->currentAttestationBlock === null ? null : [
+                'trigger' => $member->currentAttestationBlock->trigger->value,
+                'trigger_label' => $member->currentAttestationBlock->trigger->label(),
+                'reason' => $member->currentAttestationBlock->reason,
+                'blocked_at' => $member->currentAttestationBlock->blocked_at->toIso8601ZuluString(),
+            ]),
+            // « Impayé (n mois) » : périodes d'honoraires impayées (RG-PAY-04).
+            'fees_overdue_periods' => $alerts->overdueFeePeriods($member),
+            'alerts' => $alerts->for($member),
             'radiation' => $this->radiation($member),
             'reference_revenue' => $revenue instanceof MemberRevenue ? ['year' => $revenue->year, 'amount' => $revenue->amount, 'kind' => $revenue->kind->value, 'source' => $revenue->source->value] : null,
             // Ce qui manque encore pour valider l'adhésion (RG-ADH-02) : brouillon seulement.
@@ -108,6 +119,8 @@ class MemberResource extends JsonResource
                 'change_regime' => Gate::allows('changeRegime', $member) && in_array($member->status, [MemberStatus::Active, MemberStatus::RadiationPending], true),
                 'request_radiation' => Gate::allows('requestRadiation', $member) && $member->portfolio === Portfolio::Cga && $member->status === MemberStatus::Active,
                 'move_to_cga' => Gate::allows('moveToCga', $member) && $member->portfolio === Portfolio::Cabinet && $member->status === MemberStatus::Active && ! $member->regime->isReal(),
+                'block_attestation' => $this->attestationBlockable($member) && ! $member->attestation_blocked,
+                'release_attestation' => $this->attestationBlockable($member) && $member->attestation_blocked,
             ],
         ];
     }
@@ -124,26 +137,13 @@ class MemberResource extends JsonResource
     }
 
     /**
-     * Bandeaux d'alerte de la fiche : « Radiation requise — reclassement au régime réel » tant qu'un
-     * dossier actif du portefeuille CGA reste au régime réel sans radiation demandée (RG-ADH-08), en
-     * retard passé rsi.radiation_deadline_days (RG-ADH-09). Une alerte ne bloque rien (CR-04).
-     *
-     * @return list<array{code: string, label: string, since: string, days: int, overdue: bool}>
+     * Le gérant peut bloquer ou débloquer l'attestation de ce dossier validé du portefeuille CGA
+     * (RG-DOC-10).
      */
-    private function alerts(Member $member): array
+    private function attestationBlockable(Member $member): bool
     {
-        if ($member->portfolio !== Portfolio::Cga || $member->status !== MemberStatus::Active || $member->rsi_since === null) {
-            return [];
-        }
-        $days = max(0, (int) $member->rsi_since->diffInDays(today()));
-        $deadline = (int) app(SettingsService::class)->get('rsi.radiation_deadline_days', $member->organization_id);
-
-        return [[
-            'code' => 'radiation_required',
-            'label' => __('members.alerts.radiation_required'),
-            'since' => $member->rsi_since->toDateString(),
-            'days' => $days,
-            'overdue' => $days >= $deadline,
-        ]];
+        return $member->portfolio === Portfolio::Cga
+            && in_array($member->status, [MemberStatus::Active, MemberStatus::RadiationPending], true)
+            && Gate::allows('block', [AttestationBlock::class, $member]);
     }
 }

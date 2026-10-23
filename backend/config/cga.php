@@ -168,6 +168,22 @@ return [
                 'type' => 'integer', 'level' => 'network', 'default' => 25_000, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:0', 'max:100000000']],
             ],
+            // Jour d'échéance des honoraires dans le premier mois de la période (F-PAY-04 : le 1er par défaut).
+            'due_day' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 1, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:28']],
+            ],
+            // Une échéance non réglée ce nombre de jours après sa date passe « impayée » (RG-PAY-03).
+            'overdue_days' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 30, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:365']],
+            ],
+            // Honoraires impayés depuis plus de ce nombre de mois : alerte au gérant, jamais de blocage
+            // automatique (RG-PAY-05, CR-04).
+            'alert_after_months' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 3, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:24']],
+            ],
         ],
 
         // Adhérent du portefeuille CGA reclassé au régime réel (RG-ADH-08, 09) : alerte au gérant passé ce délai

@@ -35,6 +35,9 @@ return [
     // Annulation automatique de l'attestation en cours de validité (RG-DOC-08).
     'radiation_cancel_reason' => 'Radiation validée le :date.',
 
+    // Blocage de l'attestation sur une alerte qui n'est pas en retard (RG-DOC-10).
+    'block_alert_missing' => 'Cette alerte n\'est pas en retard pour cet adhérent : choisissez « Décision du gérant ».',
+
     // Formes juridiques en toutes lettres (attestation) ; une forme absente reste telle quelle.
     'legal_forms' => [
         'SARL' => 'Société à responsabilité limitée',
