@@ -14,8 +14,10 @@ use App\Domain\Members\Models\PortfolioMovement;
 use App\Domain\Members\Rules\RegimeOfPortfolio;
 use App\Domain\Members\Support\MemberNumbering;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Payments\Actions\RecordPayment;
+use App\Domain\Payments\Actions\SyncEntryFee;
+use App\Domain\Payments\Data\PaymentEntry;
 use App\Domain\Users\Models\User;
-use App\Support\Config\SettingsService;
 use App\Support\Files\StorageService;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use App\Support\Numbering\SequenceService;
@@ -27,8 +29,8 @@ use Illuminate\Validation\ValidationException;
 /**
  * « Basculer vers le portefeuille CGA » un dossier du Cabinet (RG-PTF-03, 05, 08) : régime RME ou TEE,
  * contrat CGA signé par les deux parties (date, confirmation ; l'exemplaire scanné reste une pièce
- * attendue s'il n'est pas joint), droit d'adhésion payé quand les paiements sont branchés (Lot 3),
- * exclusivité sous verrou (RG-ADH-05). Le dossier reçoit un n° CGA Connect (année de la signature),
+ * attendue s'il n'est pas joint), droit d'adhésion entièrement payé, avec le paiement saisi dans la
+ * modale de bascule (03-APPFLOW §4), exclusivité sous verrou (RG-ADH-05). Le dossier reçoit un n° CGA Connect (année de la signature),
  * garde son n° client et son historique, peut être rattaché à un apporteur (RG-PTF-06) ; la bascule
  * est historisée et entre dans l'état « Nouveaux adhérents » du trimestre de la signature. C'est, avec
  * la validation de l'adhésion, la seule entrée au portefeuille CGA.
@@ -41,17 +43,20 @@ class MoveToCgaPortfolio
         private readonly MemberNumbering $numbering,
         private readonly CreateExpectedPieces $pieces,
         private readonly StorageService $storage,
-        private readonly SettingsService $settings,
+        private readonly SyncEntryFee $entryFee,
+        private readonly RecordPayment $payments,
         private readonly AuditLogger $audit,
     ) {}
 
     /**
+     * @param  PaymentEntry|null  $entryFeePayment  paiement du droit d'adhésion saisi avec la bascule
+     *
      * @throws BusinessRuleException portfolio_already_cga, member_not_active, membership_incomplete, membership_exclusive, abbreviation_missing
-     * @throws ValidationException régime réel
+     * @throws ValidationException régime réel, paiement supérieur au droit dû
      */
-    public function execute(Member $member, CarbonImmutable $contractSignedOn, ?UploadedFile $contract, ?string $referrerId, ?string $reason, User $actor): Member
+    public function execute(Member $member, CarbonImmutable $contractSignedOn, ?UploadedFile $contract, ?string $referrerId, ?string $reason, User $actor, ?PaymentEntry $entryFeePayment = null): Member
     {
-        return DB::transaction(function () use ($member, $contractSignedOn, $contract, $referrerId, $reason, $actor): Member {
+        return DB::transaction(function () use ($member, $contractSignedOn, $contract, $referrerId, $reason, $actor, $entryFeePayment): Member {
             $member = Member::query()->lockForUpdate()->findOrFail($member->id);
             if ($member->portfolio === Portfolio::Cga) {
                 throw new BusinessRuleException('portfolio_already_cga');
@@ -61,9 +66,6 @@ class MoveToCgaPortfolio
             }
             if (! in_array($member->regime, RegimeOfPortfolio::cga(), true)) {
                 throw ValidationException::withMessages(['regime' => __('members.move.regime_not_cga', ['regime' => $member->regime->value])]);
-            }
-            if ((bool) $this->settings->get('members.require_entry_fee_payment')) {
-                throw new BusinessRuleException('membership_incomplete', details: ['missing' => ['entry_fee_payment']]);
             }
             $this->exclusivity->execute($member->ncc, $member->organization_id);
 
@@ -86,12 +88,38 @@ class MoveToCgaPortfolio
             $member->updated_by = $actor->id;
             $member->save();
 
+            $this->settleEntryFee($member, $entryFeePayment, $actor);
             $this->contractPiece($member);
             $this->movement($member, $contractSignedOn, $file?->id, $reason, $actor);
             $this->audit->record('portfolio_moved', $member, context: ['direction' => MovementDirection::CabinetToCga->value, 'number' => $member->membership_number]);
 
             return $member->refresh();
         });
+    }
+
+    /**
+     * RG-PTF-03, RG-ADH-02 : à l'entrée au portefeuille CGA, le droit d'adhésion du dossier (montant
+     * contractuel hors taxe, TVA en sus) est ouvert et doit être entièrement payé — par le paiement
+     * saisi avec la bascule (confirmé d'office, reçu numéroté), ou déjà. Un droit à zéro n'ouvre
+     * aucune somme due. Sinon, rien ne bascule.
+     *
+     * @throws BusinessRuleException membership_incomplete (entry_fee_payment)
+     * @throws ValidationException paiement supérieur au droit restant dû
+     */
+    private function settleEntryFee(Member $member, ?PaymentEntry $payment, User $actor): void
+    {
+        $charge = $this->entryFee->execute($member);
+        if ($charge === null || $charge->balance() === 0) {
+            return;
+        }
+
+        if ($payment !== null) {
+            $this->payments->execute($member, $payment, [$charge->id], null, $actor);
+            $charge->refresh();
+        }
+        if ($charge->balance() > 0) {
+            throw new BusinessRuleException('membership_incomplete', details: ['missing' => ['entry_fee_payment'], 'balance' => $charge->balance()]);
+        }
     }
 
     /**

@@ -19,7 +19,7 @@ class PortfolioController extends BaseApiController
     public function moveToCga(MoveToCgaRequest $request, Member $member, MoveToCgaPortfolio $move): MemberResource|JsonResponse
     {
         return $this->handle(function () use ($request, $member, $move): MemberResource {
-            $member = $move->execute($member, $request->contractSignedOn(), $request->contract(), $request->referrerId(), $request->reason(), $this->currentUser());
+            $member = $move->execute($member, $request->contractSignedOn(), $request->contract(), $request->referrerId(), $request->reason(), $this->currentUser(), $request->entryFeePayment());
             $this->logSubject($member);
 
             return new MemberResource($member->load(MemberController::WITH));

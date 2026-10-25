@@ -22162,6 +22162,85 @@
                     "response": []
                 },
                 {
+                    "name": "Bascule — droit d'adhésion non payé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    const body = pm.response.json();",
+                                    "    pm.test(\"Droit d'adhésion manquant\", () => { pm.expect(body.code).to.eql(\"membership_incomplete\"); pm.expect(body.details.missing).to.eql([\"entry_fee_payment\"]); pm.expect(body.details.balance).to.eql(29500); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{move_member_id}}/portfolio/cga",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{move_member_id}}",
+                                "portfolio",
+                                "cga"
+                            ]
+                        },
+                        "description": "RG-PTF-03 : sans le paiement du droit d'adhésion, rien ne bascule : 409 membership_incomplete, avec le reste dû.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "cga_contract_signed_on",
+                                    "value": "{{today}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "cga_contract_confirmed",
+                                    "value": "1",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "referrer_id",
+                                    "value": "{{referrer_id}}",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Bascule — vers le portefeuille CGA",
                     "event": [
                         {
@@ -22218,7 +22297,7 @@
                                 "cga"
                             ]
                         },
-                        "description": "« Basculer vers le portefeuille CGA » (RG-PTF-03), en multipart : contrat signé (date, confirmation, exemplaire scanné), apporteur. Le dossier reçoit son n° CGA Connect, garde son n° client ; la bascule est historisée (RG-PTF-05).",
+                        "description": "« Basculer vers le portefeuille CGA » (RG-PTF-03), en multipart : contrat signé (date, confirmation, exemplaire scanné), apporteur. Le dossier reçoit son n° CGA Connect, garde son n° client ; la bascule est historisée (RG-PTF-05). Le droit d'adhésion (25 000 F HT, TVA 18 % en sus : 29 500 F) est payé avec la bascule (étape 3.15, RG-PTF-03) : paiement confirmé d'office, reçu numéroté.",
                         "body": {
                             "mode": "formdata",
                             "formdata": [
@@ -22241,6 +22320,26 @@
                                     "key": "contract",
                                     "type": "file",
                                     "src": "postman/files/justificatif-demo.pdf"
+                                },
+                                {
+                                    "key": "entry_fee_payment[amount]",
+                                    "value": "29500",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "entry_fee_payment[paid_on]",
+                                    "value": "{{today}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "entry_fee_payment[method]",
+                                    "value": "mobile_money",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "entry_fee_payment[reference]",
+                                    "value": "OM-BASCULE",
+                                    "type": "text"
                                 }
                             ]
                         }

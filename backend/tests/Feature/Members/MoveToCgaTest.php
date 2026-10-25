@@ -9,9 +9,13 @@ use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\PortfolioMovement;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Payments\Enums\ChargeKind;
+use App\Domain\Payments\Enums\ChargeStatus;
+use App\Domain\Payments\Enums\PaymentStatus;
+use App\Domain\Payments\Models\MemberCharge;
+use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
-use App\Support\Config\SettingsService;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -50,7 +54,10 @@ function cabinetClient(Membership $manager, array $overrides = []): Member
 function moveToCga(Membership $agent, Member $member, array $overrides = []): TestResponse
 {
     return inSpace($agent)->post("/api/v1/cga/members/{$member->id}/portfolio/cga", [
-        'cga_contract_signed_on' => '2026-09-01', 'cga_contract_confirmed' => '1', ...$overrides,
+        'cga_contract_signed_on' => '2026-09-01', 'cga_contract_confirmed' => '1',
+        // Droit d'adhésion de la fabrique (25 000 F HT), TVA de 18 % en sus (étape 3.15).
+        'entry_fee_payment' => ['amount' => 29_500, 'paid_on' => '2026-09-01', 'method' => 'cash'],
+        ...$overrides,
     ], ['Accept' => 'application/json']);
 }
 
@@ -85,6 +92,27 @@ it('RG-PTF-03 bascule un client TEE du Cabinet au portefeuille CGA : n° CGA Con
         ->toEqual(['direction' => 'cabinet_to_cga', 'number' => '2026-DCK-0001']);
 });
 
+it('RG-PTF-03 RG-ADH-02 encaisse le droit d\'adhésion avec la bascule : somme due TTC ouverte et payée, reçu numéroté ; un droit à zéro n\'exige rien', function () {
+    $manager = moveManager();
+    $member = cabinetClient($manager);
+
+    moveToCga($manager, $member, ['entry_fee_payment' => ['amount' => 29_500, 'paid_on' => '2026-09-01', 'method' => 'mobile_money', 'reference' => 'OM-PTF']])->assertOk();
+
+    $charge = app(TenantContext::class)->runAs($manager, fn () => MemberCharge::query()->where('member_id', $member->id)->sole());
+    $payment = app(TenantContext::class)->runAs($manager, fn () => MemberPayment::query()->where('member_id', $member->id)->sole());
+    expect($charge->kind)->toBe(ChargeKind::EntryFee)
+        ->and($charge->amount_excl_tax)->toBe(25_000)
+        ->and($charge->amount)->toBe(29_500)
+        ->and($charge->status)->toBe(ChargeStatus::Paid)
+        ->and($payment->status)->toBe(PaymentStatus::Confirmed)
+        ->and($payment->reference)->toBe('OM-PTF')
+        ->and($payment->receipt_number)->toBe('REC-DCK-'.today()->year.'-00001');
+
+    $free = cabinetClient($manager, ['entry_fee_amount' => 0]);
+    moveToCga($manager, $free, ['entry_fee_payment' => null])->assertOk()->assertJsonPath('data.portfolio', 'cga');
+    expect(app(TenantContext::class)->runAs($manager, fn () => MemberCharge::query()->where('member_id', $free->id)->count()))->toBe(0);
+});
+
 it('RG-PTF-08 garde le contrat signé scanné comme pièce attendue s\'il n\'est pas joint', function () {
     $manager = moveManager();
     $member = cabinetClient($manager);
@@ -108,9 +136,17 @@ it('RG-PTF-03 refuse le régime réel, un contrat non confirmé, le droit d\'adh
     moveToCga($manager, Member::factory()->cabinet()->create(['organization_id' => $manager->organization_id]))->assertStatus(409)->assertJsonPath('code', 'member_not_active');
     moveToCga(Membership::factory()->role(Role::CgaAccountant)->create(['organization_id' => $manager->organization_id]), $member)->assertForbidden();
 
-    app(SettingsService::class)->set('members.require_entry_fee_payment', true);
-    moveToCga($manager, $member)->assertStatus(409)->assertJsonPath('code', 'membership_incomplete')->assertJsonPath('details.missing', ['entry_fee_payment']);
-    app(SettingsService::class)->set('members.require_entry_fee_payment', false);
+    moveToCga($manager, $member, ['entry_fee_payment' => null])->assertStatus(409)
+        ->assertJsonPath('code', 'membership_incomplete')
+        ->assertJsonPath('details.missing', ['entry_fee_payment'])
+        ->assertJsonPath('details.balance', 29_500);
+    moveToCga($manager, $member, ['entry_fee_payment' => ['amount' => 10_000, 'paid_on' => '2026-09-01', 'method' => 'cash']])->assertStatus(409)
+        ->assertJsonPath('details.balance', 19_500);
+    moveToCga($manager, $member, ['entry_fee_payment' => ['amount' => 30_000, 'paid_on' => '2026-09-01', 'method' => 'cash']])->assertUnprocessable()->assertJsonValidationErrors('amount');
+    moveToCga($manager, $member, ['entry_fee_payment' => ['amount' => 0, 'paid_on' => today()->addDay()->toDateString(), 'method' => 'troc', 'extra' => 'x']])->assertUnprocessable()
+        ->assertJsonValidationErrors(['entry_fee_payment', 'entry_fee_payment.amount', 'entry_fee_payment.paid_on', 'entry_fee_payment.method']);
+    expect(app(TenantContext::class)->runAs($manager, fn () => MemberPayment::query()->where('member_id', $member->id)->count()))->toBe(0)
+        ->and(app(TenantContext::class)->runAs($manager, fn () => MemberCharge::query()->where('member_id', $member->id)->count()))->toBe(0);
 
     Member::factory()->active()->create(['ncc' => $member->ncc]);
     moveToCga($manager, $member)->assertStatus(409)->assertJsonPath('code', 'membership_exclusive');

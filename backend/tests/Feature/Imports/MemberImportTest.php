@@ -13,7 +13,6 @@ use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
-use App\Support\Config\SettingsService;
 use App\Support\Numbering\SequenceService;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
@@ -176,7 +175,6 @@ it('RG-IMP-01 analyse sans rien écrire : sort de chaque ligne et ancien n° en 
 
 it('RG-IMP-01 importe le portefeuille : ancien n° gardé, n° CGA Connect chronologique depuis le numéro de départ, rapport', function () {
     $manager = portfolioManager();
-    app(SettingsService::class)->set('members.require_entry_fee_payment', true);
 
     $batch = importPortfolio($manager, portfolioWorkbook(samplePortfolio('1450145K')), 150);
 
