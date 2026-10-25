@@ -13,8 +13,8 @@ use LogicException;
 /**
  * Numéro d'un document émis (F-DOC-01, 02-TRD §7.1) selon son format paramétré (numbering.*.pattern) :
  * séquence du centre par année, sans doublon ni trou, tirée dans la transaction de l'Action qui émet
- * le document. Le contrat porte le n° d'adhésion du dossier, sans séquence propre ; la facture suit la
- * certification FNE (étape 3.13).
+ * le document. Le contrat porte le n° d'adhésion du dossier, sans séquence propre ; la facture et son
+ * PDF certifié portent le n° FAC tiré à la création de la facture.
  */
 class DocumentNumbering
 {
@@ -27,6 +27,9 @@ class DocumentNumbering
         'receipt' => ['numbering.receipt.pattern', 'receipt'],
         'membership_certificate' => ['numbering.certificate.pattern', 'attestation'],
         'radiation_notice' => ['numbering.radiation_notice.pattern', 'notification_letter'],
+        // Factures et avoirs partagent la séquence « invoice » du centre (F-PAY-05).
+        'invoice' => ['numbering.invoice.pattern', 'invoice'],
+        'credit_note' => ['numbering.invoice.pattern', 'invoice'],
     ];
 
     public function __construct(

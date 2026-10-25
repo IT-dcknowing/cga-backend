@@ -18,6 +18,7 @@
 |
 */
 
+use App\Domain\Documents\Composers\InvoiceComposer;
 use App\Domain\Documents\Composers\MembershipCertificateComposer;
 use App\Domain\Documents\Composers\MembershipContractComposer;
 use App\Domain\Documents\Composers\RadiationNoticeComposer;
@@ -84,6 +85,32 @@ return [
                 'document_place', 'document_date',
             ],
         ],
+
+        // Modèle provisoire (la maquette n'en a pas) : facture certifiée FNE (F-PAY-05, RG-FNE-02), produite
+        // seulement après la certification, avec le n° FNE, le QR de certification et le cachet fiscal.
+        'invoice' => $invoice = [
+            'label' => 'Facture',
+            'format' => 'docx',
+            'path' => resource_path('templates/invoice.docx'),
+            'composer' => InvoiceComposer::class,
+            'images' => [...$signature, 'fne_qr'],
+            'rows' => [
+                'line_label' => ['line_label', 'line_quantity', 'line_unit_amount', 'line_tax_rate', 'line_amount'],
+            ],
+            'variables' => [
+                ...$cga, 'cga_legal_form', 'cga_share_capital', 'cga_address', 'cga_phones', 'cga_email', 'cga_rccm',
+                'cga_signatory_name', 'cga_signatory_title',
+                'invoice_title', 'invoice_number', 'invoice_date', 'invoice_reference',
+                'member_name', 'member_ncc', 'member_number', 'member_address',
+                'amount_excl_tax', 'tax_amount', 'amount_incl_tax', 'amount_words',
+                'fne_number', 'fne_certified_at', 'fne_stamp',
+                'document_place', 'document_date',
+            ],
+        ],
+
+        // Avoir certifié FNE (RG-FNE-01) : même modèle provisoire que la facture, titre et référence de
+        // la facture annulée en plus ; le CNCGA peut lui donner un modèle propre (F-ADM-02).
+        'credit_note' => [...$invoice, 'label' => 'Avoir'],
 
         // Modèle provisoire (la maquette n'en a pas) : courrier de notification de la radiation au CDI de
         // rattachement (F-ADH-06, effet 3), remis par le CGA.

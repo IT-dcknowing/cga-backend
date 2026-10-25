@@ -35,31 +35,34 @@ function feeMember(array $attributes = []): Member
 }
 
 describe('fees:generate (F-PAY-04)', function () {
-    it('crée l\'échéance de la période en cours selon la périodicité du dossier, au 1er de la période', function () {
-        $this->travelTo('2026-05-20 01:15:00');
+    it('crée l\'échéance de la période en cours selon la périodicité du dossier, au 1er de la période, TVA en sus', function () {
         $monthly = feeMember();
         $quarterly = feeMember(['fees_periodicity' => FeesPeriodicity::Quarterly, 'fees_amount' => 40_000]);
         $yearly = feeMember(['fees_periodicity' => FeesPeriodicity::Yearly, 'fees_amount' => 150_000]);
 
+        $this->travelTo('2026-05-20 01:15:00');
         Artisan::call('fees:generate');
 
         expect(feeCharges($monthly))->toHaveCount(1)
             ->and(feeCharges($monthly)[0]->period_start->toDateString())->toBe('2026-05-01')
             ->and(feeCharges($monthly)[0]->period_end->toDateString())->toBe('2026-05-31')
             ->and(feeCharges($monthly)[0]->due_date->toDateString())->toBe('2026-05-01')
-            ->and(feeCharges($monthly)[0]->amount)->toBe(15_000)
+            ->and(feeCharges($monthly)[0]->amount_excl_tax)->toBe(15_000)
+            ->and(feeCharges($monthly)[0]->tax_rate)->toBe(18.0)
+            ->and(feeCharges($monthly)[0]->tax_amount)->toBe(2_700)
+            ->and(feeCharges($monthly)[0]->amount)->toBe(17_700)
             ->and(feeCharges($monthly)[0]->status)->toBe(ChargeStatus::Due)
             ->and(feeCharges($quarterly)[0]->period_start->toDateString())->toBe('2026-04-01')
             ->and(feeCharges($quarterly)[0]->period_end->toDateString())->toBe('2026-06-30')
-            ->and(feeCharges($quarterly)[0]->amount)->toBe(40_000)
+            ->and(feeCharges($quarterly)[0]->amount)->toBe(47_200)
             ->and(feeCharges($yearly)[0]->period_start->toDateString())->toBe('2026-01-01')
             ->and(feeCharges($yearly)[0]->period_end->toDateString())->toBe('2026-12-31');
     });
 
     it('est idempotente : relancée, elle ne crée aucun doublon ; le mois suivant ouvre une nouvelle période', function () {
-        $this->travelTo('2026-05-20');
         $member = feeMember();
 
+        $this->travelTo('2026-05-20');
         Artisan::call('fees:generate');
         Artisan::call('fees:generate');
         expect(feeCharges($member))->toHaveCount(1);
@@ -71,17 +74,16 @@ describe('fees:generate (F-PAY-04)', function () {
     });
 
     it('prend le jour d\'échéance réglé par le CGA (fees.due_day)', function () {
-        $this->travelTo('2026-02-03');
         $member = feeMember();
         app(SettingsService::class)->set('fees.due_day', 10, $member->organization_id);
 
+        $this->travelTo('2026-02-03');
         Artisan::call('fees:generate');
 
         expect(feeCharges($member)[0]->due_date->toDateString())->toBe('2026-02-10');
     });
 
     it('ignore les brouillons, les radiés, les honoraires nuls, une adhésion à venir et les CGA résiliés ; garde les radiations en cours', function () {
-        $this->travelTo('2026-05-20');
         $ignored = [
             feeMember(['status' => MemberStatus::Draft, 'membership_number' => null, 'adhesion_date' => null]),
             feeMember(['status' => MemberStatus::Radiated]),
@@ -91,6 +93,7 @@ describe('fees:generate (F-PAY-04)', function () {
         ];
         $pending = feeMember(['status' => MemberStatus::RadiationPending]);
 
+        $this->travelTo('2026-05-20');
         Artisan::call('fees:generate');
 
         foreach ($ignored as $member) {

@@ -31,6 +31,9 @@ class MemberChargeFactory extends Factory
             'kind' => ChargeKind::EntryFee,
             'due_date' => today(),
             'amount' => 25_000,
+            'amount_excl_tax' => fn (array $attributes): int => (int) $attributes['amount'] - (int) ($attributes['tax_amount'] ?? 0),
+            'tax_rate' => 0,
+            'tax_amount' => 0,
             'amount_paid' => 0,
             'status' => ChargeStatus::Due,
         ];

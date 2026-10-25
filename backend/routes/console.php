@@ -21,6 +21,11 @@ Schedule::command('statuses:refresh')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('fne:retry')
+    ->cron(config('schedule.fne_retry'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('members:radiation-expiry')
     ->dailyAt(config('schedule.radiation_expiry'))
     ->withoutOverlapping()

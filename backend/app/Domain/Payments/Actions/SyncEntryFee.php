@@ -8,16 +8,20 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Payments\Enums\ChargeKind;
 use App\Domain\Payments\Enums\ChargeStatus;
 use App\Domain\Payments\Models\MemberCharge;
+use App\Domain\Payments\Support\ChargeAmounts;
 
 /**
  * Somme due « droit d'adhésion » d'un dossier du portefeuille CGA (F-PAY-02, RG-ADH-02), tenue à jour
- * avec la fiche : ouverte à l'inscription pour le montant contractuel (RG-PAY-01), ajustée tant que
+ * avec la fiche : ouverte à l'inscription pour le montant contractuel hors taxe (RG-PAY-01), TVA en
+ * sus (ChargeAmounts), ajustée tant que
  * rien n'est payé, annulée si le dossier quitte le portefeuille CGA avant paiement ou si le brouillon
  * est supprimé. Un dossier repris d'un portefeuille existant est réputé l'avoir acquitté (RG-IMP-03).
  * Appelée dans la transaction de l'Action du dossier.
  */
 class SyncEntryFee
 {
+    public function __construct(private readonly ChargeAmounts $amounts) {}
+
     /**
      * @param  bool  $settled  droit d'adhésion déjà acquitté hors plateforme (import, RG-IMP-03)
      */
@@ -36,8 +40,8 @@ class SyncEntryFee
 
         if ($charge !== null && $charge->amount_paid === 0) {
             if ($wanted && $settled) {
-                $charge->amount = $member->entry_fee_amount;
-                $charge->amount_paid = $member->entry_fee_amount;
+                $this->amounts->apply($charge, $member->entry_fee_amount, $member->organization_id);
+                $charge->amount_paid = $charge->amount;
                 $charge->status = ChargeStatus::Paid;
                 $charge->save();
 
@@ -49,8 +53,8 @@ class SyncEntryFee
 
                 return null;
             }
-            if ($charge->amount !== $member->entry_fee_amount) {
-                $charge->amount = $member->entry_fee_amount;
+            if ($charge->amount_excl_tax !== $member->entry_fee_amount) {
+                $this->amounts->apply($charge, $member->entry_fee_amount, $member->organization_id);
                 $charge->save();
             }
         }
@@ -63,8 +67,8 @@ class SyncEntryFee
         $charge->member_id = $member->id;
         $charge->kind = ChargeKind::EntryFee;
         $charge->due_date = today();
-        $charge->amount = $member->entry_fee_amount;
-        $charge->amount_paid = $settled ? $member->entry_fee_amount : 0;
+        $this->amounts->apply($charge, $member->entry_fee_amount, $member->organization_id);
+        $charge->amount_paid = $settled ? $charge->amount : 0;
         $charge->status = $settled ? ChargeStatus::Paid : ChargeStatus::Due;
         $charge->save();
 

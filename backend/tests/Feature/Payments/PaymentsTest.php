@@ -14,6 +14,7 @@ use App\Domain\Payments\Models\MemberCharge;
 use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
+use App\Support\Config\SettingsService;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
@@ -115,7 +116,8 @@ describe('barème (F-PAY-01)', function () {
             ->and($after->fees_amount)->toBe(10_000)
             ->and($after->fees_periodicity->value)->toBe('quarterly')
             ->and($before->fresh()?->entry_fee_amount)->toBe(25_000)
-            ->and(memberCharges($manager, $before)[0]->amount)->toBe(25_000);
+            ->and(memberCharges($manager, $before)[0]->amount_excl_tax)->toBe(25_000)
+            ->and(memberCharges($manager, $before)[0]->amount)->toBe(29_500);
     });
 
     it('lit le barème avec le droit d\'inscrire, le modifie avec celui de paramétrer le centre', function () {
@@ -140,16 +142,23 @@ describe('droit d\'adhésion (F-PAY-02)', function () {
 
         expect(memberCharges($manager, $cabinet))->toBe([])
             ->and(memberCharges($manager, $member)[0]->kind->value)->toBe('entry_fee')
-            ->and(memberCharges($manager, $member)[0]->amount)->toBe(40_000)
+            ->and(memberCharges($manager, $member)[0]->amount_excl_tax)->toBe(40_000)
+            ->and(memberCharges($manager, $member)[0]->tax_amount)->toBe(7_200)
+            ->and(memberCharges($manager, $member)[0]->amount)->toBe(47_200)
             ->and(memberCharges($manager, $member)[0]->status)->toBe(ChargeStatus::Due);
 
         paymentsSpace($manager)->putJson("/api/v1/cga/members/{$member->id}", [
             'entity_type' => 'company', 'company_name' => 'Ets Paiements', 'legal_form' => 'SARL', 'ncc' => $member->ncc, 'regime' => 'TEE',
             'main_activity' => 'Commerce', 'phone' => '0707070707', 'entry_fee_amount' => 35_000,
         ])->assertOk();
-        expect(memberCharges($manager, $member)[0]->amount)->toBe(35_000);
+        expect(memberCharges($manager, $member)[0]->amount)->toBe(41_300);
 
-        paymentsSpace($manager)->getJson("/api/v1/cga/members/{$member->id}/charges")->assertOk()->assertJsonPath('data.0.balance', 35_000)->assertJsonPath('data.0.kind_label', 'Droit d\'adhésion');
+        paymentsSpace($manager)->getJson("/api/v1/cga/members/{$member->id}/charges")->assertOk()
+            ->assertJsonPath('data.0.amount_excl_tax', 35_000)
+            ->assertJsonPath('data.0.tax_rate', 18)
+            ->assertJsonPath('data.0.tax_amount', 6_300)
+            ->assertJsonPath('data.0.balance', 41_300)
+            ->assertJsonPath('data.0.kind_label', 'Droit d\'adhésion');
         paymentsSpace($manager)->deleteJson("/api/v1/cga/members/{$member->id}")->assertNoContent();
         expect(memberCharges($manager, $member)[0]->status)->toBe(ChargeStatus::Cancelled);
     });
@@ -171,9 +180,9 @@ describe('paiement saisi par le CGA (F-PAY-02)', function () {
             ->assertJsonPath('data.can.confirm', false);
         expect(memberCharges($manager, $member)[0]->status)->toBe(ChargeStatus::Partial);
 
-        recordPayment($manager, $member, ['amount' => 15_000, 'method' => 'transfer'])->assertCreated()->assertJsonPath('data.receipt_number', 'REC-DCK-'.today()->year.'-00002');
+        recordPayment($manager, $member, ['amount' => 19_500, 'method' => 'transfer'])->assertCreated()->assertJsonPath('data.receipt_number', 'REC-DCK-'.today()->year.'-00002');
         expect(memberCharges($manager, $member)[0]->status)->toBe(ChargeStatus::Paid)
-            ->and(memberCharges($manager, $member)[0]->amount_paid)->toBe(25_000);
+            ->and(memberCharges($manager, $member)[0]->amount_paid)->toBe(29_500);
         Event::assertDispatchedTimes(PaymentConfirmed::class, 2);
 
         $this->travelTo(today()->addYear()->startOfYear()->addDay());
@@ -247,7 +256,7 @@ describe('paiement déclaré par l\'adhérent (F-PAY-03)', function () {
         $manager = paymentsManager();
         $member = enrolledDraft($manager);
         $owner = memberOwner($member);
-        $declared = declarePayment($owner)->json('data.id');
+        $declared = declarePayment($owner, ['amount' => 29_500])->json('data.id');
         $wrong = declarePayment($owner, ['amount' => 1_000])->json('data.id');
         $charge = memberCharges($manager, $member)[0];
 
@@ -288,5 +297,18 @@ it('RG-IMP-03 tient pour acquitté le droit d\'adhésion d\'un dossier repris ac
 
     expect($member->status)->toBe(MemberStatus::Active)
         ->and(memberCharges($manager, $member)[0]->status)->toBe(ChargeStatus::Paid)
-        ->and(memberCharges($manager, $member)[0]->amount_paid)->toBe(25_000);
+        ->and(memberCharges($manager, $member)[0]->amount_paid)->toBe(29_500);
+});
+
+it('applique le taux de TVA réglé par le CGA (invoices.vat_rate) aux sommes dues ouvertes ensuite', function () {
+    $manager = paymentsManager();
+    app(SettingsService::class)->set('invoices.vat_rate', 0, $manager->organization_id);
+
+    $member = enrolledDraft($manager, ['entry_fee_amount' => 40_000]);
+
+    $other = paymentsManager('AUT');
+
+    expect(memberCharges($manager, $member)[0]->amount)->toBe(40_000)
+        ->and(memberCharges($manager, $member)[0]->tax_amount)->toBe(0)
+        ->and(memberCharges($other, enrolledDraft($other, ['entry_fee_amount' => 40_000]))[0]->amount)->toBe(47_200);
 });

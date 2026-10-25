@@ -27,6 +27,8 @@ use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
 use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
 use App\Domain\Payments\Http\Controllers\FeeScheduleController;
+use App\Domain\Payments\Http\Controllers\InvoiceController;
+use App\Domain\Payments\Http\Controllers\InvoicingProviderController;
 use App\Domain\Payments\Http\Controllers\MemberPaymentController;
 use App\Domain\Payments\Http\Controllers\MemberSpacePaymentController;
 use App\Domain\Payments\Http\Controllers\PaymentController;
@@ -229,6 +231,19 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth', 'tenant'])->prefix('cga')->name('cga.')->group(function (): void {
         Route::get('fee-schedule', [FeeScheduleController::class, 'show'])->name('fee-schedule.show');
         Route::put('fee-schedule', [FeeScheduleController::class, 'update'])->name('fee-schedule.update');
+        // Facturation FNE du centre (F-ADM-07, RG-FNE-03).
+        Route::get('invoicing-provider', [InvoicingProviderController::class, 'show'])->name('invoicing-provider.show');
+        Route::put('invoicing-provider', [InvoicingProviderController::class, 'update'])->name('invoicing-provider.update');
+        Route::post('invoicing-provider/test', [InvoicingProviderController::class, 'test'])->name('invoicing-provider.test');
+        // Factures et avoirs certifiés FNE (F-PAY-05, F-PAY-06, RG-FNE-01 à 04).
+        Route::get('invoices', [InvoiceController::class, 'index'])->name('invoices.index');
+        Route::post('invoices', [InvoiceController::class, 'store'])->name('invoices.store');
+        Route::get('invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::post('invoices/{invoice}/manual-certification', [InvoiceController::class, 'certify'])->name('invoices.certify');
+        Route::post('invoices/{invoice}/resubmit', [InvoiceController::class, 'resubmit'])->name('invoices.resubmit');
+        Route::post('invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('invoices.cancel');
+        Route::post('invoices/{invoice}/credit-note', [InvoiceController::class, 'creditNote'])->name('invoices.credit-note');
+        Route::post('invoices/{invoice}/deliver', [InvoiceController::class, 'deliver'])->name('invoices.deliver');
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
     });
 

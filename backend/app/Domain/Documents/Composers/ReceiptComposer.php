@@ -6,9 +6,9 @@ use App\Domain\Documents\Data\DocumentContent;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Documents\Support\DocumentFormat;
 use App\Domain\Organizations\Models\Organization;
-use App\Domain\Payments\Enums\ChargeKind;
 use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Payments\Models\PaymentAllocation;
+use App\Domain\Payments\Support\ChargeLabel;
 
 /**
  * Données du reçu d'un paiement confirmé (F-PAY-02, RG-PAY-02, modèle receipt) : n° du reçu, adhérent
@@ -26,7 +26,7 @@ class ReceiptComposer implements DocumentComposer
         $payment = MemberPayment::query()->with(['member', 'allocations.charge'])->findOrFail($document->source_id);
 
         $lines = $payment->allocations->map(static fn (PaymentAllocation $allocation): array => [
-            'line_label' => self::label($allocation),
+            'line_label' => ChargeLabel::of($allocation->charge),
             'line_amount' => DocumentFormat::amount($allocation->amount),
         ])->values()->all();
 
@@ -45,18 +45,5 @@ class ReceiptComposer implements DocumentComposer
         ], $this->identity->images($organization), [
             'line_label' => $lines !== [] ? $lines : [['line_label' => DocumentFormat::text(null), 'line_amount' => DocumentFormat::amount($payment->amount)]],
         ]);
-    }
-
-    private static function label(PaymentAllocation $allocation): string
-    {
-        $charge = $allocation->charge;
-
-        return (string) match ($charge->kind) {
-            ChargeKind::Fees => __('documents.receipt_lines.fees', [
-                'start' => DocumentFormat::shortDate($charge->period_start ?? $charge->due_date),
-                'end' => DocumentFormat::shortDate($charge->period_end ?? $charge->due_date),
-            ]),
-            default => __('documents.receipt_lines.'.$charge->kind->value),
-        };
     }
 }

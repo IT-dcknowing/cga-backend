@@ -10,6 +10,7 @@ use App\Domain\Organizations\Models\Organization;
 use App\Domain\Payments\Enums\ChargeKind;
 use App\Domain\Payments\Enums\ChargeStatus;
 use App\Domain\Payments\Models\MemberCharge;
+use App\Domain\Payments\Support\ChargeAmounts;
 use App\Support\Config\SettingsService;
 use App\Support\Tenancy\Tenancy;
 use Carbon\CarbonImmutable;
@@ -21,7 +22,7 @@ use Illuminate\Support\Facades\DB;
  * Échéances d'honoraires de la période en cours (F-PAY-04, tâche fees:generate chaque nuit) : pour
  * chaque dossier validé (actif ou en radiation) dont les honoraires contractuels ne sont pas nuls
  * (RG-PAY-01), une somme due par période selon sa périodicité (mois, trimestre ou année civile), du
- * montant du dossier, échue le jour fees.due_day de la période (1er par défaut, réglable par CGA).
+ * montant hors taxe du dossier, TVA en sus (ChargeAmounts), échue le jour fees.due_day de la période (1er par défaut, réglable par CGA).
  * Idempotente : une période déjà ouverte n'est jamais recréée (index unique member_id, kind,
  * period_start). Tous les CGA en activité, par lots (contournement journalisé).
  */
@@ -36,7 +37,10 @@ class GenerateFeeCharges
      */
     private array $dueDays = [];
 
-    public function __construct(private readonly SettingsService $settings) {}
+    public function __construct(
+        private readonly SettingsService $settings,
+        private readonly ChargeAmounts $amounts,
+    ) {}
 
     /**
      * @return int nombre d'échéances créées
@@ -98,7 +102,7 @@ class GenerateFeeCharges
             $charge->period_start = $start;
             $charge->period_end = $this->periodEnd($member->fees_periodicity, $start);
             $charge->due_date = $this->dueDate($start, $member->organization_id);
-            $charge->amount = $member->fees_amount;
+            $this->amounts->apply($charge, $member->fees_amount, $member->organization_id);
             $charge->amount_paid = 0;
             $charge->status = ChargeStatus::Due;
             $charge->save();

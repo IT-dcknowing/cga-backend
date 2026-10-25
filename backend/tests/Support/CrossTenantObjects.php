@@ -11,6 +11,10 @@ use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Payments\Enums\CertificationMode;
+use App\Domain\Payments\Enums\InvoiceStatus;
+use App\Domain\Payments\Enums\InvoiceType;
+use App\Domain\Payments\Models\Invoice;
 use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
@@ -59,6 +63,24 @@ final class CrossTenantObjects
             MemberPayment::class => static fn (Organization $other): MemberPayment => MemberPayment::factory()->create(['member_id' => Member::factory()->active()->create(['organization_id' => $other->id])->id]),
             Membership::class => static fn (Organization $other): Membership => Membership::factory()->role(Role::MemberOwner)->create(['organization_id' => $other->id]),
             User::class => static fn (Organization $other): User => Membership::factory()->create(['organization_id' => $other->id])->user,
+            Invoice::class => static fn (Organization $other): Invoice => Tenancy::bypass(static function () use ($other): Invoice {
+                $invoice = new Invoice;
+                $invoice->organization_id = $other->id;
+                $invoice->type = InvoiceType::Invoice;
+                $invoice->member_id = Member::factory()->active()->create(['organization_id' => $other->id])->id;
+                $invoice->number = 'FAC-B-'.Str::random(6);
+                $invoice->issue_date = today()->toImmutable();
+                $invoice->lines = [];
+                $invoice->amount_excl_tax = 0;
+                $invoice->tax_amount = 0;
+                $invoice->amount_incl_tax = 0;
+                $invoice->status = InvoiceStatus::Rejected;
+                $invoice->certification_mode = CertificationMode::Manual;
+                $invoice->created_by = Membership::factory()->create(['organization_id' => $other->id])->user_id;
+                $invoice->save();
+
+                return $invoice;
+            }, 'Test de cloisonnement : facture du CGA B.'),
             ImportBatch::class => static fn (Organization $other): ImportBatch => Tenancy::bypass(static function () use ($other): ImportBatch {
                 $batch = new ImportBatch;
                 $batch->organization_id = $other->id;

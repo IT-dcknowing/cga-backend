@@ -36,7 +36,8 @@ it('garde des sommes dues cohérentes : montants, période des honoraires, une �
     $member = Member::factory()->active()->create();
     $row = static fn (array $overrides = []): array => [
         'id' => strtolower((string) Str::ulid()), 'organization_id' => $member->organization_id, 'member_id' => $member->id,
-        'kind' => 'fees', 'period_start' => '2026-10-01', 'period_end' => '2026-10-31', 'due_date' => '2026-10-10', 'amount' => 15_000,
+        'kind' => 'fees', 'period_start' => '2026-10-01', 'period_end' => '2026-10-31', 'due_date' => '2026-10-10', 'amount' => 17_700,
+        'amount_excl_tax' => 15_000, 'tax_rate' => 18, 'tax_amount' => 2_700,
         'status' => 'due', 'created_at' => now(), 'updated_at' => now(), ...$overrides,
     ];
     DB::table('member_charges')->insert($row());
@@ -49,6 +50,9 @@ it('garde des sommes dues cohérentes : montants, période des honoraires, une �
     refusedByPaymentsSchema(fn () => DB::table('member_charges')->insert($row(['period_start' => '2026-12-01', 'amount_paid' => 20_000])));
     refusedByPaymentsSchema(fn () => DB::table('member_charges')->insert($row(['period_start' => '2027-01-01', 'kind' => 'autre'])));
     refusedByPaymentsSchema(fn () => DB::table('member_charges')->insert($row(['period_start' => '2027-02-01', 'status' => 'perdue'])));
+    // Montant dû = hors taxe + TVA (décision du 23/10/2026).
+    refusedByPaymentsSchema(fn () => DB::table('member_charges')->insert($row(['period_start' => '2027-03-01', 'tax_amount' => 1_000])));
+    refusedByPaymentsSchema(fn () => DB::table('member_charges')->insert($row(['period_start' => '2027-04-01', 'tax_rate' => 101])));
 });
 
 it('exige un montant positif, la preuve d\'un paiement déclaré par l\'adhérent et le motif d\'un rejet', function () {
@@ -124,7 +128,7 @@ it('charge chaque modèle de la maquette en version 1 active, avec ses variables
     $this->seed(TemplateSeeder::class);
 
     $templates = DocumentTemplate::query()->with('file')->get()->keyBy(fn (DocumentTemplate $template): string => $template->type->value);
-    expect($templates->keys()->sort()->values()->all())->toBe(['membership_certificate', 'membership_contract', 'quarterly_report_docx', 'quarterly_report_xlsx', 'radiation_notice', 'receipt']);
+    expect($templates->keys()->sort()->values()->all())->toBe(['credit_note', 'invoice', 'membership_certificate', 'membership_contract', 'quarterly_report_docx', 'quarterly_report_xlsx', 'radiation_notice', 'receipt']);
 
     $contract = $templates['membership_contract'];
     expect($contract->version)->toBe('1')

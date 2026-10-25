@@ -285,6 +285,32 @@ return [
         'cancelled' => 'Annulée',
     ],
 
+    'invoice_type' => [
+        'invoice' => 'Facture',
+        'credit_note' => 'Avoir',
+    ],
+
+    'invoice_status' => [
+        'draft' => 'Brouillon',
+        'pending_certification' => 'En attente de certification',
+        'certified' => 'Certifiée',
+        'rejected' => 'Rejetée',
+        'cancelled' => 'Annulée',
+    ],
+
+    'certification_mode' => [
+        'manual' => 'Manuel',
+        'dgi_api' => 'API FNE de la DGI',
+        'sell_flow' => 'Via Sell Flow',
+    ],
+
+    'certification_attempt_status' => [
+        'sent' => 'Envoyée',
+        'accepted' => 'Acceptée',
+        'rejected' => 'Rejetée',
+        'error' => 'Service indisponible',
+    ],
+
     'payment_method' => [
         'cash' => 'Espèces',
         'cheque' => 'Chèque',

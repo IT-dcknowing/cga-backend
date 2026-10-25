@@ -18,6 +18,8 @@ return [
     'empty' => '—',
     'amount' => ':amount FCFA',
     'amount_words' => ':words francs CFA',
+    'date_time' => ':date à :time',
+    'rate' => ':rate %',
     'first_day' => '1er',
     'agreement' => ':number du :date',
     'signatory' => ':name, :title',

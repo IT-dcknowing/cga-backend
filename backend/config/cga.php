@@ -270,6 +270,37 @@ return [
                     'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
                 ],
             ],
+            // Factures et avoirs (F-PAY-05, F-DOC-01) : séquence « invoice » du centre par année, sans trou.
+            'invoice' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => 'FAC-{ABR}-{YYYY}-{N:5}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:40', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
+        ],
+
+        // Factures (F-PAY-05) : taux de TVA ajouté au barème hors taxe dès la création de la somme due
+        // (décision du 23/10/2026), réglable par le CNCGA et par chaque CGA.
+        'invoices' => [
+            'vat_rate' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 18, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:0', 'max:100']],
+            ],
+        ],
+
+        // Certification FNE (RG-FNE-04, 02-TRD §10 bis.1) : nouveaux essais quand le service est
+        // indisponible (nombre, attente croissante en secondes), puis alerte du gérant.
+        'fne' => [
+            'retry' => [
+                'tries' => [
+                    'type' => 'integer', 'level' => 'platform', 'default' => 5, 'permission' => $platform,
+                    'rules' => ['' => ['integer', 'min:1', 'max:20']],
+                ],
+                'backoff_seconds' => [
+                    'type' => 'array', 'level' => 'platform', 'default' => [300, 900, 3600, 14400], 'permission' => $platform,
+                    'rules' => ['' => ['array', 'min:1'], '*' => ['integer', 'min:60', 'max:86400']],
+                ],
+            ],
         ],
 
     ],

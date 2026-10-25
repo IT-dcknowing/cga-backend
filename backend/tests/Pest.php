@@ -1,14 +1,19 @@
 <?php
 
+use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Payments\Enums\ChargeKind;
+use App\Domain\Payments\Models\MemberCharge;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Support\Files\PdfConverter;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Testing\TestResponse;
 use Tests\Support\Spa;
 use Tests\TestCase;
 
@@ -109,4 +114,50 @@ function documentBody(GeneratedDocument $document): string
     unlink($path);
 
     return $body;
+}
+
+/**
+ * Somme due avec la TVA par défaut de 18 % en sus du hors taxe (factures, étape 3.13).
+ *
+ * @param  array<string, mixed>  $attributes
+ */
+function taxedCharge(Member $member, int $amountExclTax, ChargeKind $kind = ChargeKind::EntryFee, array $attributes = []): MemberCharge
+{
+    $tax = (int) round($amountExclTax * 0.18);
+
+    return MemberCharge::factory()->create([
+        'member_id' => $member->id, 'kind' => $kind, 'amount_excl_tax' => $amountExclTax, 'tax_rate' => 18, 'tax_amount' => $tax, 'amount' => $amountExclTax + $tax,
+        ...($kind === ChargeKind::Fees ? ['period_start' => '2026-10-01', 'period_end' => '2026-10-31', 'due_date' => '2026-10-01'] : []),
+        ...$attributes,
+    ]);
+}
+
+/**
+ * Espace de l'agent, actif à l'instant (le délai d'inactivité de la session suit les voyages dans le temps).
+ */
+function invoiceSpace(Membership $agent): TestCase
+{
+    return inSpace($agent)->withSession([AuthSession::LAST_ACTIVITY_KEY => now()->getTimestamp()]);
+}
+
+/**
+ * @param  list<string>  $chargeIds
+ * @param  array<string, mixed>  $extra
+ */
+function issueInvoice(Membership $agent, Member $member, array $chargeIds, array $extra = []): TestResponse
+{
+    return invoiceSpace($agent)->postJson('/api/v1/cga/invoices', ['member_id' => $member->id, 'charge_ids' => $chargeIds, ...$extra]);
+}
+
+/**
+ * @param  array<string, mixed>  $payload
+ */
+function certifyManually(Membership $agent, string $invoiceId, array $payload): TestResponse
+{
+    return invoiceSpace($agent)->post("/api/v1/cga/invoices/{$invoiceId}/manual-certification", $payload, ['Accept' => 'application/json']);
+}
+
+function certifiedPdf(): UploadedFile
+{
+    return UploadedFile::fake()->createWithContent('facture-certifiee.pdf', "%PDF-1.4\n% facture certifiée FNE\n%%EOF");
 }

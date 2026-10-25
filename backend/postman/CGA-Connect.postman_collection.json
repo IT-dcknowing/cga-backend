@@ -22795,7 +22795,7 @@
                         "description": "Le droit d'adhésion est payé avant la validation (RG-ADH-02, parcours P2) : paiement saisi, reçu numéroté.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 25000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "raw": "{\n    \"amount\": 29500,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -23447,7 +23447,7 @@
                         "description": "Le droit d'adhésion est payé avant la validation (RG-ADH-02, parcours P2) : paiement saisi, reçu numéroté.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 25000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "raw": "{\n    \"amount\": 29500,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -25264,7 +25264,7 @@
                         "description": "Le droit d'adhésion est payé avant la validation (RG-ADH-02, parcours P2) : paiement saisi, reçu numéroté.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 25000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "raw": "{\n    \"amount\": 29500,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -27250,7 +27250,7 @@
                                     "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
                                     "    const data = pm.response.json().data;",
                                     "    pm.collectionVariables.set(\"pay_charge_id\", data[0].id);",
-                                    "    pm.test(\"Droit d'adhésion à payer\", () => { pm.expect(data[0].kind).to.eql(\"entry_fee\"); pm.expect(data[0].status).to.eql(\"due\"); pm.expect(data[0].balance).to.eql(25000); });",
+                                    "    pm.test(\"Droit d'adhésion à payer, TVA de 18 % en sus\", () => { pm.expect(data[0].kind).to.eql(\"entry_fee\"); pm.expect(data[0].status).to.eql(\"due\"); pm.expect(data[0].amount_excl_tax).to.eql(25000); pm.expect(data[0].tax_amount).to.eql(4500); pm.expect(data[0].balance).to.eql(29500); });",
                                     "})();"
                                 ]
                             }
@@ -27505,7 +27505,7 @@
                         "description": "Le comptable enregistre le solde : le droit d'adhésion est payé.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 15000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"transfer\"\n}",
+                            "raw": "{\n    \"amount\": 19500,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"transfer\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -28920,7 +28920,7 @@
                         "description": "Le droit d'adhésion est payé avant la validation (RG-ADH-02).",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 25000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "raw": "{\n    \"amount\": 29500,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -30259,7 +30259,7 @@
                         "description": "Paiement confirmé d'office : son reçu numéroté est produit aussitôt (F-PAY-02, RG-PAY-02).",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 25000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "raw": "{\n    \"amount\": 29500,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -32732,7 +32732,7 @@
                         "description": "Droit d'adhésion payé, exigé à la validation (RG-ADH-02).",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"amount\": 25000,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
+                            "raw": "{\n    \"amount\": 29500,\n    \"paid_on\": \"{{today}}\",\n    \"method\": \"cash\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -34216,6 +34216,1470 @@
             ]
         },
         {
+            "name": "25. Étape 3.13 — Factures certifiées FNE (mode manuel)",
+            "description": "F-PAY-05, F-PAY-06, RG-FNE-01 à 03, F-ADM-07 : paramétrage « Facturation FNE » du centre (mode manuel par défaut ; le mode API exige une adresse HTTPS d'un hôte autorisé et des identifiants chiffrés), émission d'une facture des sommes dues choisies (n° FAC, hors taxe, TVA de 18 % et TTC calculés par le serveur), aucune remise avant certification, saisie de la certification (n° FNE et PDF certifié exigés), facture certifiée immuable corrigée par un avoir total. Le mode API se rejoue en CI contre le bouchon FakeFneCertifier. Chaque envoi inscrit, paie, valide et facture un nouveau dossier : le dossier se rejoue.",
+            "item": [
+                {
+                    "name": "Facturation FNE — consultation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Pas d'identifiants en clair\", () => pm.expect(pm.response.json().data).to.not.have.property(\"credentials\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoicing-provider",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoicing-provider"
+                            ]
+                        },
+                        "description": "Onglet « Facturation FNE » : mode en vigueur et modes proposés, identifiants jamais renvoyés (4 derniers caractères seulement)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facturation FNE — mode manuel",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Mode manuel, sans identifiants\", () => { pm.expect(data.mode).to.eql(\"manual\"); pm.expect(data.credentials_hint).to.eql(null); });",
+                                    "    pm.test(\"Sell Flow pas encore disponible\", () => pm.expect(data.modes.find(m => m.value === \"sell_flow\").available).to.eql(false));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoicing-provider",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoicing-provider"
+                            ]
+                        },
+                        "description": "Onglet « Facturation FNE » de /cga/parametres : mode manuel, mode par défaut au lancement (RG-FNE-03).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"mode\": \"manual\",\n    \"active\": true,\n    \"fne_number_pattern\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facturation FNE — hôte non autorisé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur sur base_url\", () => pm.expect(pm.response.json().errors).to.have.property(\"base_url\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoicing-provider",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoicing-provider"
+                            ]
+                        },
+                        "description": "L'adresse du service doit être en HTTPS, sur un hôte de la liste blanche integrations.fne.allowed_hosts : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"mode\": \"dgi_api\",\n    \"base_url\": \"http://pirate.example/api\",\n    \"credentials\": \"jeton\",\n    \"active\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facturation FNE — refusée au comptable",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoicing-provider",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoicing-provider"
+                            ]
+                        },
+                        "description": "Le paramétrage est réservé au gérant (integrations.manage) : 403.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"mode\": \"manual\",\n    \"active\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facturation FNE — rien à tester en mode manuel",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur invoicing_test_unavailable\", () => pm.expect(pm.response.json().code).to.eql(\"invoicing_test_unavailable\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoicing-provider/test",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoicing-provider",
+                                "test"
+                            ]
+                        },
+                        "description": "Le mode manuel n'appelle aucun service : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Préparation — brouillon complet",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"inv_ncc\", String(Math.floor(Math.random() * 1e7)).padStart(7, \"0\") + \"F\");",
+                                    "    pm.collectionVariables.set(\"today\", new Date().toISOString().slice(0, 10));",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    pm.collectionVariables.set(\"inv_member_id\", pm.response.json().data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Nouveau dossier du portefeuille CGA, NCC tiré au hasard ; droit d'adhésion 25 000 F HT, soit 29 500 F TTC.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Facture Postman\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{inv_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce de détail\",\n    \"phone\": \"07 07 07 07 07\",\n    \"tax_office_id\": \"{{demo_cdi_id}}\",\n    \"sector_id\": \"{{demo_sector_id}}\",\n    \"address\": \"Cocody, II Plateaux\",\n    \"signatory_name\": \"Koffi Kouassi\",\n    \"signatory_title\": \"Gérant\",\n    \"cga_contract_signed_on\": \"2026-03-01\",\n    \"cga_contract_confirmed\": true,\n    \"entry_fee_amount\": 25000,\n    \"reference_revenue\": {\n        \"year\": 2025,\n        \"amount\": 12000000,\n        \"kind\": \"actual\"\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Préparation — somme due du droit d'adhésion",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"inv_charge_id\", data[0].id);",
+                                    "    pm.test(\"HT, TVA et TTC\", () => { pm.expect(data[0].amount_excl_tax).to.eql(25000); pm.expect(data[0].tax_amount).to.eql(4500); pm.expect(data[0].amount).to.eql(29500); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{inv_member_id}}/charges",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{inv_member_id}}",
+                                "charges"
+                            ]
+                        },
+                        "description": "Droit d'adhésion : 25 000 F HT, TVA 18 % en sus dès la création de la somme due."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — émission",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"invoice_id\", data.id);",
+                                    "    pm.test(\"Numéro FAC\", () => pm.expect(data.number).to.match(/^FAC-DCK-\\d{4}-\\d{5}$/));",
+                                    "    pm.test(\"Montants du serveur\", () => { pm.expect(data.amount_excl_tax).to.eql(25000); pm.expect(data.tax_amount).to.eql(4500); pm.expect(data.amount_incl_tax).to.eql(29500); });",
+                                    "    pm.test(\"En attente, pas de PDF\", () => { pm.expect(data.status).to.eql(\"pending_certification\"); pm.expect(data.pdf).to.eql(null); pm.expect(data.can.certify_manually).to.eql(true); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices"
+                            ]
+                        },
+                        "description": "« + Émettre une facture » (03-APPFLOW `/cga/factures`) : n° FAC, lignes et montants calculés par le serveur ; en mode manuel, en attente de la saisie de la certification.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"member_id\": \"{{inv_member_id}}\",\n    \"charge_ids\": [\n        \"{{inv_charge_id}}\"\n    ],\n    \"amount_incl_tax\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — somme déjà facturée",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur sur charge_ids\", () => pm.expect(pm.response.json().errors).to.have.property(\"charge_ids\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices"
+                            ]
+                        },
+                        "description": "Une somme due ne se facture qu'une fois : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"member_id\": \"{{inv_member_id}}\",\n    \"charge_ids\": [\n        \"{{inv_charge_id}}\"\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — saisie de la certification sans PDF",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur sur file\", () => pm.expect(pm.response.json().errors).to.have.property(\"file\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}/manual-certification",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}",
+                                "manual-certification"
+                            ]
+                        },
+                        "description": "Le mode manuel exige le n° FNE et la facture certifiée en PDF : 422.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "fne_number",
+                                    "value": "FNE-POSTMAN-0001",
+                                    "type": "text"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — saisie de la certification",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Certifiée\", () => { pm.expect(data.status).to.eql(\"certified\"); pm.expect(data.fne_number).to.eql(\"FNE-POSTMAN-0001\"); });",
+                                    "    pm.test(\"PDF remis par lien signé\", () => pm.expect(data.pdf.url).to.include(\"signature=\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}/manual-certification",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}",
+                                "manual-certification"
+                            ]
+                        },
+                        "description": "« Saisir la certification » : n° FNE et PDF certifié ; la facture est certifiée, le PDF déposé devient le document remis à l'adhérent.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "fne_number",
+                                    "value": "FNE-POSTMAN-0001",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/justificatif-demo.pdf"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — une facture certifiée ne s'annule pas",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur invoice_not_cancellable\", () => pm.expect(pm.response.json().code).to.eql(\"invoice_not_cancellable\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}",
+                                "cancel"
+                            ]
+                        },
+                        "description": "RG-FNE-01 : une facture certifiée n'est plus modifiable, elle se corrige par un avoir : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"reason\": \"Erreur\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Avoir — émission",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"credit_note_id\", data.id);",
+                                    "    pm.test(\"Avoir de la facture\", () => { pm.expect(data.type).to.eql(\"credit_note\"); pm.expect(data.original.id).to.eql(pm.collectionVariables.get(\"invoice_id\")); pm.expect(data.amount_incl_tax).to.eql(29500); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}/credit-note",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}",
+                                "credit-note"
+                            ]
+                        },
+                        "description": "« Émettre un avoir » : avoir total, mêmes lignes et montants, n° FAC propre, même cycle de certification.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Avoir — un seul par facture",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur credit_note_exists\", () => pm.expect(pm.response.json().code).to.eql(\"credit_note_exists\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}/credit-note",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}",
+                                "credit-note"
+                            ]
+                        },
+                        "description": "Une facture n'a qu'un avoir : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Avoir — saisie de la certification",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Avoir certifié\", () => pm.expect(pm.response.json().data.status).to.eql(\"certified\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{credit_note_id}}/manual-certification",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{credit_note_id}}",
+                                "manual-certification"
+                            ]
+                        },
+                        "description": "L'avoir certifié libère la somme due, qui peut être facturée de nouveau.",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "fne_number",
+                                    "value": "FNE-POSTMAN-AV-0001",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/justificatif-demo.pdf"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — détail après l'avoir",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Certifiée, avec son avoir\", () => { pm.expect(data.status).to.eql(\"certified\"); pm.expect(data.credit_note.id).to.eql(pm.collectionVariables.get(\"credit_note_id\")); pm.expect(data.can.issue_credit_note).to.eql(false); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}"
+                            ]
+                        },
+                        "description": "La facture d'origine reste certifiée et inchangée ; elle porte son avoir."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Factures — certifiées du centre",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Seulement des factures certifiées\", () => pm.response.json().data.forEach(i => pm.expect(i.status).to.eql(\"certified\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices?filter[status]=certified&sort=-number",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[status]",
+                                    "value": "certified"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "-number"
+                                }
+                            ]
+                        },
+                        "description": "`/cga/factures` filtrée par statut FNE ; le comptable émet les factures (invoices.issue)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Factures — refusées à l'adhérent",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices"
+                            ]
+                        },
+                        "description": "L'adhérent ne voit que le PDF d'une facture certifiée, parmi ses documents : 403."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — inconnue",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ"
+                            ]
+                        },
+                        "description": "Facture inconnue ou d'un autre centre : 404."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — remise d'un PDF déjà remis",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur invoice_not_deliverable\", () => pm.expect(pm.response.json().code).to.eql(\"invoice_not_deliverable\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}/deliver",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}",
+                                "deliver"
+                            ]
+                        },
+                        "description": "Le PDF de la facture certifiée est déjà remis : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Facture — nouvelle soumission refusée",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur invoice_not_resubmittable\", () => pm.expect(pm.response.json().code).to.eql(\"invoice_not_resubmittable\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices/{{invoice_id}}/resubmit",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices",
+                                "{{invoice_id}}",
+                                "resubmit"
+                            ]
+                        },
+                        "description": "Seule une facture rejetée, ou restée en attente après le dernier essai d'un service indisponible, se soumet de nouveau : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Factures — sans session",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 401\", () => pm.response.to.have.status(401));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/invoices",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "invoices"
+                            ]
+                        },
+                        "description": "Sans session : 401."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -34879,6 +36343,26 @@
         },
         {
             "key": "template_id",
+            "value": ""
+        },
+        {
+            "key": "inv_ncc",
+            "value": ""
+        },
+        {
+            "key": "inv_member_id",
+            "value": ""
+        },
+        {
+            "key": "inv_charge_id",
+            "value": ""
+        },
+        {
+            "key": "invoice_id",
+            "value": ""
+        },
+        {
+            "key": "credit_note_id",
             "value": ""
         }
     ]

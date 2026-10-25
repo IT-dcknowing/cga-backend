@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Somme due par l'adhérent à son CGA (F-PAY-02) : droit d'adhésion, échéance d'honoraires d'une
- * période, formation ; montant payé maintenu par les Actions de paiement, état (à payer, payée en
+ * période, formation ; hors taxe, taux et TVA, montant dû toutes taxes comprises ; facture qui la porte
+ * (F-PAY-05) ; montant payé maintenu par les Actions de paiement, état (à payer, payée en
  * partie ou en totalité, impayée depuis…, annulée).
  *
  * @property string $id
@@ -27,7 +28,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property CarbonInterface|null $period_start
  * @property CarbonInterface|null $period_end
  * @property CarbonInterface $due_date
- * @property int $amount
+ * @property int $amount_excl_tax
+ * @property float $tax_rate
+ * @property int $tax_amount
+ * @property int $amount montant dû, toutes taxes comprises
  * @property int $amount_paid
  * @property ChargeStatus $status
  * @property CarbonInterface|null $overdue_since
@@ -59,6 +63,9 @@ class MemberCharge extends Model
             'period_end' => 'immutable_date',
             'due_date' => 'immutable_date',
             'overdue_since' => 'immutable_date',
+            'amount_excl_tax' => 'integer',
+            'tax_rate' => 'float',
+            'tax_amount' => 'integer',
             'amount' => 'integer',
             'amount_paid' => 'integer',
         ];

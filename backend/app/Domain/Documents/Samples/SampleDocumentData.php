@@ -72,8 +72,18 @@ class SampleDocumentData
             'radiation_validated_on' => '15 octobre 2026', 'radiation_reference' => 'REF-000',
         ];
 
+        $invoice = [
+            'invoice_title' => $type === 'credit_note' ? 'FACTURE D\'AVOIR' : 'FACTURE', 'invoice_number' => 'FAC-EXA-2026-00001',
+            'invoice_date' => '20 octobre 2026', 'invoice_reference' => $type === 'credit_note' ? 'Avoir sur la facture n° FAC-EXA-2026-00000 du 1er octobre 2026' : '',
+            'member_name' => 'ENTREPRISE EXEMPLE', 'member_ncc' => '1111111 B', 'member_number' => 'EXA-2026-B00001',
+            'member_address' => 'Abidjan, Cocody', 'amount_excl_tax' => '40 000 FCFA', 'tax_amount' => '7 200 FCFA',
+            'amount_incl_tax' => '47 200 FCFA', 'amount_words' => 'quarante-sept mille deux cents francs CFA',
+            'fne_number' => 'FNE-EXEMPLE-0001', 'fne_certified_at' => '20 octobre 2026 à 10 h 00', 'fne_stamp' => 'CACHET-EXEMPLE',
+        ];
+
         return match ($type) {
             'membership_contract', 'membership_certificate' => [...$cga, ...$member],
+            'invoice', 'credit_note' => [...$cga, ...$invoice],
             'receipt' => [...$cga, ...$receipt],
             'radiation_notice' => [...$cga, ...$notice],
             'quarterly_report_docx' => [...$cga, ...$report],
@@ -92,6 +102,12 @@ class SampleDocumentData
             return ['line_label' => [
                 ['line_label' => 'Droit d\'adhésion', 'line_amount' => '25 000 FCFA'],
                 ['line_label' => 'Honoraires du 01/10/2026 au 31/10/2026', 'line_amount' => '15 000 FCFA'],
+            ]];
+        }
+        if (in_array($type, ['invoice', 'credit_note'], true)) {
+            return ['line_label' => [
+                ['line_label' => 'Droit d\'adhésion', 'line_quantity' => '1', 'line_unit_amount' => '25 000 FCFA', 'line_tax_rate' => '18 %', 'line_amount' => '25 000 FCFA'],
+                ['line_label' => 'Honoraires du 01/10/2026 au 31/10/2026', 'line_quantity' => '1', 'line_unit_amount' => '15 000 FCFA', 'line_tax_rate' => '18 %', 'line_amount' => '15 000 FCFA'],
             ]];
         }
         if ($type !== 'quarterly_report_docx') {
@@ -231,6 +247,7 @@ class SampleDocumentData
 
         $qr = (new PngWriter)->write(new QrCode(data: $verificationUrl, size: 240, margin: 8));
         $qr->saveToFile($images['qr_code'] = $directory.'/qr.png');
+        (new PngWriter)->write(new QrCode(data: 'FNE-EXEMPLE-0001', size: 240, margin: 8))->saveToFile($images['fne_qr'] = $directory.'/fne-qr.png');
 
         return $images;
     }

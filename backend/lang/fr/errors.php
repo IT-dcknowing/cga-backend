@@ -96,6 +96,14 @@ return [
     'attestation_not_blocked' => 'L\'attestation de cet adhérent n\'est pas bloquée.',
     'certificate_campaign_empty' => 'Aucun adhérent n\'attend son attestation de l\'année.',
     'template_already_active' => 'Cette version du modèle est déjà active.',
+    'certification_mode_unavailable' => 'Le mode de certification FNE du centre n\'est pas encore disponible : choisissez le mode manuel dans « Facturation FNE ».',
+    'invoice_not_awaiting_manual_certification' => 'Seule une facture en attente de certification, en mode manuel, reçoit une certification saisie.',
+    'invoice_not_resubmittable' => 'Seule une facture rejetée, ou restée en attente après le dernier essai d\'un service indisponible, se soumet de nouveau.',
+    'invoice_not_cancellable' => 'Seule une facture jamais certifiée et qui n\'est pas en cours d\'envoi au service s\'annule ; une facture certifiée se corrige par un avoir.',
+    'invoice_not_deliverable' => 'Cette facture n\'est pas certifiée, ou son PDF est déjà remis.',
+    'credit_note_unavailable' => 'Un avoir ne s\'émet que sur une facture certifiée.',
+    'credit_note_exists' => 'Cette facture a déjà un avoir.',
+    'invoicing_test_unavailable' => 'Le mode manuel n\'appelle aucun service : rien à tester.',
     'template_variables_mismatch' => 'Les variables de cette version ne correspondent pas à celles que la plateforme remplit : corrigez le modèle et déposez-le de nouveau.',
 
     // Référentiels (RG-DATA-05)

@@ -28,7 +28,11 @@ use App\Domain\Notifications\Providers\LogSmsProvider;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Organizations\Policies\OrganizationPolicy;
 use App\Domain\Payments\Events\PaymentConfirmed;
+use App\Domain\Payments\Models\Invoice;
+use App\Domain\Payments\Models\InvoicingProvider;
 use App\Domain\Payments\Models\MemberPayment;
+use App\Domain\Payments\Policies\InvoicePolicy;
+use App\Domain\Payments\Policies\InvoicingProviderPolicy;
 use App\Domain\Payments\Policies\PaymentPolicy;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
@@ -131,6 +135,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Member::class, MemberPolicy::class);
         Gate::policy(BusinessReferrer::class, ReferrerPolicy::class);
         Gate::policy(MemberPayment::class, PaymentPolicy::class);
+        Gate::policy(Invoice::class, InvoicePolicy::class);
+        Gate::policy(InvoicingProvider::class, InvoicingProviderPolicy::class);
 
         // Documents officiels produits ou déposés (M08).
         Gate::policy(GeneratedDocument::class, DocumentPolicy::class);

@@ -38,6 +38,25 @@ final class DocumentFormat
     }
 
     /**
+     * Date et heure (20 octobre 2026 à 10 h 05), pour l'horodatage d'une certification.
+     */
+    public static function dateTime(?CarbonInterface $moment): string
+    {
+        return $moment === null ? self::empty() : (string) __('documents.date_time', [
+            'date' => self::date($moment),
+            'time' => CarbonImmutable::instance($moment)->setTimezone((string) config('app.timezone'))->format('H \h i'),
+        ]);
+    }
+
+    /**
+     * Taux en pourcentage (18 %, 9,5 %).
+     */
+    public static function rate(float|int $rate): string
+    {
+        return (string) __('documents.rate', ['rate' => rtrim(rtrim(number_format((float) $rate, 2, ',', ' '), '0'), ',')]);
+    }
+
+    /**
      * Date courte (02/01/2026), pour les tableaux et les numéros datés.
      */
     public static function shortDate(?CarbonInterface $date): string

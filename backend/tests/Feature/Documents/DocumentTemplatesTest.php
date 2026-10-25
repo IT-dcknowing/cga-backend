@@ -28,10 +28,10 @@ function realDataOfMockup(): array
     ];
 }
 
-dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
+dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
 
 it('déclare chaque modèle de la liste', function () {
-    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
+    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
 });
 
 it('ne contient aucune donnée réelle de la maquette, même dans un attribut ou les propriétés', function (string $type) {
@@ -59,7 +59,7 @@ it('porte exactement les variables déclarées (modèles Word)', function (strin
 
     expect(app(DocxTemplateRenderer::class)->variables($template['path']))->toBe(array_values(array_unique($expected)))
         ->and(array_keys(app(DocxTemplateRenderer::class)->framedImages($template['path'])))->toBe($template['framed_images'] ?? []);
-})->with(['membership_contract', 'membership_certificate', 'receipt', 'radiation_notice', 'quarterly_report_docx']);
+})->with(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx']);
 
 it('RG-DOC-02 ne porte jamais la mention « signature électronique »', function (string $type) {
     foreach (templateParts(config("documents.templates.{$type}.path")) as $xml) {
