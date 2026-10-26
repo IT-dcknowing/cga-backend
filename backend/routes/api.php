@@ -18,6 +18,7 @@ use App\Domain\Imports\Http\Controllers\MemberImportController;
 use App\Domain\Members\Http\Controllers\MemberAccessController;
 use App\Domain\Members\Http\Controllers\MemberController;
 use App\Domain\Members\Http\Controllers\MemberHistoryController;
+use App\Domain\Members\Http\Controllers\MemberHomeController;
 use App\Domain\Members\Http\Controllers\MemberTransferController;
 use App\Domain\Members\Http\Controllers\PieceController;
 use App\Domain\Members\Http\Controllers\PortfolioController;
@@ -278,6 +279,7 @@ Route::prefix('v1')->group(function (): void {
 
     // Espace de l'adhérent : ses honoraires et la déclaration d'un paiement (F-PAY-03), ses documents en PDF (RG-DOC-04).
     Route::middleware(['auth', 'tenant'])->prefix('member')->name('member.')->group(function (): void {
+        Route::get('home', [MemberHomeController::class, 'show'])->name('home');
         Route::get('documents', [MemberSpaceDocumentController::class, 'index'])->name('documents.index');
         Route::get('charges', [MemberSpacePaymentController::class, 'charges'])->name('charges.index');
         Route::get('payments', [MemberSpacePaymentController::class, 'index'])->name('payments.index');

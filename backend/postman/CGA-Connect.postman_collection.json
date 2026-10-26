@@ -35779,7 +35779,7 @@
             ]
         },
         {
-            "name": "26. Frontend 2.7 à 2.9 — Liste des adhérents, secteur proposé, historique",
+            "name": "26. Frontend du lot 2 — Liste des adhérents, secteur proposé, historique, accueil adhérent",
             "item": [
                 {
                     "name": "Adhérents — tous les portefeuilles",
@@ -36313,6 +36313,125 @@
                             ]
                         },
                         "description": "per_page est borné par pagination.max."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Accueil adhérent — son dossier et son CGA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Dossier et CGA\", () => { pm.expect(data.member.company_name).to.be.a(\"string\"); pm.expect(data.organization.name).to.be.a(\"string\"); });",
+                                    "    pm.test(\"Jamais l’apporteur\", () => pm.expect(JSON.stringify(data)).to.not.include(\"referrer\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/home",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "home"
+                            ]
+                        },
+                        "description": "Accueil de l’espace adhérent, version minimale (étape 2.11) : son dossier, son accès, les coordonnées de son CGA."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Accueil adhérent — refusé à un agent",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/home",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "home"
+                            ]
+                        },
+                        "description": "Réservé aux accès adhérents (principal ou secondaire)."
                     },
                     "response": []
                 }

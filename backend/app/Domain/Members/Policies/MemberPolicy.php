@@ -29,6 +29,14 @@ class MemberPolicy
     }
 
     /**
+     * Accueil de l'espace adhérent (F-DSH-03) : son propre dossier, depuis un accès adhérent actif.
+     */
+    public function viewOwn(User $user): bool
+    {
+        return $this->inCga() && $this->context->memberId() !== null;
+    }
+
+    /**
      * Liste d'un portefeuille (RG-PTF-02).
      */
     public function viewPortfolio(User $user, Portfolio $portfolio): bool
