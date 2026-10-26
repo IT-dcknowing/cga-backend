@@ -41,7 +41,9 @@ class MemberController extends BaseApiController
     public function index(ListMembersRequest $request, SettingsService $settings): AnonymousResourceCollection|JsonResponse
     {
         return $this->handle(function () use ($request, $settings): AnonymousResourceCollection {
-            Gate::authorize('viewPortfolio', [Member::class, $request->portfolio()]);
+            foreach ($request->portfolios() as $portfolio) {
+                Gate::authorize('viewPortfolio', [Member::class, $portfolio]);
+            }
 
             $members = QueryBuilder::for(Member::query()->with(self::WITH), $request->listQuery())
                 ->allowedFilters(...$request->queryFilters())

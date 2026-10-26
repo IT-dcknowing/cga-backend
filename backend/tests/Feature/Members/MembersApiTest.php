@@ -278,6 +278,27 @@ describe('liste et droits', function () {
         inSpace($manager)->getJson('/api/v1/cga/members?filter[regime]=XYZ')->assertUnprocessable();
     });
 
+    it('liste les deux portefeuilles avec « Tous », et plusieurs statuts à la fois (onglet « Radiés / clos »)', function () {
+        $manager = cgaAgent();
+        $org = $manager->organization_id;
+        Member::factory()->active()->create(['organization_id' => $org, 'company_name' => 'ACTIF CGA']);
+        Member::factory()->active()->create(['organization_id' => $org, 'company_name' => 'RADIÉ CGA', 'status' => MemberStatus::Radiated]);
+        Member::factory()->cabinet()->create(['organization_id' => $org, 'company_name' => 'CLOS CABINET', 'status' => MemberStatus::Closed]);
+        Member::factory()->cabinet()->create(['organization_id' => $org, 'company_name' => 'KOUADIO, FILS']);
+
+        $names = fn (string $query): array => array_column((array) inSpace($manager)->getJson('/api/v1/cga/members'.$query)->assertOk()->json('data'), 'company_name');
+
+        expect($names('?filter[portfolio]=all'))->toBe(['ACTIF CGA', 'CLOS CABINET', 'KOUADIO, FILS', 'RADIÉ CGA'])
+            ->and($names('?filter[portfolio]=all&filter[status]=radiated,closed'))->toBe(['CLOS CABINET', 'RADIÉ CGA'])
+            ->and($names('?filter[status]=radiated,closed'))->toBe(['RADIÉ CGA'])
+            // Une virgule de la recherche reste dans le texte cherché.
+            ->and($names('?filter[portfolio]=all&filter[search]=kouadio, fils'))->toBe(['KOUADIO, FILS']);
+
+        foreach (['?filter[status]=radiated,inconnu', '?filter[status]=,', '?filter[status][]=active', '?filter[portfolio]=tous'] as $query) {
+            inSpace($manager)->getJson('/api/v1/cga/members'.$query)->assertUnprocessable();
+        }
+    });
+
     it('applique la matrice des droits du centre', function (Role $role, bool $view, bool $create, bool $update, bool $cabinet) {
         $agent = cgaAgent($role);
         $member = Member::factory()->create(['organization_id' => $agent->organization_id]);

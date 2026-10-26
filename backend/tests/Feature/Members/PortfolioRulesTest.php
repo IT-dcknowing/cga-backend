@@ -114,6 +114,8 @@ it('RG-PTF-02 réserve le portefeuille Cabinet au droit de le voir', function ()
 
     inSpace($agent)->getJson("/api/v1/cga/members/{$cabinet->id}")->assertForbidden();
     inSpace($agent)->getJson('/api/v1/cga/members?filter[portfolio]=cabinet')->assertForbidden();
+    inSpace($agent)->getJson('/api/v1/cga/members?filter[portfolio]=all')->assertForbidden();
     inSpace($agent)->getJson('/api/v1/cga/members')->assertOk()->assertJsonCount(0, 'data');
     inSpace($manager)->getJson('/api/v1/cga/members?filter[portfolio]=cabinet')->assertOk()->assertJsonCount(1, 'data');
+    inSpace($manager)->getJson('/api/v1/cga/members?filter[portfolio]=all')->assertOk()->assertJsonCount(1, 'data');
 });

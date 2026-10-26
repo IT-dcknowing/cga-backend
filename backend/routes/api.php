@@ -17,6 +17,7 @@ use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
 use App\Domain\Members\Http\Controllers\MemberAccessController;
 use App\Domain\Members\Http\Controllers\MemberController;
+use App\Domain\Members\Http\Controllers\MemberHistoryController;
 use App\Domain\Members\Http\Controllers\MemberTransferController;
 use App\Domain\Members\Http\Controllers\PieceController;
 use App\Domain\Members\Http\Controllers\PortfolioController;
@@ -40,6 +41,7 @@ use App\Domain\Referentials\Http\Controllers\NationalReferenceController;
 use App\Domain\Referentials\Http\Controllers\ReferenceDataController;
 use App\Domain\Referentials\Http\Controllers\RegionalDirectorateController;
 use App\Domain\Referentials\Http\Controllers\SectorController;
+use App\Domain\Referentials\Http\Controllers\SectorProposalController;
 use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
 use App\Domain\Users\Http\Controllers\AgentController;
 use App\Domain\Users\Http\Controllers\RolePermissionController;
@@ -199,6 +201,7 @@ Route::prefix('v1')->group(function (): void {
         Route::put('{member}', [MemberController::class, 'update'])->name('update');
         Route::delete('{member}', [MemberController::class, 'destroy'])->name('destroy');
         Route::post('{member}/validate', [MemberController::class, 'validate'])->name('validate');
+        Route::get('{member}/history', [MemberHistoryController::class, 'index'])->name('history.index');
         Route::get('{member}/regimes', [RegimeController::class, 'index'])->name('regimes.index');
         Route::post('{member}/regimes', [RegimeController::class, 'store'])->name('regimes.store');
         Route::post('{member}/radiation', [RadiationController::class, 'store'])->name('radiation.store');
@@ -229,6 +232,8 @@ Route::prefix('v1')->group(function (): void {
 
     // Barème du CGA (F-PAY-01) et paiements du centre, dont les déclarations des adhérents à examiner (F-PAY-03).
     Route::middleware(['auth', 'tenant'])->prefix('cga')->name('cga.')->group(function (): void {
+        // Secteur proposé à l'inscription d'un adhérent (RG-REF-01).
+        Route::post('sectors', [SectorProposalController::class, 'store'])->name('sectors.store');
         Route::get('fee-schedule', [FeeScheduleController::class, 'show'])->name('fee-schedule.show');
         Route::put('fee-schedule', [FeeScheduleController::class, 'update'])->name('fee-schedule.update');
         // Facturation FNE du centre (F-ADM-07, RG-FNE-03).

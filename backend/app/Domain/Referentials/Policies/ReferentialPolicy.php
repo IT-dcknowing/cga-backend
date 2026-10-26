@@ -2,6 +2,7 @@
 
 namespace App\Domain\Referentials\Policies;
 
+use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Users\Models\User;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Model;
@@ -29,6 +30,16 @@ class ReferentialPolicy
     public function create(User $user): bool
     {
         return $this->manages();
+    }
+
+    /**
+     * « Proposer un secteur » (RG-REF-01) : un agent d'un CGA qui inscrit les adhérents.
+     */
+    public function propose(User $user): bool
+    {
+        return $this->context->has()
+            && $this->context->organizationType() === OrganizationType::Cga
+            && $this->context->allows('members.create');
     }
 
     public function update(User $user, Model $referential): bool

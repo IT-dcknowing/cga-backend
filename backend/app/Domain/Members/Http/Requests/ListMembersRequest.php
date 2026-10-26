@@ -10,37 +10,49 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Members\Support\Ncc;
 use App\Support\Http\ListRequest;
 use App\Support\Tenancy\TenantContext;
+use App\Support\Validation\Rules\EnumList;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Spatie\QueryBuilder\AllowedFilter;
 
 /**
- * GET /api/v1/cga/members : adhérents du centre (F-ADH-01), par portefeuille ; recherche par raison
- * sociale, sigle, NCC, numéros (d'adhésion, client, ancien) ou téléphone ; filtres par statut,
- * régime, secteur, CDI, pièces, apporteur, date d'adhésion.
+ * GET /api/v1/cga/members : adhérents du centre (F-ADH-01), par portefeuille ou tous ; recherche par
+ * raison sociale, sigle, NCC, numéros (d'adhésion, client, ancien) ou téléphone ; filtres par statuts
+ * (onglet « Radiés / clos » : radiated,closed), régime, secteur, CDI, pièces, apporteur, date
+ * d'adhésion.
  */
 class ListMembersRequest extends ListRequest
 {
+    /**
+     * « Tous » du sélecteur de portefeuille (03-APPFLOW §4.3) : les deux portefeuilles.
+     */
+    public const ALL_PORTFOLIOS = 'all';
+
     public function authorize(): bool
     {
         return Gate::allows('viewAny', Member::class);
     }
 
     /**
-     * Portefeuille de la liste (CGA par défaut) : celui du Cabinet demande members.cabinet.view.
+     * Portefeuilles de la liste (CGA par défaut) : celui du Cabinet, seul ou avec « Tous », demande
+     * members.cabinet.view.
+     *
+     * @return list<Portfolio>
      */
-    public function portfolio(): Portfolio
+    public function portfolios(): array
     {
-        return Portfolio::from((string) ($this->validated('filter.portfolio') ?? Portfolio::Cga->value));
+        $portfolio = (string) ($this->validated('filter.portfolio') ?? Portfolio::Cga->value);
+
+        return $portfolio === self::ALL_PORTFOLIOS ? Portfolio::cases() : [Portfolio::from($portfolio)];
     }
 
     protected function filters(): array
     {
         return [
             'search' => ['string', 'max:100'],
-            'portfolio' => [Rule::enum(Portfolio::class)],
-            'status' => [Rule::enum(MemberStatus::class)],
+            'portfolio' => [Rule::in([...array_column(Portfolio::cases(), 'value'), self::ALL_PORTFOLIOS])],
+            'status' => ['string', 'max:100', new EnumList(MemberStatus::class)],
             'regime' => [Rule::enum(TaxRegime::class)],
             'sector_id' => ['string', 'max:26'],
             'tax_office_id' => ['string', 'max:26'],
@@ -64,12 +76,14 @@ class ListMembersRequest extends ListRequest
     {
         return [
             AllowedFilter::callback('search', static function (Builder $members, mixed $term): void {
-                $text = mb_strtolower(trim((string) $term));
+                // Une virgule de la saisie ne fait pas une liste de valeurs (« Kouadio, Fils »).
+                $text = mb_strtolower(trim(is_array($term) ? implode(',', $term) : (string) $term));
                 $members->where(static fn (Builder $search) => $search
                     ->where('search_text', 'like', '%'.addcslashes($text, '\\%_').'%')
                     ->orWhere('ncc', Ncc::normalize($text)));
             }),
-            AllowedFilter::exact('portfolio')->default(Portfolio::Cga->value),
+            AllowedFilter::callback('portfolio', static fn (Builder $members, mixed $portfolio) => $portfolio === self::ALL_PORTFOLIOS ? $members : $members->where('portfolio', $portfolio))
+                ->default(Portfolio::Cga->value),
             AllowedFilter::exact('status'),
             AllowedFilter::exact('regime'),
             AllowedFilter::exact('sector_id'),

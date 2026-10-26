@@ -264,6 +264,14 @@ return [
                     'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
                 ],
             ],
+            // Code d'un secteur proposé par un CGA (RG-REF-01) : séquence « sector_proposal » du centre ; le
+            // code produit compte 10 caractères au plus (sectors.code), contrôlé à chaque proposition.
+            'sector_proposal' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => '{ABR}{N:4}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:20', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
             // Factures et avoirs (F-PAY-05, F-DOC-01) : séquence « invoice » du centre par année, sans trou.
             'invoice' => [
                 'pattern' => [
