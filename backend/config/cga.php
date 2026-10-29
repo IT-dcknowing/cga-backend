@@ -316,9 +316,10 @@ return [
     ],
 
     // Obligations fiscales et sociales (M07) : version portée par les obligations locales d'un CGA,
-    // hors du catalogue national versionné (RG-OBL-01).
+    // hors du catalogue national versionné (RG-OBL-01) ; borne de saisie des montants (F CFA).
     'obligations' => [
         'local_catalog_version' => 'local',
+        'max_amount' => 100_000_000_000,
     ],
 
     /*

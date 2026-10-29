@@ -26,6 +26,7 @@ use App\Domain\Members\Http\Controllers\RadiationController;
 use App\Domain\Members\Http\Controllers\ReferrerController;
 use App\Domain\Members\Http\Controllers\RegimeController;
 use App\Domain\Obligations\Http\Controllers\MemberObligationController;
+use App\Domain\Obligations\Http\Controllers\ObligationInstanceController;
 use App\Domain\Obligations\Http\Controllers\ObligationTypeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
@@ -223,6 +224,8 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{member}/obligations', [MemberObligationController::class, 'index'])->name('obligations.index');
         Route::post('{member}/obligations', [MemberObligationController::class, 'store'])->name('obligations.store');
         Route::post('{member}/obligations/review', [MemberObligationController::class, 'review'])->name('obligations.review');
+        Route::get('{member}/obligation-instances', [ObligationInstanceController::class, 'index'])->name('obligation-instances.index');
+        Route::post('{member}/obligation-instances', [ObligationInstanceController::class, 'store'])->name('obligation-instances.store');
         Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
         Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
         Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
@@ -233,6 +236,10 @@ Route::prefix('v1')->group(function (): void {
             Route::post('{member}/accesses/{access}/enable', [MemberAccessController::class, 'enable'])->name('accesses.enable');
             Route::post('{member}/payments/{payment}/confirm', [MemberPaymentController::class, 'confirm'])->name('payments.confirm');
             Route::post('{member}/payments/{payment}/reject', [MemberPaymentController::class, 'reject'])->name('payments.reject');
+            Route::post('{member}/obligation-instances/{obligationInstance}/done', [ObligationInstanceController::class, 'done'])->name('obligation-instances.done');
+            Route::put('{member}/obligation-instances/{obligationInstance}/amount', [ObligationInstanceController::class, 'amount'])->name('obligation-instances.amount');
+            Route::post('{member}/obligation-instances/{obligationInstance}/payments', [ObligationInstanceController::class, 'payment'])->name('obligation-instances.payments');
+            Route::put('{member}/obligation-instances/{obligationInstance}/diligence', [ObligationInstanceController::class, 'diligence'])->name('obligation-instances.diligence');
         });
     });
 

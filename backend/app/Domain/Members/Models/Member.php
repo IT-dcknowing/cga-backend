@@ -12,6 +12,7 @@ use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\PiecesStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Enums\TaxRegime;
+use App\Domain\Obligations\Models\ObligationInstance;
 use App\Domain\Payments\Enums\ChargeKind;
 use App\Domain\Payments\Enums\ChargeStatus;
 use App\Domain\Payments\Models\MemberCharge;
@@ -324,6 +325,16 @@ class Member extends Model
     public function payments(): HasMany
     {
         return $this->hasMany(MemberPayment::class);
+    }
+
+    /**
+     * Échéances des obligations du dossier (F-OBL-04).
+     *
+     * @return HasMany<ObligationInstance, $this>
+     */
+    public function obligationInstances(): HasMany
+    {
+        return $this->hasMany(ObligationInstance::class);
     }
 
     /**
