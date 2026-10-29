@@ -25,9 +25,11 @@ use App\Domain\Members\Http\Controllers\PortfolioController;
 use App\Domain\Members\Http\Controllers\RadiationController;
 use App\Domain\Members\Http\Controllers\ReferrerController;
 use App\Domain\Members\Http\Controllers\RegimeController;
+use App\Domain\Obligations\Http\Controllers\CenterObligationController;
 use App\Domain\Obligations\Http\Controllers\MemberObligationController;
 use App\Domain\Obligations\Http\Controllers\MemberSpaceObligationController;
 use App\Domain\Obligations\Http\Controllers\ObligationInstanceController;
+use App\Domain\Obligations\Http\Controllers\ObligationPlanningController;
 use App\Domain\Obligations\Http\Controllers\ObligationTypeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
@@ -311,6 +313,15 @@ Route::prefix('v1')->group(function (): void {
         Route::get('suggestions', [ObligationTypeController::class, 'suggestions'])->name('suggestions');
         Route::post('/', [ObligationTypeController::class, 'store'])->name('store');
         Route::put('{obligationType}', [ObligationTypeController::class, 'update'])->name('update');
+    });
+
+    // Planning des échéances du portefeuille (F-OBL-06) et obligations propres du centre (F-OBL-07).
+    Route::middleware(['auth', 'tenant'])->prefix('cga')->name('cga.')->group(function (): void {
+        Route::get('obligation-planning', [ObligationPlanningController::class, 'index'])->name('obligation-planning.index');
+        Route::get('obligation-planning/members', [ObligationPlanningController::class, 'members'])->name('obligation-planning.members');
+        Route::get('center-obligations', [CenterObligationController::class, 'index'])->name('center-obligations.index');
+        Route::post('center-obligations', [CenterObligationController::class, 'store'])->name('center-obligations.store');
+        Route::put('center-obligations/{centerObligation}', [CenterObligationController::class, 'update'])->name('center-obligations.update');
     });
 
     // Apporteurs d'affaires du centre (sous-portefeuille « Accessoires », RG-PTF-06).
