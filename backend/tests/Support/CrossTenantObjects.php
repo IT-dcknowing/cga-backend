@@ -152,6 +152,7 @@ final class CrossTenantObjects
             'reference-data.preview:dataset' => $dataset,
             'reference-data.apply:dataset' => $dataset,
             'reference-data.validate:dataset' => $dataset,
+            'network.obligation-catalog.validate:version' => 'Version du catalogue national des obligations (F-OBL-01) : commune à tout le réseau, elle ne désigne aucun objet d\'une organisation ; une version inconnue répond 404.',
             'auth.invitations.show:invitationToken' => $invitationToken,
             'auth.invitations.accept:invitationToken' => $invitationToken,
             'public.verify:verificationCode' => 'Code aléatoire du QR d\'un document (page publique, F-DOC-04) : il désigne le document sans identifiant ; un code inconnu répond 404.',

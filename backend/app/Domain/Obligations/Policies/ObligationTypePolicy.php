@@ -11,6 +11,7 @@ use App\Support\Tenancy\TenantContext;
  * Catalogue des obligations vu d'un CGA (F-OBL-01, RG-OBL-01) : lu par les agents qui voient les
  * dossiers ou gèrent les obligations ; obligations locales créées et modifiées avec « Gérer les
  * obligations », seulement celles du centre — jamais le catalogue national ni celles d'un autre CGA.
+ * Le catalogue national se gère depuis le réseau.
  */
 class ObligationTypePolicy
 {
@@ -29,6 +30,17 @@ class ObligationTypePolicy
     public function update(User $user, ObligationType $type): bool
     {
         return $this->create($user) && $type->organization_id === $this->context->organizationId();
+    }
+
+    /**
+     * Catalogue national (F-OBL-01, RG-DATA-04) : versions, import d'une nouvelle version avec aperçu
+     * de ses effets, validation ; CNCGA et administrateur de la plateforme (referentials.manage).
+     */
+    public function manageCatalog(User $user): bool
+    {
+        return $this->context->has()
+            && in_array($this->context->organizationType(), [OrganizationType::Cncga, OrganizationType::Platform], true)
+            && $this->context->allows('referentials.manage');
     }
 
     private function inCga(): bool

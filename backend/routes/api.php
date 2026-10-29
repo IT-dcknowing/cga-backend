@@ -28,6 +28,7 @@ use App\Domain\Members\Http\Controllers\RegimeController;
 use App\Domain\Obligations\Http\Controllers\CenterObligationController;
 use App\Domain\Obligations\Http\Controllers\MemberObligationController;
 use App\Domain\Obligations\Http\Controllers\MemberSpaceObligationController;
+use App\Domain\Obligations\Http\Controllers\ObligationCatalogController;
 use App\Domain\Obligations\Http\Controllers\ObligationInstanceController;
 use App\Domain\Obligations\Http\Controllers\ObligationPlanningController;
 use App\Domain\Obligations\Http\Controllers\ObligationTypeController;
@@ -313,6 +314,15 @@ Route::prefix('v1')->group(function (): void {
         Route::get('suggestions', [ObligationTypeController::class, 'suggestions'])->name('suggestions');
         Route::post('/', [ObligationTypeController::class, 'store'])->name('store');
         Route::put('{obligationType}', [ObligationTypeController::class, 'update'])->name('update');
+    });
+
+    // Catalogue national des obligations (F-OBL-01, RG-DATA-04) : versions, aperçu des effets d'une
+    // nouvelle version sur les dossiers, application, validation par le CNCGA.
+    Route::middleware(['auth', 'tenant'])->prefix('network/obligation-catalog')->name('network.obligation-catalog.')->group(function (): void {
+        Route::get('/', [ObligationCatalogController::class, 'index'])->name('index');
+        Route::post('preview', [ObligationCatalogController::class, 'preview'])->name('preview');
+        Route::post('apply', [ObligationCatalogController::class, 'apply'])->name('apply');
+        Route::post('{version}/validate', [ObligationCatalogController::class, 'validateVersion'])->name('validate');
     });
 
     // Planning des échéances du portefeuille (F-OBL-06) et obligations propres du centre (F-OBL-07).
