@@ -10,6 +10,7 @@ use App\Domain\Obligations\Enums\TaxNature;
 use App\Domain\Obligations\Models\ObligationType;
 use App\Domain\Obligations\Support\DueRule;
 use App\Domain\Referentials\Enums\DataStatus;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -37,10 +38,47 @@ class LoadObligationCatalog
      */
     public function execute(array $catalog): int
     {
-        $validated = Validator::make($catalog, $this->rules(), [], ['version' => __('obligations.catalog_version')])->validate();
-        $version = (string) $validated['version'];
+        return $this->write($this->validate($catalog));
+    }
 
-        return DB::transaction(static function () use ($validated, $version): int {
+    /**
+     * Catalogue contrôlé, prêt à écrire.
+     *
+     * @param  array<string, mixed>  $catalog
+     * @return array{version: string, obligations: list<array<string, mixed>>}
+     *
+     * @throws ValidationException catalogue invalide
+     */
+    public function validate(array $catalog): array
+    {
+        $validated = Validator::make($catalog, $this->rules(), [], ['version' => __('obligations.catalog_version')])->validate();
+
+        return ['version' => (string) $validated['version'], 'obligations' => array_values($validated['obligations'])];
+    }
+
+    /**
+     * Obligations de la version, par code, sans rien écrire (aperçu des effets, RG-DATA-04).
+     *
+     * @param  array{version: string, obligations: list<array<string, mixed>>}  $validated
+     * @return Collection<string, ObligationType>
+     */
+    public function types(array $validated): Collection
+    {
+        return new Collection(array_combine(
+            array_map(static fn (array $entry): string => (string) $entry['code'], $validated['obligations']),
+            array_map(fn (array $entry): ObligationType => $this->fill(new ObligationType, $validated['version'], $entry), $validated['obligations']),
+        ));
+    }
+
+    /**
+     * @param  array{version: string, obligations: list<array<string, mixed>>}  $validated
+     * @return int nombre d'obligations chargées
+     */
+    public function write(array $validated): int
+    {
+        $version = $validated['version'];
+
+        return DB::transaction(function () use ($validated, $version): int {
             foreach ($validated['obligations'] as $entry) {
                 $type = ObligationType::query()
                     ->whereNull('organization_id')
@@ -48,27 +86,7 @@ class LoadObligationCatalog
                     ->where('code', $entry['code'])
                     ->first() ?? new ObligationType;
 
-                $type->organization_id = null;
-                $type->catalog_version = $version;
-                $type->code = $entry['code'];
-                $type->label = $entry['label'];
-                $type->category = ObligationCategory::from($entry['category']);
-                $type->authority = $entry['authority'];
-                $type->platform = $entry['platform'] ?? null;
-                $type->kind = ObligationKind::from($entry['kind']);
-                $type->periodicity = ObligationPeriodicity::from($entry['periodicity']);
-                $type->due_rule = $entry['due_rule'];
-                $type->applicability = [
-                    'regimes' => $entry['applicability']['regimes'] ?? [],
-                    'min_employees' => $entry['applicability']['min_employees'] ?? null,
-                    'sectors' => $entry['applicability']['sectors'] ?? [],
-                ];
-                $type->tax_nature = isset($entry['tax_nature']) ? TaxNature::from($entry['tax_nature']) : null;
-                $type->has_abatement = (bool) ($entry['has_abatement'] ?? false);
-                $type->creates_payment_on_done = (bool) ($entry['creates_payment_on_done'] ?? true);
-                $type->legal_basis = $entry['legal_basis'] ?? null;
-                $type->active = true;
-
+                $this->fill($type, $version, $entry);
                 if (! $type->exists) {
                     $type->data_status = DataStatus::Provisional;
                 }
@@ -78,6 +96,35 @@ class LoadObligationCatalog
 
             return count($validated['obligations']);
         });
+    }
+
+    /**
+     * @param  array<string, mixed>  $entry
+     */
+    private function fill(ObligationType $type, string $version, array $entry): ObligationType
+    {
+        $type->organization_id = null;
+        $type->catalog_version = $version;
+        $type->code = $entry['code'];
+        $type->label = $entry['label'];
+        $type->category = ObligationCategory::from($entry['category']);
+        $type->authority = $entry['authority'];
+        $type->platform = $entry['platform'] ?? null;
+        $type->kind = ObligationKind::from($entry['kind']);
+        $type->periodicity = ObligationPeriodicity::from($entry['periodicity']);
+        $type->due_rule = $entry['due_rule'];
+        $type->applicability = [
+            'regimes' => $entry['applicability']['regimes'] ?? [],
+            'min_employees' => $entry['applicability']['min_employees'] ?? null,
+            'sectors' => $entry['applicability']['sectors'] ?? [],
+        ];
+        $type->tax_nature = isset($entry['tax_nature']) ? TaxNature::from($entry['tax_nature']) : null;
+        $type->has_abatement = (bool) ($entry['has_abatement'] ?? false);
+        $type->creates_payment_on_done = (bool) ($entry['creates_payment_on_done'] ?? true);
+        $type->legal_basis = $entry['legal_basis'] ?? null;
+        $type->active = true;
+
+        return $type;
     }
 
     /**
