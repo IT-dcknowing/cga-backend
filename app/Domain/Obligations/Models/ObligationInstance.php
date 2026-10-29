@@ -45,6 +45,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property InstanceStatus $status
  * @property InstanceStatus|null $member_declared_status
  * @property CarbonInterface|null $member_declared_at
+ * @property string|null $member_declaration_rejection
  * @property string|null $parent_instance_id
  * @property CarbonInterface|null $done_at
  * @property-read Member $member
