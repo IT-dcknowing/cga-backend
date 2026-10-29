@@ -588,6 +588,7 @@ U (`member_id`, `obligation_type_id`) `WHERE status <> 'removed'`.
 | status | varchar(30) | NN, CHECK `todo, done, to_pay, partially_paid, paid, not_established, in_progress, established, cancelled` |
 | member_declared_status | varchar(30) | N — statut déclaré par l'adhérent, à confirmer (RG-OBL-09) |
 | member_declared_at | timestamptz | N |
+| member_declaration_rejection | text | N — motif du dernier rejet d'une déclaration de l'adhérent par le CGA, effacé à la déclaration suivante (RG-OBL-09, décision 0004) |
 | parent_instance_id | char(26) | N, FK → obligation_instances (paiement créé depuis une déclaration, RG-OBL-05) |
 | done_at | date | N |
 | reminder_j7_sent_at, reminder_j1_sent_at, overdue_notified_at | timestamptz | N |

@@ -13,7 +13,8 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * Ligne d'échéance d'un bloc Impôts, CNPS, CMU ou Autres administrations (F-OBL-04) : période, libellé,
  * échéance, plateforme, montant dû (avant et après abattement pour la TEE), payé, reste, statut,
- * déclaration de l'adhérent à confirmer (RG-OBL-09), paiements, actions permises.
+ * déclaration de l'adhérent à confirmer et motif de son dernier rejet (RG-OBL-09), paiements, actions
+ * permises — au CGA, ou à l'adhérent dans son espace (F-OBL-05).
  *
  * @property ObligationInstance $resource
  */
@@ -21,10 +22,20 @@ class ObligationInstanceResource extends JsonResource
 {
     private bool $manages = false;
 
+    private bool $member = false;
+
     /** Le lecteur gère-t-il les obligations du dossier (boutons de la ligne) ? */
     public function managedBy(bool $manages): self
     {
         $this->manages = $manages;
+
+        return $this;
+    }
+
+    /** Ligne lue par l'adhérent dans son espace : seule action, « Signaler comme fait / payé ». */
+    public function forMember(): self
+    {
+        $this->member = true;
 
         return $this;
     }
@@ -62,15 +73,29 @@ class ObligationInstanceResource extends JsonResource
             'member_declared_status' => $instance->member_declared_status?->value,
             'member_declared_status_label' => $instance->member_declared_status?->label(),
             'member_declared_at' => $instance->member_declared_at?->toIso8601ZuluString(),
+            'member_declaration_rejection' => $instance->member_declaration_rejection,
             'parent_instance_id' => $instance->parent_instance_id,
             'done_at' => $instance->done_at?->toDateString(),
             'payments' => ObligationPaymentResource::collection($this->whenLoaded('payments')),
-            'can' => [
+            'can' => $this->member ? ['declare' => $this->declarable($instance)] : [
                 'mark_done' => $live && $instance->kind === InstanceKind::Declaration && $instance->status === InstanceStatus::Todo,
                 'set_amount' => $live && $instance->kind === InstanceKind::Payment,
                 'record_payment' => $live && $instance->kind === InstanceKind::Payment && $instance->amount_due !== null && ($instance->balance() ?? 0) > 0,
                 'set_diligence' => $live && $instance->kind === InstanceKind::Diligence,
+                'review_declaration' => $live && $instance->member_declared_status !== null,
             ],
         ];
+    }
+
+    /**
+     * Déclaration à signaler faite, ou paiement pas encore soldé, sans déclaration en attente (RG-OBL-09).
+     */
+    private function declarable(ObligationInstance $instance): bool
+    {
+        return $instance->member_declared_status === null && match ($instance->kind) {
+            InstanceKind::Declaration => $instance->status === InstanceStatus::Todo,
+            InstanceKind::Payment => in_array($instance->status, [InstanceStatus::ToPay, InstanceStatus::PartiallyPaid], true),
+            InstanceKind::Diligence => false,
+        };
     }
 }

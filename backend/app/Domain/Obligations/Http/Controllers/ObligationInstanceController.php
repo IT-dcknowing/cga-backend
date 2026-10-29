@@ -4,17 +4,21 @@ namespace App\Domain\Obligations\Http\Controllers;
 
 use App\Domain\Members\Models\Member;
 use App\Domain\Obligations\Actions\AddOtherAuthorityInstance;
+use App\Domain\Obligations\Actions\ConfirmMemberDeclaration;
 use App\Domain\Obligations\Actions\MarkDeclarationDone;
 use App\Domain\Obligations\Actions\RecordObligationPayment;
+use App\Domain\Obligations\Actions\RejectMemberDeclaration;
 use App\Domain\Obligations\Actions\SetDiligenceStatus;
 use App\Domain\Obligations\Actions\SetInstanceAmount;
 use App\Domain\Obligations\Enums\ObligationCategory;
+use App\Domain\Obligations\Http\Requests\ConfirmMemberDeclarationRequest;
 use App\Domain\Obligations\Http\Requests\DiligenceStatusRequest;
 use App\Domain\Obligations\Http\Requests\InstanceAmountRequest;
 use App\Domain\Obligations\Http\Requests\ListObligationInstancesRequest;
 use App\Domain\Obligations\Http\Requests\MarkDeclarationDoneRequest;
 use App\Domain\Obligations\Http\Requests\OtherAuthorityInstanceRequest;
 use App\Domain\Obligations\Http\Requests\RecordObligationPaymentRequest;
+use App\Domain\Obligations\Http\Requests\RejectMemberDeclarationRequest;
 use App\Domain\Obligations\Http\Resources\ObligationInstanceResource;
 use App\Domain\Obligations\Models\MemberObligation;
 use App\Domain\Obligations\Models\ObligationInstance;
@@ -29,7 +33,8 @@ use Illuminate\Support\Facades\Gate;
 /**
  * /api/v1/cga/members/{member}/obligation-instances : onglet Obligations du dossier (F-OBL-04) — échéances
  * des 4 blocs avec leur « Total dû » (RG-OBL-08), « Marquer faite » (RG-OBL-05), « Saisir le montant
- * dû », « Enregistrer un paiement » (RG-OBL-07), avancement des diligences, « + Autre administration ».
+ * dû », « Enregistrer un paiement » (RG-OBL-07), avancement des diligences, « + Autre administration »,
+ * « Confirmer la déclaration de l'adhérent », la « Corriger » ou la rejeter (RG-OBL-09).
  */
 class ObligationInstanceController extends BaseApiController
 {
@@ -103,6 +108,26 @@ class ObligationInstanceController extends BaseApiController
 
             return $this->resource($instance);
         }, action: 'obligation_instances.diligence');
+    }
+
+    public function confirmDeclaration(ConfirmMemberDeclarationRequest $request, Member $member, ObligationInstance $obligationInstance, ConfirmMemberDeclaration $confirm): ObligationInstanceResource|JsonResponse
+    {
+        return $this->handle(function () use ($request, $obligationInstance, $confirm): ObligationInstanceResource {
+            $instance = $confirm->execute($obligationInstance, $request->review(), $this->currentUser());
+            $this->logSubject($instance);
+
+            return $this->resource($instance);
+        }, action: 'obligation_instances.declaration.confirm');
+    }
+
+    public function rejectDeclaration(RejectMemberDeclarationRequest $request, Member $member, ObligationInstance $obligationInstance, RejectMemberDeclaration $reject): ObligationInstanceResource|JsonResponse
+    {
+        return $this->handle(function () use ($request, $obligationInstance, $reject): ObligationInstanceResource {
+            $instance = $reject->execute($obligationInstance, $request->reason(), $this->currentUser());
+            $this->logSubject($instance);
+
+            return $this->resource($instance);
+        }, action: 'obligation_instances.declaration.reject');
     }
 
     private function resource(ObligationInstance $instance): ObligationInstanceResource

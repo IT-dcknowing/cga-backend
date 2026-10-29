@@ -26,6 +26,7 @@ use App\Domain\Members\Http\Controllers\RadiationController;
 use App\Domain\Members\Http\Controllers\ReferrerController;
 use App\Domain\Members\Http\Controllers\RegimeController;
 use App\Domain\Obligations\Http\Controllers\MemberObligationController;
+use App\Domain\Obligations\Http\Controllers\MemberSpaceObligationController;
 use App\Domain\Obligations\Http\Controllers\ObligationInstanceController;
 use App\Domain\Obligations\Http\Controllers\ObligationTypeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
@@ -240,6 +241,8 @@ Route::prefix('v1')->group(function (): void {
             Route::put('{member}/obligation-instances/{obligationInstance}/amount', [ObligationInstanceController::class, 'amount'])->name('obligation-instances.amount');
             Route::post('{member}/obligation-instances/{obligationInstance}/payments', [ObligationInstanceController::class, 'payment'])->name('obligation-instances.payments');
             Route::put('{member}/obligation-instances/{obligationInstance}/diligence', [ObligationInstanceController::class, 'diligence'])->name('obligation-instances.diligence');
+            Route::post('{member}/obligation-instances/{obligationInstance}/member-declaration/confirm', [ObligationInstanceController::class, 'confirmDeclaration'])->name('obligation-instances.declaration.confirm');
+            Route::post('{member}/obligation-instances/{obligationInstance}/member-declaration/reject', [ObligationInstanceController::class, 'rejectDeclaration'])->name('obligation-instances.declaration.reject');
         });
     });
 
@@ -296,6 +299,9 @@ Route::prefix('v1')->group(function (): void {
         Route::get('charges', [MemberSpacePaymentController::class, 'charges'])->name('charges.index');
         Route::get('payments', [MemberSpacePaymentController::class, 'index'])->name('payments.index');
         Route::post('payments', [MemberSpacePaymentController::class, 'store'])->name('payments.store');
+        // Mes obligations (F-OBL-05) et « Signaler comme fait / payé » (RG-OBL-09).
+        Route::get('obligations', [MemberSpaceObligationController::class, 'index'])->name('obligations.index');
+        Route::post('obligations/{obligationInstance}/declare', [MemberSpaceObligationController::class, 'declare'])->name('obligations.declare');
     });
 
     // Catalogue des obligations vu du centre (F-OBL-01) : national en vigueur et obligations locales

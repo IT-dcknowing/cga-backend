@@ -13,7 +13,7 @@ Le PRD fixe le calcul du statut d'un paiement (RG-OBL-07), le rôle du CGA comme
 
 1. **Paiement supérieur au reste dû : refusé** (409 `obligation_payment_exceeds_balance`), comme pour le droit d'adhésion. L'agent corrige d'abord le montant dû s'il le faut.
 2. **Montant dû inconnu : le CGA le saisit d'abord.** Un paiement ne s'enregistre ni ne se confirme sur une échéance sans montant dû (409 `obligation_amount_unknown`). L'adhérent peut tout de même déclarer son paiement : la déclaration attend, et le CGA saisit le montant dû avant de la confirmer.
-3. **Le CGA confirme, corrige ou rejette** la déclaration de l'adhérent : il la confirme telle quelle, la confirme avec un montant ou une date corrigés, ou la rejette avec un motif (la ligne revient « À faire » ou « À payer »).
+3. **Le CGA confirme, corrige ou rejette** la déclaration de l'adhérent : il la confirme telle quelle, la confirme avec un montant ou une date corrigés, ou la rejette avec un motif (la ligne revient « À faire » ou « À payer »). Le motif est gardé sur l'échéance (`obligation_instances.member_declaration_rejection`, colonne ajoutée au schéma) jusqu'à la déclaration suivante.
 4. **Preuve facultative sur les paiements seulement**, comme le prévoit le schéma (`obligation_payments.proof_file_id`). Une déclaration « faite » n'a pas de pièce jointe.
 
 ## Preuve
