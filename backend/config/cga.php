@@ -189,6 +189,14 @@ return [
             ],
         ],
 
+        // Échéances des obligations confirmées générées chaque nuit sur ce nombre de mois glissants (RG-OBL-04).
+        'obligations' => [
+            'horizon_months' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 3, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:24']],
+            ],
+        ],
+
         'invitation' => [
             'validity_days' => [
                 'type' => 'integer', 'level' => 'platform', 'default' => 7, 'permission' => $platform,
@@ -307,6 +315,12 @@ return [
 
     ],
 
+    // Obligations fiscales et sociales (M07) : version portée par les obligations locales d'un CGA,
+    // hors du catalogue national versionné (RG-OBL-01).
+    'obligations' => [
+        'local_catalog_version' => 'local',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Données initiales (PlatformSeeder)
@@ -335,6 +349,11 @@ return [
             'last_name' => env('SEED_PLATFORM_ADMIN_LAST_NAME', 'Plateforme'),
             'phone' => env('SEED_PLATFORM_ADMIN_PHONE'),
             'email' => env('SEED_PLATFORM_ADMIN_EMAIL'),
+        ],
+        // Référentiel des obligations de DC-KNOWING (F-OBL-01, étape 4.1), fourni en JSON : chargé par
+        // ObligationCatalogSeeder s'il est présent, sinon le catalogue reste vide jusqu'à son import.
+        'obligations' => [
+            'catalog_path' => env('SEED_OBLIGATION_CATALOG_PATH') ?: database_path('data/obligation-catalog.json'),
         ],
         // Jeu de démonstration (DemoSeeder) : comptes fictifs du poste de développement et de la
         // recette, jamais en production. Les essais de code s'y renouvellent chaque minute, pour

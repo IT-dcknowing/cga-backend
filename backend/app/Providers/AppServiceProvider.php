@@ -25,6 +25,10 @@ use App\Domain\Notifications\Channels\SmsChannel;
 use App\Domain\Notifications\Contracts\SmsProvider;
 use App\Domain\Notifications\Listeners\LogNotificationActivity;
 use App\Domain\Notifications\Providers\LogSmsProvider;
+use App\Domain\Obligations\Models\MemberObligation;
+use App\Domain\Obligations\Models\ObligationType;
+use App\Domain\Obligations\Policies\MemberObligationPolicy;
+use App\Domain\Obligations\Policies\ObligationTypePolicy;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Organizations\Policies\OrganizationPolicy;
 use App\Domain\Payments\Events\PaymentConfirmed;
@@ -137,6 +141,10 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(MemberPayment::class, PaymentPolicy::class);
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(InvoicingProvider::class, InvoicingProviderPolicy::class);
+
+        // Obligations fiscales et sociales (M07).
+        Gate::policy(ObligationType::class, ObligationTypePolicy::class);
+        Gate::policy(MemberObligation::class, MemberObligationPolicy::class);
 
         // Documents officiels produits ou déposés (M08).
         Gate::policy(GeneratedDocument::class, DocumentPolicy::class);

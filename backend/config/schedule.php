@@ -15,6 +15,9 @@ return [
     // Partitions mensuelles des journaux, préparées à l'avance.
     'logs_partitions' => env('SCHEDULE_LOGS_PARTITIONS', '00:05'),
 
+    // Échéances des obligations confirmées jusqu'à l'horizon paramétré (RG-OBL-04).
+    'obligations_generate' => env('SCHEDULE_OBLIGATIONS_GENERATE', '01:00'),
+
     // Échéances d'honoraires de la période en cours (F-PAY-04).
     'fees_generate' => env('SCHEDULE_FEES_GENERATE', '01:15'),
 

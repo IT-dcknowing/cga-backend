@@ -8,6 +8,7 @@ use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Support\MemberFields;
 use App\Domain\Members\Support\MembershipExclusivity;
+use App\Domain\Obligations\Actions\SuggestMemberObligations;
 use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Users\Models\User;
 use App\Support\Files\StorageService;
@@ -35,6 +36,7 @@ class UpdateMember
         private readonly SaveReferenceRevenue $revenue,
         private readonly StorageService $storage,
         private readonly SyncEntryFee $entryFee,
+        private readonly SuggestMemberObligations $obligations,
     ) {}
 
     /**
@@ -81,6 +83,10 @@ class UpdateMember
             }
             $member->updated_by = $actor->id;
             $member->save();
+            // Régime, effectif ou secteur changés : propositions revues (RG-OBL-02, 03).
+            if ($member->wasChanged(['regime', 'employees_count', 'sector_id'])) {
+                $this->obligations->execute($member);
+            }
 
             if ($justification !== null && $justified !== []) {
                 $this->attach($member, $justification, $actor);

@@ -25,6 +25,8 @@ use App\Domain\Members\Http\Controllers\PortfolioController;
 use App\Domain\Members\Http\Controllers\RadiationController;
 use App\Domain\Members\Http\Controllers\ReferrerController;
 use App\Domain\Members\Http\Controllers\RegimeController;
+use App\Domain\Obligations\Http\Controllers\MemberObligationController;
+use App\Domain\Obligations\Http\Controllers\ObligationTypeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
 use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
@@ -218,6 +220,9 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{member}/attestation-blocks', [AttestationBlockController::class, 'index'])->name('attestation-blocks.index');
         Route::post('{member}/attestation-blocks', [AttestationBlockController::class, 'store'])->name('attestation-blocks.store');
         Route::post('{member}/attestation-blocks/release', [AttestationBlockController::class, 'release'])->name('attestation-blocks.release');
+        Route::get('{member}/obligations', [MemberObligationController::class, 'index'])->name('obligations.index');
+        Route::post('{member}/obligations', [MemberObligationController::class, 'store'])->name('obligations.store');
+        Route::post('{member}/obligations/review', [MemberObligationController::class, 'review'])->name('obligations.review');
         Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
         Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
         Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
@@ -284,6 +289,15 @@ Route::prefix('v1')->group(function (): void {
         Route::get('charges', [MemberSpacePaymentController::class, 'charges'])->name('charges.index');
         Route::get('payments', [MemberSpacePaymentController::class, 'index'])->name('payments.index');
         Route::post('payments', [MemberSpacePaymentController::class, 'store'])->name('payments.store');
+    });
+
+    // Catalogue des obligations vu du centre (F-OBL-01) : national en vigueur et obligations locales
+    // (RG-OBL-01), obligations applicables à un futur dossier (RG-OBL-02, 03). Modification : PUT.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/obligation-types')->name('cga.obligation-types.')->group(function (): void {
+        Route::get('/', [ObligationTypeController::class, 'index'])->name('index');
+        Route::get('suggestions', [ObligationTypeController::class, 'suggestions'])->name('suggestions');
+        Route::post('/', [ObligationTypeController::class, 'store'])->name('store');
+        Route::put('{obligationType}', [ObligationTypeController::class, 'update'])->name('update');
     });
 
     // Apporteurs d'affaires du centre (sous-portefeuille « Accessoires », RG-PTF-06).
