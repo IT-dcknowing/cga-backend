@@ -9,6 +9,7 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberTransfer;
 use App\Domain\Members\Support\MemberFields;
 use App\Domain\Members\Support\MembershipExclusivity;
+use App\Domain\Obligations\Actions\SuggestMemberObligations;
 use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Users\Models\User;
 use App\Support\Http\Exceptions\BusinessRuleException;
@@ -31,6 +32,7 @@ class CreateMemberDraft
         private readonly MembershipExclusivity $exclusivity,
         private readonly SaveReferenceRevenue $revenue,
         private readonly SyncEntryFee $entryFee,
+        private readonly SuggestMemberObligations $obligations,
     ) {}
 
     /**
@@ -72,6 +74,8 @@ class CreateMemberDraft
                 $transfer->save();
             }
             $this->entryFee->execute($member);
+            // Obligations applicables proposées dès l'inscription (RG-OBL-02).
+            $this->obligations->execute($member);
 
             return $member->refresh();
         });

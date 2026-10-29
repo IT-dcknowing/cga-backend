@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Domain\Obligations\Policies;
+
+use App\Domain\Obligations\Models\ObligationType;
+use App\Domain\Organizations\Enums\OrganizationType;
+use App\Domain\Users\Models\User;
+use App\Support\Tenancy\TenantContext;
+
+/**
+ * Catalogue des obligations vu d'un CGA (F-OBL-01, RG-OBL-01) : lu par les agents qui voient les
+ * dossiers ou gèrent les obligations ; obligations locales créées et modifiées avec « Gérer les
+ * obligations », seulement celles du centre — jamais le catalogue national ni celles d'un autre CGA.
+ */
+class ObligationTypePolicy
+{
+    public function __construct(private readonly TenantContext $context) {}
+
+    public function viewAny(User $user): bool
+    {
+        return $this->inCga() && ($this->context->allows('obligations.manage') || $this->context->allows('members.view'));
+    }
+
+    public function create(User $user): bool
+    {
+        return $this->inCga() && $this->context->allows('obligations.manage');
+    }
+
+    public function update(User $user, ObligationType $type): bool
+    {
+        return $this->create($user) && $type->organization_id === $this->context->organizationId();
+    }
+
+    private function inCga(): bool
+    {
+        return $this->context->has() && $this->context->organizationType() === OrganizationType::Cga;
+    }
+}

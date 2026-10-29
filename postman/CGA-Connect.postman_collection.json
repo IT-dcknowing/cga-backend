@@ -36438,6 +36438,1392 @@
             ]
         },
         {
+            "name": "27. Étape 4.2 — Obligations des adhérents",
+            "description": "F-OBL-01, F-OBL-02, RG-OBL-01 à 03 : catalogue du centre (national en vigueur et local), obligation locale (création, unicité du code, modification, désactivation), simulation des obligations applicables pour l'assistant, propositions à l'inscription, confirmation, retrait et ajout manuel par le CGA. Catalogue national : chargé depuis le référentiel de DC-KNOWING, encore attendu ; le dossier s'appuie sur une obligation locale créée à chaque passage, puis désactivée : il se rejoue.",
+            "item": [
+                {
+                    "name": "Catalogue — consultation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Liste\", () => pm.expect(pm.response.json().data).to.be.an(\"array\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types"
+                            ]
+                        },
+                        "description": "Catalogue du centre (F-OBL-01) : obligations nationales en vigueur et obligations locales du centre, par catégorie puis libellé."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation locale — création",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"obl_code\", \"LOC-\" + String(Math.floor(Math.random() * 1e6)).padStart(6, \"0\"));",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"obl_type_id\", data.id);",
+                                    "    pm.test(\"Obligation locale validée\", () => { pm.expect(data.local).to.be.true; pm.expect(data.data_status).to.eql(\"validated\"); pm.expect(data.can.update).to.be.true; });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types"
+                            ]
+                        },
+                        "description": "Le centre ajoute une obligation à son usage (RG-OBL-01) : validée d'office, version « local » ; le catalogue national n'est jamais modifié.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"{{obl_code}}\",\n    \"label\": \"Obligation locale d'essai (Postman)\",\n    \"category\": \"other\",\n    \"authority\": \"Commune\",\n    \"platform\": null,\n    \"kind\": \"declaration_payment\",\n    \"periodicity\": \"monthly\",\n    \"due_rule\": {\n        \"type\": \"day_of_next_month\",\n        \"day\": 15\n    },\n    \"applicability\": {\n        \"regimes\": [\n            \"TEE\"\n        ],\n        \"min_employees\": null,\n        \"sectors\": []\n    },\n    \"tax_nature\": \"other\",\n    \"has_abatement\": false,\n    \"creates_payment_on_done\": true,\n    \"active\": true,\n    \"legal_basis\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation locale — code déjà utilisé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur code\", () => pm.expect(pm.response.json().errors).to.have.property(\"code\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types"
+                            ]
+                        },
+                        "description": "Le code est unique dans le centre : 422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"{{obl_code}}\",\n    \"label\": \"Obligation locale d'essai (Postman)\",\n    \"category\": \"other\",\n    \"authority\": \"Commune\",\n    \"platform\": null,\n    \"kind\": \"declaration_payment\",\n    \"periodicity\": \"monthly\",\n    \"due_rule\": {\n        \"type\": \"day_of_next_month\",\n        \"day\": 15\n    },\n    \"applicability\": {\n        \"regimes\": [\n            \"TEE\"\n        ],\n        \"min_employees\": null,\n        \"sectors\": []\n    },\n    \"tax_nature\": \"other\",\n    \"has_abatement\": false,\n    \"creates_payment_on_done\": true,\n    \"active\": true,\n    \"legal_basis\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation locale — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur code\", () => pm.expect(pm.response.json().errors).to.have.property(\"code\"));",
+                                    "    pm.test(\"Erreur de validation sur category\", () => pm.expect(pm.response.json().errors).to.have.property(\"category\"));",
+                                    "    pm.test(\"Erreur de validation sur due_rule.day\", () => pm.expect(pm.response.json().errors).to.have.property(\"due_rule.day\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types"
+                            ]
+                        },
+                        "description": "422 : code et libellé vides, catégorie inconnue, jour d'échéance manquant pour « le n du mois suivant ».",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"\",\n    \"label\": \"\",\n    \"category\": \"inconnue\",\n    \"kind\": \"declaration\",\n    \"periodicity\": \"monthly\",\n    \"due_rule\": {\n        \"type\": \"day_of_next_month\"\n    },\n    \"applicability\": {\n        \"regimes\": [],\n        \"sectors\": []\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation locale — refusée au CNCGA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "    pm.test(\"Code d'erreur forbidden\", () => pm.expect(pm.response.json().code).to.eql(\"forbidden\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types"
+                            ]
+                        },
+                        "description": "Les obligations locales sont propres à un CGA : 403 depuis l'espace du CNCGA.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"{{obl_code}}\",\n    \"label\": \"Obligation locale d'essai (Postman)\",\n    \"category\": \"other\",\n    \"authority\": \"Commune\",\n    \"platform\": null,\n    \"kind\": \"declaration_payment\",\n    \"periodicity\": \"monthly\",\n    \"due_rule\": {\n        \"type\": \"day_of_next_month\",\n        \"day\": 15\n    },\n    \"applicability\": {\n        \"regimes\": [\n            \"TEE\"\n        ],\n        \"min_employees\": null,\n        \"sectors\": []\n    },\n    \"tax_nature\": \"other\",\n    \"has_abatement\": false,\n    \"creates_payment_on_done\": true,\n    \"active\": true,\n    \"legal_basis\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation locale — modification",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Libellé modifié\", () => pm.expect(pm.response.json().data.label).to.eql(\"Obligation locale d'essai (Postman), modifiée\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types/{{obl_type_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types",
+                                "{{obl_type_id}}"
+                            ]
+                        },
+                        "description": "Le centre modifie son obligation locale.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"{{obl_code}}\",\n    \"label\": \"Obligation locale d'essai (Postman), modifiée\",\n    \"category\": \"other\",\n    \"authority\": \"Commune\",\n    \"platform\": null,\n    \"kind\": \"declaration_payment\",\n    \"periodicity\": \"monthly\",\n    \"due_rule\": {\n        \"type\": \"day_of_next_month\",\n        \"day\": 15\n    },\n    \"applicability\": {\n        \"regimes\": [\n            \"TEE\"\n        ],\n        \"min_employees\": null,\n        \"sectors\": []\n    },\n    \"tax_nature\": \"other\",\n    \"has_abatement\": false,\n    \"creates_payment_on_done\": true,\n    \"active\": true,\n    \"legal_basis\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations proposées — simulation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"L'obligation locale TEE est proposée\", () => pm.expect(pm.response.json().data.map(t => t.id)).to.include(pm.collectionVariables.get(\"obl_type_id\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types/suggestions?regime=TEE&employees_count=0",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types",
+                                "suggestions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "regime",
+                                    "value": "TEE"
+                                },
+                                {
+                                    "key": "employees_count",
+                                    "value": "0"
+                                }
+                            ]
+                        },
+                        "description": "Obligations applicables à un futur dossier (RG-OBL-02, 03) d'après son régime, son effectif et son secteur ; l'assistant d'inscription les affiche."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations proposées — régime invalide",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur regime\", () => pm.expect(pm.response.json().errors).to.have.property(\"regime\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types/suggestions?regime=INCONNU",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types",
+                                "suggestions"
+                            ],
+                            "query": [
+                                {
+                                    "key": "regime",
+                                    "value": "INCONNU"
+                                }
+                            ]
+                        },
+                        "description": "422."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Préparation — brouillon",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"obl_ncc\", String(Math.floor(Math.random() * 1e7)).padStart(7, \"0\") + \"O\");",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    pm.collectionVariables.set(\"obl_member_id\", pm.response.json().data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Brouillon TEE : la plateforme lui propose aussitôt les obligations applicables, dont l'obligation locale (RG-OBL-02).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Obligations Postman\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{obl_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce\",\n    \"phone\": \"0707070707\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations du dossier — liste",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const line = pm.response.json().data.find(o => o.type.id === pm.collectionVariables.get(\"obl_type_id\"));",
+                                    "    pm.test(\"Obligation locale proposée\", () => { pm.expect(line.status).to.eql(\"suggested\"); pm.expect(line.source).to.eql(\"suggested\"); pm.expect(line.can.confirm).to.be.true; });",
+                                    "    pm.collectionVariables.set(\"obl_member_obligation_id\", line.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations"
+                            ]
+                        },
+                        "description": "Obligations du dossier : proposées, confirmées, puis retirées ; boutons selon le bloc `can`."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations — confirmation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const line = pm.response.json().data.find(o => o.id === pm.collectionVariables.get(\"obl_member_obligation_id\"));",
+                                    "    pm.test(\"Confirmée\", () => { pm.expect(line.status).to.eql(\"active\"); pm.expect(line.confirmed_at).to.be.a(\"string\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations/review",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations",
+                                "review"
+                            ]
+                        },
+                        "description": "Le CGA confirme une proposition : elle devient active et ses échéances seront générées chaque nuit (RG-OBL-04).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"confirm\": [\n        \"{{obl_member_obligation_id}}\"\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations — déjà confirmée",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur obligation_not_reviewable\", () => pm.expect(pm.response.json().code).to.eql(\"obligation_not_reviewable\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations/review",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations",
+                                "review"
+                            ]
+                        },
+                        "description": "Seule une proposition se confirme : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"confirm\": [\n        \"{{obl_member_obligation_id}}\"\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation — déjà attribuée",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur obligation_already_assigned\", () => pm.expect(pm.response.json().code).to.eql(\"obligation_already_assigned\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations"
+                            ]
+                        },
+                        "description": "Une obligation déjà attribuée au dossier ne s'ajoute pas deux fois : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"obligation_type_id\": \"{{obl_type_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations — revue invalide",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur confirm\", () => pm.expect(pm.response.json().errors).to.have.property(\"confirm\"));",
+                                    "    pm.test(\"Erreur de validation sur remove\", () => pm.expect(pm.response.json().errors).to.have.property(\"remove\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations/review",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations",
+                                "review"
+                            ]
+                        },
+                        "description": "422 : ni confirmation ni retrait.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations — retrait",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const line = pm.response.json().data.find(o => o.id === pm.collectionVariables.get(\"obl_member_obligation_id\"));",
+                                    "    pm.test(\"Retirée\", () => { pm.expect(line.status).to.eql(\"removed\"); pm.expect(line.end_date).to.be.a(\"string\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations/review",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations",
+                                "review"
+                            ]
+                        },
+                        "description": "Le CGA retire l'obligation : fin au jour du retrait, échéances à venir non commencées annulées.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"remove\": [\n        \"{{obl_member_obligation_id}}\"\n    ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation — ajout manuel",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Ajout manuel actif\", () => { pm.expect(data.source).to.eql(\"manual\"); pm.expect(data.status).to.eql(\"active\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations"
+                            ]
+                        },
+                        "description": "Le CGA ajoute une obligation du catalogue en vigueur ou une obligation locale : active d'office.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"obligation_type_id\": \"{{obl_type_id}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation — ajout invalide",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur obligation_type_id\", () => pm.expect(pm.response.json().errors).to.have.property(\"obligation_type_id\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{obl_member_id}}/obligations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{obl_member_id}}",
+                                "obligations"
+                            ]
+                        },
+                        "description": "422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"obligation_type_id\": \"inconnu\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations — dossier inconnu",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/01HZZZZZZZZZZZZZZZZZZZZZZZ/obligations",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "obligations"
+                            ]
+                        },
+                        "description": "404."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligations — sans session",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 401\", () => pm.response.to.have.status(401));",
+                                    "    pm.test(\"Code d'erreur unauthenticated\", () => pm.expect(pm.response.json().code).to.eql(\"unauthenticated\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types"
+                            ]
+                        },
+                        "description": "401."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Obligation locale — désactivation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Inactive\", () => pm.expect(pm.response.json().data.active).to.be.false);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-types/{{obl_type_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-types",
+                                "{{obl_type_id}}"
+                            ]
+                        },
+                        "description": "Une obligation locale désactivée n'est plus proposée : le jeu de démonstration reste propre d'un passage à l'autre.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"code\": \"{{obl_code}}\",\n    \"label\": \"Obligation locale d'essai (Postman), modifiée\",\n    \"category\": \"other\",\n    \"authority\": \"Commune\",\n    \"platform\": null,\n    \"kind\": \"declaration_payment\",\n    \"periodicity\": \"monthly\",\n    \"due_rule\": {\n        \"type\": \"day_of_next_month\",\n        \"day\": 15\n    },\n    \"applicability\": {\n        \"regimes\": [\n            \"TEE\"\n        ],\n        \"min_employees\": null,\n        \"sectors\": []\n    },\n    \"tax_nature\": \"other\",\n    \"has_abatement\": false,\n    \"creates_payment_on_done\": true,\n    \"active\": false,\n    \"legal_basis\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -37125,6 +38511,26 @@
         },
         {
             "key": "history_member_id",
+            "value": ""
+        },
+        {
+            "key": "obl_code",
+            "value": ""
+        },
+        {
+            "key": "obl_type_id",
+            "value": ""
+        },
+        {
+            "key": "obl_ncc",
+            "value": ""
+        },
+        {
+            "key": "obl_member_id",
+            "value": ""
+        },
+        {
+            "key": "obl_member_obligation_id",
             "value": ""
         }
     ]

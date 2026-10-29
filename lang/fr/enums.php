@@ -368,4 +368,97 @@ return [
         'other' => 'Autre document',
     ],
 
+    'obligation_category' => [
+        'tax' => 'Impôts et taxes',
+        'cnps' => 'CNPS',
+        'cmu' => 'CMU',
+        'other' => 'Autres administrations',
+    ],
+
+    'obligation_kind' => [
+        'declaration' => 'Déclaration',
+        'payment' => 'Paiement',
+        'declaration_payment' => 'Déclaration et paiement',
+        'diligence' => 'Diligence',
+    ],
+
+    'obligation_periodicity' => [
+        'monthly' => 'Mensuelle',
+        'quarterly' => 'Trimestrielle',
+        'half_yearly' => 'Semestrielle',
+        'yearly' => 'Annuelle',
+        'one_off' => 'Ponctuelle',
+        'on_event' => 'Sur événement',
+    ],
+
+    'tax_nature' => [
+        'patente' => 'Patente',
+        'bic' => 'BIC',
+        'tva' => 'TVA',
+        'tse' => 'TSE',
+        'its' => 'ITS',
+        'airsi' => 'AIRSI',
+        'igr' => 'IGR',
+        'irvm' => 'IRVM',
+        'irc' => 'IRC',
+        'fdfp' => 'FDFP',
+        'tee' => 'TEE',
+        'rme' => 'Impôt microentreprise',
+        'cnps' => 'CNPS',
+        'cmu' => 'CMU',
+        'other' => 'Autres',
+    ],
+
+    'member_obligation_source' => [
+        'suggested' => 'Proposée',
+        'manual' => 'Ajoutée par le CGA',
+    ],
+
+    'member_obligation_status' => [
+        'suggested' => 'À confirmer',
+        'active' => 'Active',
+        'removed' => 'Retirée',
+    ],
+
+    'instance_kind' => [
+        'declaration' => 'Déclaration',
+        'payment' => 'Paiement',
+        'diligence' => 'Diligence',
+    ],
+
+    'instance_status' => [
+        'todo' => 'À faire',
+        'done' => 'Faite',
+        'to_pay' => 'À payer',
+        'partially_paid' => 'Partiellement payé',
+        'paid' => 'Payé',
+        'not_established' => 'Non établie',
+        'in_progress' => 'En cours',
+        'established' => 'Établie',
+        'cancelled' => 'Annulée',
+    ],
+
+    'obligation_payment_source' => [
+        'cga_entry' => 'Saisi par le CGA',
+        'member_declaration' => 'Déclaré par l\'adhérent',
+        'import' => 'Importé',
+        'compta_flow' => 'Compta Flow',
+    ],
+
+    'center_obligation_kind' => [
+        'tax' => 'Impôts et taxes',
+        'cnps' => 'CNPS',
+        'cmu' => 'CMU',
+        'agreement_renewal' => 'Renouvellement de l\'agrément',
+        'smt' => 'SMT',
+        'other' => 'Autre',
+    ],
+
+    'center_obligation_status' => [
+        'todo' => 'À faire',
+        'done' => 'Faite',
+        'to_pay' => 'À payer',
+        'paid' => 'Payée',
+    ],
+
 ];

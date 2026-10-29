@@ -70,6 +70,13 @@ return [
     'access_not_disabled' => 'Cet accès n\'est pas désactivé.',
     'transfer_source_not_found' => 'Aucun dossier de ce NCC dans un autre CGA abonné : inscrivez l\'adhérent normalement.',
     'portfolio_already_cga' => 'Ce dossier est déjà au portefeuille CGA.',
+    // Obligations fiscales et sociales (M07)
+    'obligation_type_unavailable' => 'Cette obligation n\'est pas proposée à votre centre : choisissez une obligation du catalogue en vigueur ou une obligation locale active.',
+    'obligation_already_assigned' => 'Cette obligation est déjà attribuée à ce dossier.',
+    'obligation_not_reviewable' => 'Cette obligation a déjà été traitée : rechargez le dossier.',
+    'instance_not_declaration' => 'Seule une déclaration peut être marquée « faite ».',
+    'instance_already_done' => 'Cette déclaration est déjà marquée « faite » ou n\'est plus à faire : rechargez le dossier.',
+
     'referrer_in_use' => 'Cet apporteur est rattaché à des dossiers : désactivez-le plutôt que de le supprimer.',
     'payment_not_pending' => 'Ce paiement n\'attend plus de confirmation.',
     'radiation_cancel_expired' => 'Le délai d\'annulation de cette radiation est dépassé.',

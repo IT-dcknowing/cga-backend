@@ -7,6 +7,7 @@ use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Enums\TaxRegime;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\MemberRegimeChange;
+use App\Domain\Obligations\Actions\SuggestMemberObligations;
 use App\Domain\Users\Models\User;
 use App\Support\Files\StorageService;
 use App\Support\Http\Exceptions\BusinessRuleException;
@@ -25,7 +26,10 @@ use Illuminate\Validation\ValidationException;
  */
 class ChangeRegime
 {
-    public function __construct(private readonly StorageService $storage) {}
+    public function __construct(
+        private readonly StorageService $storage,
+        private readonly SuggestMemberObligations $obligations,
+    ) {}
 
     /**
      * @throws BusinessRuleException member_draft, member_closed
@@ -65,6 +69,8 @@ class ChangeRegime
             $member->regime_since = $effectiveDate;
             $member->updated_by = $actor->id;
             $member->save();
+            // Nouveau régime : obligations applicables proposées, les anciennes propositions revues (RG-OBL-02).
+            $this->obligations->execute($member);
 
             return $member->refresh();
         });
