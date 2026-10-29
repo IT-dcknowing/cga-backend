@@ -7,7 +7,9 @@ use App\Domain\Obligations\Enums\CenterObligationKind;
 use App\Domain\Obligations\Enums\CenterObligationStatus;
 use App\Support\Tenancy\BelongsToOrganization;
 use Carbon\CarbonInterface;
+use Database\Factories\CenterObligationFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -26,7 +28,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class CenterObligation extends Model
 {
-    use Auditable, BelongsToOrganization, HasUlids;
+    /** @use HasFactory<CenterObligationFactory> */
+    use Auditable, BelongsToOrganization, HasFactory, HasUlids;
 
     /**
      * Écrit par les Actions des obligations seulement.
@@ -47,5 +50,10 @@ class CenterObligation extends Model
             'reminder_sent_at' => 'immutable_datetime',
             'amount' => 'integer',
         ];
+    }
+
+    protected static function newFactory(): CenterObligationFactory
+    {
+        return CenterObligationFactory::new();
     }
 }

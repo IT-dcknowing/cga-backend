@@ -10,6 +10,7 @@ use App\Domain\Imports\Enums\ImportType;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
+use App\Domain\Obligations\Models\CenterObligation;
 use App\Domain\Obligations\Models\MemberObligation;
 use App\Domain\Obligations\Models\ObligationInstance;
 use App\Domain\Obligations\Models\ObligationType;
@@ -65,6 +66,7 @@ final class CrossTenantObjects
             // Obligation locale du CGA B (RG-OBL-01) : le catalogue national n'est pas cloisonné, mais une
             // obligation locale n'appartient qu'à son centre.
             ObligationType::class => static fn (Organization $other): ObligationType => ObligationType::factory()->localTo($other)->create(),
+            CenterObligation::class => static fn (Organization $other): CenterObligation => CenterObligation::factory()->create(['organization_id' => $other->id]),
             ObligationInstance::class => static fn (Organization $other): ObligationInstance => ObligationInstance::factory()->create([
                 'member_obligation_id' => MemberObligation::factory()->create(['member_id' => Member::factory()->active()->create(['organization_id' => $other->id])->id])->id,
             ]),

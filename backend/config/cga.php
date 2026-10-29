@@ -195,6 +195,11 @@ return [
                 'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 3, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:1', 'max:24']],
             ],
+            // Indicateur « Échéances sous n jours » du planning du portefeuille (F-OBL-06).
+            'upcoming_days' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 15, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:90']],
+            ],
         ],
 
         'invitation' => [
