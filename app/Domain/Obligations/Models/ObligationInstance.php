@@ -95,6 +95,19 @@ class ObligationInstance extends Model
     }
 
     /**
+     * Nature d'impôt portée par ses paiements (recettes fiscales, rapport) : celle de l'échéance, sinon
+     * celle de son bloc.
+     */
+    public function paymentTaxNature(): TaxNature
+    {
+        return $this->tax_nature ?? match ($this->category) {
+            ObligationCategory::Cnps => TaxNature::Cnps,
+            ObligationCategory::Cmu => TaxNature::Cmu,
+            ObligationCategory::Tax, ObligationCategory::Other => TaxNature::Other,
+        };
+    }
+
+    /**
      * @return BelongsTo<Member, $this>
      */
     public function member(): BelongsTo

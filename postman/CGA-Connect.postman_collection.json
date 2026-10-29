@@ -37824,6 +37824,1376 @@
             ]
         },
         {
+            "name": "28. Étape 4.4 — Onglet Obligations du dossier (saisie du CGA)",
+            "description": "F-OBL-04, RG-OBL-05, RG-OBL-07, RG-OBL-08, décision 0004 : ligne « autre administration », « Total dû » par bloc, montant dû avant et après abattement, paiements confirmés d'office et statut déduit, refus au-delà du reste dû et sous le déjà payé, « Marquer faite » et diligences réservées à leur nature. Chaque envoi inscrit un nouveau brouillon : le dossier se rejoue.",
+            "item": [
+                {
+                    "name": "Préparation — brouillon",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"oi_ncc\", String(Math.floor(Math.random() * 1e7)).padStart(7, \"0\") + \"E\");",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    pm.collectionVariables.set(\"oi_member_id\", pm.response.json().data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members"
+                            ]
+                        },
+                        "description": "Dossier qui reçoit une ligne « autre administration » : les échéances du catalogue naissent de la tâche de nuit obligations:generate, que la collection ne lance pas.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"portfolio\": \"cga\",\n    \"entity_type\": \"company\",\n    \"company_name\": \"Ets Échéances Postman\",\n    \"legal_form\": \"SARL\",\n    \"ncc\": \"{{oi_ncc}}\",\n    \"regime\": \"TEE\",\n    \"main_activity\": \"Commerce\",\n    \"phone\": \"0707070707\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Autre administration — ajout",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.collectionVariables.set(\"oi_instance_id\", data.id);",
+                                    "    pm.test(\"Ligne à payer du bloc Autres\", () => { pm.expect(data.category).to.eql(\"other\"); pm.expect(data.kind).to.eql(\"payment\"); pm.expect(data.status).to.eql(\"to_pay\"); pm.expect(data.balance).to.eql(25000); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances"
+                            ]
+                        },
+                        "description": "« + Autre administration » : ligne de paiement hors catalogue (administration, libellé, montant dû, échéance).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"authority\": \"Mairie de Cocody\",\n    \"label\": \"Taxe communale d'essai (Postman)\",\n    \"amount_due\": 25000,\n    \"due_date\": \"2026-12-31\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Autre administration — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur authority\", () => pm.expect(pm.response.json().errors).to.have.property(\"authority\"));",
+                                    "    pm.test(\"Erreur de validation sur amount_due\", () => pm.expect(pm.response.json().errors).to.have.property(\"amount_due\"));",
+                                    "    pm.test(\"Erreur de validation sur due_date\", () => pm.expect(pm.response.json().errors).to.have.property(\"due_date\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances"
+                            ]
+                        },
+                        "description": "422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount_due\": -5,\n    \"due_date\": \"31/12/2026\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Échéances du dossier — liste et Total dû",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const body = pm.response.json();",
+                                    "    pm.test(\"Total dû du bloc Autres\", () => pm.expect(body.summary.other.total_due).to.eql(25000));",
+                                    "    pm.test(\"Ligne listée\", () => pm.expect(body.data.map(l => l.id)).to.include(pm.collectionVariables.get(\"oi_instance_id\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances"
+                            ]
+                        },
+                        "description": "Onglet Obligations (F-OBL-04) : lignes des 4 blocs et « Total dû » de chacun, somme des restes des échéances affichées (RG-OBL-08)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Échéances du dossier — filtre invalide",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur category\", () => pm.expect(pm.response.json().errors).to.have.property(\"category\"));",
+                                    "    pm.test(\"Erreur de validation sur to\", () => pm.expect(pm.response.json().errors).to.have.property(\"to\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances?category=inconnue&from=2026-12-31&to=2026-11-01",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances"
+                            ],
+                            "query": [
+                                {
+                                    "key": "category",
+                                    "value": "inconnue"
+                                },
+                                {
+                                    "key": "from",
+                                    "value": "2026-12-31"
+                                },
+                                {
+                                    "key": "to",
+                                    "value": "2026-11-01"
+                                }
+                            ]
+                        },
+                        "description": "422 : bloc inconnu, fin avant début."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Montant dû — saisie",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Montant dû et reste\", () => { pm.expect(data.amount_due).to.eql(20000); pm.expect(data.amount_gross).to.eql(30000); pm.expect(data.balance).to.eql(20000); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/amount",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "amount"
+                            ]
+                        },
+                        "description": "Le CGA, référent des montants (RG-OBL-08), corrige le montant dû ; pour la TEE, il saisit aussi le montant avant abattement.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount_due\": 20000,\n    \"amount_gross\": 30000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Montant dû — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur amount_gross\", () => pm.expect(pm.response.json().errors).to.have.property(\"amount_gross\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/amount",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "amount"
+                            ]
+                        },
+                        "description": "422 : le montant avant abattement est au moins égal au montant dû.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount_due\": 20000,\n    \"amount_gross\": 10000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — en partie",
+                    "event": [
+                        {
+                            "listen": "prerequest",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.collectionVariables.set(\"today\", new Date().toISOString().slice(0, 10));",
+                                    "})();"
+                                ]
+                            }
+                        },
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    const data = pm.response.json().data;",
+                                    "    pm.test(\"Payé en partie\", () => { pm.expect(data.status).to.eql(\"partially_paid\"); pm.expect(data.amount_paid).to.eql(8000); pm.expect(data.balance).to.eql(12000); pm.expect(data.payments[0].status).to.eql(\"confirmed\"); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "« Enregistrer un paiement » : confirmé d'office ; le statut se déduit des montants (RG-OBL-07).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 8000,\n    \"paid_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — au-delà du reste dû",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur obligation_payment_exceeds_balance\", () => pm.expect(pm.response.json().code).to.eql(\"obligation_payment_exceeds_balance\"));",
+                                    "    pm.test(\"Reste dû indiqué\", () => pm.expect(pm.response.json().details.balance).to.eql(12000));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "Un paiement ne dépasse jamais le reste dû (décision 0004) : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 50000,\n    \"paid_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Montant dû — sous le payé",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur obligation_amount_below_paid\", () => pm.expect(pm.response.json().code).to.eql(\"obligation_amount_below_paid\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/amount",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "amount"
+                            ]
+                        },
+                        "description": "Le montant dû ne descend pas sous le déjà payé : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount_due\": 5000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — solde",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 201\", () => pm.response.to.have.status(201));",
+                                    "    pm.test(\"Payé\", () => { pm.expect(pm.response.json().data.status).to.eql(\"paid\"); pm.expect(pm.response.json().data.balance).to.eql(0); });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "Le reste payé, la ligne passe « Payé » (RG-OBL-07).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 12000,\n    \"paid_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Paiement — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur amount\", () => pm.expect(pm.response.json().errors).to.have.property(\"amount\"));",
+                                    "    pm.test(\"Erreur de validation sur paid_on\", () => pm.expect(pm.response.json().errors).to.have.property(\"paid_on\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "payments"
+                            ]
+                        },
+                        "description": "422 : montant nul, date future.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount\": 0,\n    \"paid_on\": \"2999-01-01\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Marquer faite — sur un paiement",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur instance_not_declaration\", () => pm.expect(pm.response.json().code).to.eql(\"instance_not_declaration\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/done",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "done"
+                            ]
+                        },
+                        "description": "« Marquer faite » ne vaut que pour une déclaration (RG-OBL-05) : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"done_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Marquer faite — validation",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur done_on\", () => pm.expect(pm.response.json().errors).to.have.property(\"done_on\"));",
+                                    "    pm.test(\"Erreur de validation sur amount_due\", () => pm.expect(pm.response.json().errors).to.have.property(\"amount_due\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/done",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "done"
+                            ]
+                        },
+                        "description": "422 : date future, montant avant abattement sans montant dû.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"done_on\": \"2999-01-01\",\n    \"amount_gross\": 100\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Diligence — sur un paiement",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Code d'erreur instance_not_diligence\", () => pm.expect(pm.response.json().code).to.eql(\"instance_not_diligence\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/diligence",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "diligence"
+                            ]
+                        },
+                        "description": "Seule une diligence change d'avancement : 409.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"established\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Diligence — statut invalide",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Erreur de validation sur status\", () => pm.expect(pm.response.json().errors).to.have.property(\"status\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/{{oi_instance_id}}/diligence",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "{{oi_instance_id}}",
+                                "diligence"
+                            ]
+                        },
+                        "description": "422.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"done\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Échéance — inconnue",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances/01HZZZZZZZZZZZZZZZZZZZZZZZ/amount",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances",
+                                "01HZZZZZZZZZZZZZZZZZZZZZZZ",
+                                "amount"
+                            ]
+                        },
+                        "description": "404.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"amount_due\": 1000\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Échéances — refusées au CNCGA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 404\", () => pm.response.to.have.status(404));",
+                                    "    pm.test(\"Code d'erreur not_found\", () => pm.expect(pm.response.json().code).to.eql(\"not_found\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances"
+                            ]
+                        },
+                        "description": "Le dossier d'un CGA n'existe pas pour le CNCGA : 404."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Échéances — sans session",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 401\", () => pm.response.to.have.status(401));",
+                                    "    pm.test(\"Code d'erreur unauthenticated\", () => pm.expect(pm.response.json().code).to.eql(\"unauthenticated\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "aucun",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{oi_member_id}}/obligation-instances",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{oi_member_id}}",
+                                "obligation-instances"
+                            ]
+                        },
+                        "description": "401."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -38531,6 +39901,18 @@
         },
         {
             "key": "obl_member_obligation_id",
+            "value": ""
+        },
+        {
+            "key": "oi_ncc",
+            "value": ""
+        },
+        {
+            "key": "oi_member_id",
+            "value": ""
+        },
+        {
+            "key": "oi_instance_id",
             "value": ""
         }
     ]

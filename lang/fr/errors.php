@@ -76,6 +76,12 @@ return [
     'obligation_not_reviewable' => 'Cette obligation a déjà été traitée : rechargez le dossier.',
     'instance_not_declaration' => 'Seule une déclaration peut être marquée « faite ».',
     'instance_already_done' => 'Cette déclaration est déjà marquée « faite » ou n\'est plus à faire : rechargez le dossier.',
+    'instance_not_payment' => 'Seule une échéance de paiement reçoit un montant dû ou un paiement.',
+    'instance_not_diligence' => 'Seule une diligence change d\'avancement.',
+    'instance_cancelled' => 'Cette échéance est annulée : elle ne se modifie plus.',
+    'obligation_amount_unknown' => 'Saisissez d\'abord le montant dû de cette échéance.',
+    'obligation_payment_exceeds_balance' => 'Le paiement dépasse le reste dû (:balance F CFA).',
+    'obligation_amount_below_paid' => 'Le montant dû ne peut pas être inférieur au montant déjà payé (:paid F CFA).',
 
     'referrer_in_use' => 'Cet apporteur est rattaché à des dossiers : désactivez-le plutôt que de le supprimer.',
     'payment_not_pending' => 'Ce paiement n\'attend plus de confirmation.',
