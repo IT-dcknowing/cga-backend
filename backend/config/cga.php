@@ -224,6 +224,54 @@ return [
             ],
         ],
 
+        // Rapport trimestriel (PRD M09) : règle « cotisation augmentée » du réseau (RG-RPT-08) — base de
+        // comparaison (montant annuel dû N / N-1, montant dû du trimestre / même trimestre N-1, chiffre
+        // d'affaires de référence N / N-1), hausse minimale en %, montant après ou avant abattement.
+        'report' => [
+            'increase_rule' => [
+                'type' => 'array', 'level' => 'network', 'permission' => 'network_settings.manage',
+                'default' => ['basis' => 'annual_due', 'min_increase_pct' => 0, 'amount' => 'net'],
+                'rules' => [
+                    '' => ['array:basis,min_increase_pct,amount'],
+                    'basis' => ['required', 'in:annual_due,quarter_due,revenue'],
+                    'min_increase_pct' => ['required', 'numeric', 'min:0', 'max:1000'],
+                    'amount' => ['required', 'in:net,gross'],
+                ],
+            ],
+            // Date limite J (RG-RPT-06) : n mois après la fin du trimestre, le jour indiqué (0 : dernier jour
+            // du mois) ; par défaut, fin du mois qui suit le trimestre.
+            'deadline_rule' => [
+                'type' => 'array', 'level' => 'network', 'permission' => 'network_settings.manage',
+                'default' => ['months_after' => 1, 'day' => 0],
+                'rules' => [
+                    '' => ['array:months_after,day'],
+                    'months_after' => ['required', 'integer', 'min:0', 'max:6'],
+                    'day' => ['required', 'integer', 'min:0', 'max:31'],
+                ],
+            ],
+            // Export du classeur officiel de 14 feuilles avec chaque rapport généré (RG-RPT-10) : activé tant
+            // que le SP-CGA n'a pas confirmé l'acceptation du seul rapport modernisé.
+            'legacy_workbook_enabled' => [
+                'type' => 'boolean', 'level' => 'network', 'default' => true, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['boolean']],
+            ],
+            // Relances au gérant et à l'expert-comptable d'un rapport non transmis : jours avant (négatifs) ou
+            // après la date limite J (RG-RPT-06, CR-09) ; canaux de ces relances (moteur de notifications, Lot 6).
+            'reminder_offsets' => [
+                'type' => 'array', 'level' => 'network', 'default' => [-15, -5, 5], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array', 'max:10'], '*' => ['integer', 'min:-60', 'max:60', 'distinct']],
+            ],
+            'reminder_channels' => [
+                'type' => 'array', 'level' => 'network', 'default' => ['database', 'mail', 'sms'], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array', 'min:1'], '*' => ['string', 'in:database,mail,sms,whatsapp', 'distinct']],
+            ],
+            // Échéance réglementaire stricte : J + n jours (RG-RPT-07, CR-09).
+            'legal_offset_days' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 15, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:0', 'max:90']],
+            ],
+        ],
+
         'invitation' => [
             'validity_days' => [
                 'type' => 'integer', 'level' => 'platform', 'default' => 7, 'permission' => $platform,

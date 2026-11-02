@@ -51,6 +51,11 @@ use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Referentials\Policies\ReferenceDataPolicy;
 use App\Domain\Referentials\Policies\ReferentialPolicy;
 use App\Domain\Referentials\ReferenceData\ReferenceDataset;
+use App\Domain\Reports\Models\CgaPerson;
+use App\Domain\Reports\Models\CgaResource;
+use App\Domain\Reports\Models\QuarterlyReport;
+use App\Domain\Reports\Policies\PermanentProfilePolicy;
+use App\Domain\Reports\Policies\QuarterlyReportPolicy;
 use App\Domain\Users\Http\Controllers\UserPermissionController;
 use App\Domain\Users\Models\RolePermission;
 use App\Domain\Users\Models\User;
@@ -151,6 +156,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(MemberObligation::class, MemberObligationPolicy::class);
         Gate::policy(CenterObligation::class, CenterObligationPolicy::class);
         Gate::policy(ClosingCampaign::class, ClosingCampaignPolicy::class);
+
+        // Rapport trimestriel (M09) : fiche permanente du CGA.
+        Gate::policy(CgaPerson::class, PermanentProfilePolicy::class);
+        Gate::policy(CgaResource::class, PermanentProfilePolicy::class);
+        Gate::policy(QuarterlyReport::class, QuarterlyReportPolicy::class);
 
         // Documents officiels produits ou déposés (M08).
         Gate::policy(GeneratedDocument::class, DocumentPolicy::class);

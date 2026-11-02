@@ -128,7 +128,7 @@ it('charge chaque modèle de la maquette en version 1 active, avec ses variables
     $this->seed(TemplateSeeder::class);
 
     $templates = DocumentTemplate::query()->with('file')->get()->keyBy(fn (DocumentTemplate $template): string => $template->type->value);
-    expect($templates->keys()->sort()->values()->all())->toBe(['credit_note', 'invoice', 'membership_certificate', 'membership_contract', 'quarterly_report_docx', 'quarterly_report_xlsx', 'radiation_notice', 'receipt']);
+    expect($templates->keys()->sort()->values()->all())->toBe(['credit_note', 'invoice', 'membership_certificate', 'membership_contract', 'quarterly_report_docx', 'quarterly_report_xlsx', 'radiation_notice', 'receipt', 'report_transmission_slip']);
 
     $contract = $templates['membership_contract'];
     expect($contract->version)->toBe('1')

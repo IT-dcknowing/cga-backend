@@ -478,4 +478,34 @@ return [
         'filing' => 'Dépôt légal',
     ],
 
+    'cga_person_kind' => [
+        'director' => 'Dirigeant',
+        'employee' => 'Salarié permanent',
+        'occasional' => 'Personnel occasionnel',
+    ],
+
+    'cga_resource_category' => [
+        'premises' => 'Locaux',
+        'training_rooms' => 'Salles de formation',
+        'furniture' => 'Mobilier',
+        'computers' => 'Matériel informatique',
+        'software' => 'Logiciels',
+        'projectors' => 'Vidéoprojecteurs',
+        'vehicles' => 'Véhicules',
+        'other' => 'Autres moyens',
+    ],
+
+    'report_status' => [
+        'draft' => 'Brouillon',
+        'generated' => 'Généré',
+        'transmitted' => 'Transmis',
+        'acknowledged' => 'Accusé reçu',
+    ],
+
+    'transmission_mode' => [
+        'physical' => 'Dépôt physique',
+        'email' => 'E-mail',
+        'other' => 'Autre',
+    ],
+
 ];

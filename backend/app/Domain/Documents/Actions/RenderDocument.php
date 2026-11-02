@@ -3,6 +3,7 @@
 namespace App\Domain\Documents\Actions;
 
 use App\Domain\Documents\Composers\DocumentComposer;
+use App\Domain\Documents\Composers\SpreadsheetComposer;
 use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Events\DocumentReady;
 use App\Domain\Documents\Models\DocumentTemplate;
@@ -26,7 +27,9 @@ use LogicException;
  * PDF, empreinte SHA-256 du PDF, DOCX et PDF rangés par StorageService
  * (orgs/{organisation}/documents/{année}/…), puis document valide et événement DocumentReady. Les
  * fichiers intermédiaires vivent dans un dossier de travail jetable. Un document qui n'est plus
- * « en production » n'est pas refait.
+ * « en production » n'est pas refait. Un type produit en classeur (SpreadsheetComposer, classeur officiel
+ * du rapport trimestriel) est rempli par son composeur et rangé en XLSX, sans PDF ; son empreinte est
+ * celle du classeur.
  */
 class RenderDocument
 {
@@ -52,7 +55,11 @@ class RenderDocument
         }
 
         $template = DocumentTemplate::query()->with('file')->findOrFail($document->template_id);
-        $content = $this->composer($document)->compose($document);
+        $composer = $this->composer($document);
+        if ($composer instanceof SpreadsheetComposer) {
+            return $this->spreadsheet($document, $template, $composer);
+        }
+        $content = $composer->compose($document);
 
         $work = $this->config->string('documents.work_path').'/'.Str::lower((string) Str::ulid());
         File::ensureDirectoryExists($work);
@@ -99,13 +106,47 @@ class RenderDocument
     }
 
     /**
+     * Classeur rempli par son composeur, rangé en XLSX (empreinte du classeur), document valide.
+     */
+    private function spreadsheet(GeneratedDocument $document, DocumentTemplate $template, SpreadsheetComposer $composer): GeneratedDocument
+    {
+        $work = $this->config->string('documents.work_path').'/'.Str::lower((string) Str::ulid());
+        File::ensureDirectoryExists($work);
+        try {
+            File::put($work.'/template.xlsx', $this->storage->contents($template->file));
+            $composer->render($document, $work.'/template.xlsx', $work.'/document.xlsx');
+            $xlsx = File::get($work.'/document.xlsx');
+        } finally {
+            File::deleteDirectory($work);
+        }
+
+        return DB::transaction(function () use ($document, $xlsx): GeneratedDocument {
+            $document = GeneratedDocument::query()->lockForUpdate()->findOrFail($document->id);
+            if ($document->status !== DocumentStatus::Generating) {
+                return $document;
+            }
+
+            $name = Str::slug($document->type->label().' '.($document->number ?? $document->id).($document->version > 1 ? ' v'.$document->version : ''));
+            $file = $this->storage->store($xlsx, $name.'.xlsx', self::STORAGE_TYPE, $document->organization_id, $document->generated_by);
+            $document->xlsx_file_id = $file->id;
+            $document->sha256 = $file->sha256;
+            $document->status = DocumentStatus::Valid;
+            $document->save();
+
+            DocumentReady::dispatch($document);
+
+            return $document;
+        });
+    }
+
+    /**
      * @throws LogicException type sans composeur déclaré dans config/documents.php
      */
-    private function composer(GeneratedDocument $document): DocumentComposer
+    private function composer(GeneratedDocument $document): DocumentComposer|SpreadsheetComposer
     {
         $class = $this->config->get("documents.templates.{$document->type->value}.composer");
         $composer = is_string($class) ? $this->container->make($class) : null;
 
-        return $composer instanceof DocumentComposer ? $composer : throw new LogicException("Aucun composeur pour le type {$document->type->value}.");
+        return $composer instanceof DocumentComposer || $composer instanceof SpreadsheetComposer ? $composer : throw new LogicException("Aucun composeur pour le type {$document->type->value}.");
     }
 }

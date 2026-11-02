@@ -111,6 +111,14 @@ class MemberPolicy
     }
 
     /**
+     * État des dossiers à radier après une perte d'agrément (F-ORG-07) : qui peut demander une radiation.
+     */
+    public function listAgreementLoss(User $user): bool
+    {
+        return $this->inCga() && $this->context->allows('members.radiation.request');
+    }
+
+    /**
      * « Valider la radiation » (RG-ADH-17) : gérant, expert-comptable.
      */
     public function validateRadiation(User $user, Member $member): bool

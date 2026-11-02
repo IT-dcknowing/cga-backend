@@ -87,6 +87,8 @@ class SampleDocumentData
             'receipt' => [...$cga, ...$receipt],
             'radiation_notice' => [...$cga, ...$notice],
             'quarterly_report_docx' => [...$cga, ...$report],
+            'report_transmission_slip' => [...$cga, 'report_label' => 'T3 2026', 'report_period' => 'du 1er juillet 2026 au 30 septembre 2026',
+                'report_version' => 'V1', 'transmission_date' => '20 octobre 2026', 'transmission_mode' => 'Dépôt physique', 'transmission_reference' => 'DEP-EXEMPLE-0001'],
             default => throw new RuntimeException("Pas de données d'exemple pour {$type}."),
         };
     }

@@ -28,6 +28,8 @@ use App\Domain\Referentials\Models\NationalReference;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Reports\Models\CgaPerson;
+use App\Domain\Reports\Models\QuarterlyReport;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
@@ -72,6 +74,10 @@ final class CrossTenantObjects
             // Une campagne par CGA et par exercice : le dossier suivi reprend la campagne du CGA B si elle existe.
             ClosingCampaign::class => static fn (Organization $other): ClosingCampaign => self::closingCampaignOf($other),
             ClosingCampaignItem::class => static fn (Organization $other): ClosingCampaignItem => ClosingCampaignItem::factory()->create(['campaign_id' => self::closingCampaignOf($other)->id]),
+            CgaPerson::class => static fn (Organization $other): CgaPerson => CgaPerson::factory()->create(['organization_id' => $other->id]),
+            // Un rapport par CGA et par trimestre : réutilisé s'il existe.
+            QuarterlyReport::class => static fn (Organization $other): QuarterlyReport => Tenancy::bypass(static fn (): ?QuarterlyReport => QuarterlyReport::query()->where('organization_id', $other->id)->first(), 'Test de cloisonnement : rapport du CGA B.')
+                ?? QuarterlyReport::factory()->create(['organization_id' => $other->id]),
             ObligationInstance::class => static fn (Organization $other): ObligationInstance => ObligationInstance::factory()->create([
                 'member_obligation_id' => MemberObligation::factory()->create(['member_id' => Member::factory()->active()->create(['organization_id' => $other->id])->id])->id,
             ]),
@@ -165,6 +171,7 @@ final class CrossTenantObjects
             'public.verify:verificationCode' => 'Code aléatoire du QR d\'un document (page publique, F-DOC-04) : il désigne le document sans identifiant ; un code inconnu répond 404.',
             'cga.members.pieces.store:pieceType' => 'Type de pièce du dossier (F-PJ-01) : il ne désigne aucun objet, le dossier est contrôlé par {member} ; une valeur inconnue répond 404.',
             'cga.profile.images.store:kind' => 'Type d\'image (logo, signature, cachet) de la fiche du CGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',
+            'cga.permanent-profile.resources.save:category' => 'Catégorie de moyens matériels de la fiche permanente (F-RPT-01) : la ligne est cherchée dans le CGA de l\'espace actif ; une valeur inconnue répond 404.',
         ];
     }
 
