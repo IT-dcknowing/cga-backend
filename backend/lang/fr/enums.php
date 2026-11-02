@@ -461,4 +461,21 @@ return [
         'paid' => 'Payée',
     ],
 
+    'closing_campaign_status' => [
+        'open' => 'Ouverte',
+        'closed' => 'Close',
+    ],
+
+    'closing_deliverable' => [
+        'smt' => 'SMT',
+        'financial_statements' => 'États financiers',
+    ],
+
+    'closing_step' => [
+        'pieces' => 'Collecte des pièces',
+        'regularisation' => 'Régularisation',
+        'finalisation' => 'Finalisation',
+        'filing' => 'Dépôt légal',
+    ],
+
 ];

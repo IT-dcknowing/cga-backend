@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Domain\Auth\Actions\IssueInvitation;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Closing\Actions\OpenClosingCampaign;
 use App\Domain\Documents\Samples\SampleDocumentData;
 use App\Domain\Members\Enums\EntityType;
 use App\Domain\Members\Enums\FeesPeriodicity;
@@ -50,7 +51,8 @@ use Illuminate\Support\Str;
  * plateforme · 0700000010 gérant du CGA suspendu (consultation seule, RG-ORG-08). Un ancien adhérent
  * radié du CGA de Bouaké (NCC 9000001T) permet de rejouer le réimport d'identité (RG-ADH-15) ;
  * 0700000011 est l'accès principal en ligne d'un adhérent actif de DC-KNOWING (espace adhérent).
- * La fiche de DC-KNOWING est complète (images de remplacement) : ses documents se produisent.
+ * La fiche de DC-KNOWING est complète (images de remplacement) : ses documents se produisent ; sa
+ * campagne de clôture de l'exercice précédent est ouverte.
  */
 class DemoSeeder extends Seeder
 {
@@ -62,6 +64,7 @@ class DemoSeeder extends Seeder
         private readonly SyncEntryFee $entryFee,
         private readonly StorageService $storage,
         private readonly SampleDocumentData $samples,
+        private readonly OpenClosingCampaign $openClosing,
     ) {}
 
     public function run(): void
@@ -91,6 +94,7 @@ class DemoSeeder extends Seeder
         $this->invitee($dck);
         $this->formerMember($bouake);
         $this->onlineMember($dck);
+        $this->closingCampaign($dck);
 
         // Fenêtre des demandes de code ramenée à une minute : la collection Postman se rejoue.
         $this->settings->set('rate_limit.otp', ['max_attempts' => 3, 'decay_minutes' => (int) config('cga.seed.demo.otp_decay_minutes')]);
@@ -198,6 +202,18 @@ class DemoSeeder extends Seeder
             $access->activated_at = now();
             $access->save();
         }
+    }
+
+    /**
+     * Campagne de clôture de l'exercice précédent de DC-KNOWING (F-OBL-08), ouverte comme le ferait
+     * closing:open-campaign : /cga/cloture et la collection Postman s'y appuient. Rejouable.
+     */
+    private function closingCampaign(Organization $organization): void
+    {
+        Tenancy::bypass(
+            fn () => $this->openClosing->execute($organization->id, now()->year - 1, CarbonImmutable::now()),
+            'Jeu de démonstration : campagne de clôture de DC-KNOWING.',
+        );
     }
 
     /**

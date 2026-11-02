@@ -2,6 +2,8 @@
 
 namespace Tests\Support;
 
+use App\Domain\Closing\Models\ClosingCampaign;
+use App\Domain\Closing\Models\ClosingCampaignItem;
 use App\Domain\Documents\Models\DocumentTemplate;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
@@ -67,6 +69,9 @@ final class CrossTenantObjects
             // obligation locale n'appartient qu'à son centre.
             ObligationType::class => static fn (Organization $other): ObligationType => ObligationType::factory()->localTo($other)->create(),
             CenterObligation::class => static fn (Organization $other): CenterObligation => CenterObligation::factory()->create(['organization_id' => $other->id]),
+            // Une campagne par CGA et par exercice : le dossier suivi reprend la campagne du CGA B si elle existe.
+            ClosingCampaign::class => static fn (Organization $other): ClosingCampaign => self::closingCampaignOf($other),
+            ClosingCampaignItem::class => static fn (Organization $other): ClosingCampaignItem => ClosingCampaignItem::factory()->create(['campaign_id' => self::closingCampaignOf($other)->id]),
             ObligationInstance::class => static fn (Organization $other): ObligationInstance => ObligationInstance::factory()->create([
                 'member_obligation_id' => MemberObligation::factory()->create(['member_id' => Member::factory()->active()->create(['organization_id' => $other->id])->id])->id,
             ]),
@@ -152,6 +157,8 @@ final class CrossTenantObjects
             'reference-data.preview:dataset' => $dataset,
             'reference-data.apply:dataset' => $dataset,
             'reference-data.validate:dataset' => $dataset,
+            'cga.closing-campaigns.bulk.step:step' => 'Étape de la campagne de clôture (valeur de la liste des étapes, F-OBL-08) : elle ne désigne aucun objet, les dossiers sont cherchés dans {closingCampaign} ; une valeur inconnue répond 404.',
+            'cga.closing-campaigns.items.step:step' => 'Étape de la campagne de clôture (valeur de la liste des étapes, F-OBL-08) : elle ne désigne aucun objet, le dossier est contrôlé par {closingCampaign} et {item} ; une valeur inconnue répond 404.',
             'network.obligation-catalog.validate:version' => 'Version du catalogue national des obligations (F-OBL-01) : commune à tout le réseau, elle ne désigne aucun objet d\'une organisation ; une version inconnue répond 404.',
             'auth.invitations.show:invitationToken' => $invitationToken,
             'auth.invitations.accept:invitationToken' => $invitationToken,
@@ -159,5 +166,12 @@ final class CrossTenantObjects
             'cga.members.pieces.store:pieceType' => 'Type de pièce du dossier (F-PJ-01) : il ne désigne aucun objet, le dossier est contrôlé par {member} ; une valeur inconnue répond 404.',
             'cga.profile.images.store:kind' => 'Type d\'image (logo, signature, cachet) de la fiche du CGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',
         ];
+    }
+
+    /** Campagne de clôture du CGA B, créée une fois (une seule par CGA et par exercice). */
+    private static function closingCampaignOf(Organization $other): ClosingCampaign
+    {
+        return Tenancy::bypass(static fn (): ?ClosingCampaign => ClosingCampaign::query()->where('organization_id', $other->id)->first(), 'Test de cloisonnement : campagne du CGA B.')
+            ?? ClosingCampaign::factory()->create(['organization_id' => $other->id]);
     }
 }

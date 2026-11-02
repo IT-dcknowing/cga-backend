@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Domain\Audit\AuditLogger;
 use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
+use App\Domain\Closing\Models\ClosingCampaign;
+use App\Domain\Closing\Policies\ClosingCampaignPolicy;
 use App\Domain\Documents\Listeners\CancelCertificatesOnRadiation;
 use App\Domain\Documents\Listeners\ProduceRadiationNoticeOnValidation;
 use App\Domain\Documents\Listeners\ProduceReceiptOnConfirmation;
@@ -148,6 +150,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(ObligationType::class, ObligationTypePolicy::class);
         Gate::policy(MemberObligation::class, MemberObligationPolicy::class);
         Gate::policy(CenterObligation::class, CenterObligationPolicy::class);
+        Gate::policy(ClosingCampaign::class, ClosingCampaignPolicy::class);
 
         // Documents officiels produits ou déposés (M08).
         Gate::policy(GeneratedDocument::class, DocumentPolicy::class);

@@ -41657,6 +41657,936 @@
             ]
         },
         {
+            "name": "32. Étape 4.10 — Campagne de clôture",
+            "description": "Campagne de clôture de l'exercice précédent de DC-KNOWING (ouverte par le jeu de démo, comme le ferait `closing:open-campaign`) : tableau de suivi, dossiers, étapes dans l'ordre, actions groupées, onglet du dossier et espace adhérent (F-OBL-08, RG-OBL-10 à 12). Rejouable : une étape déjà faite répond 409 ou est écartée de la sélection.",
+            "item": [
+                {
+                    "name": "Clôture — campagnes du centre",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const campaign = pm.response.json().data[0];",
+                                    "    pm.test(\"Une campagne ouverte\", () => pm.expect(campaign.status).to.eql(\"open\"));",
+                                    "    pm.test(\"Quatre étapes datées\", () => pm.expect(campaign.steps.map(s => s.code)).to.eql([\"pieces\", \"regularisation\", \"finalisation\", \"filing\"]));",
+                                    "    pm.collectionVariables.set(\"closing_campaign_id\", campaign.id);",
+                                    "    pm.collectionVariables.set(\"today\", new Date().toISOString().slice(0, 10));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns"
+                            ]
+                        },
+                        "description": "Exercices du centre, le plus récent d'abord."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — tableau de suivi (portefeuille CGA)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const meta = pm.response.json().meta;",
+                                    "    pm.test(\"Tableau par étape\", () => pm.expect(meta.board.steps).to.have.length(4));",
+                                    "    pm.test(\"Nombres du rapport\", () => pm.expect(meta.report).to.have.all.keys(\"smt_established\", \"smt_transmitted\", \"financial_statements_established\", \"financial_statements_transmitted\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}?portfolio=cga",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}"
+                            ],
+                            "query": [
+                                {
+                                    "key": "portfolio",
+                                    "value": "cga"
+                                }
+                            ]
+                        },
+                        "description": "Nombre de dossiers par étape et retards (RG-OBL-11) ; SMT et états financiers établis et transmis du seul portefeuille CGA (RG-OBL-12)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — dossiers de la campagne",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const item = pm.response.json().data[0];",
+                                    "    pm.test(\"Un dossier suivi\", () => pm.expect(item.member.id).to.be.a(\"string\"));",
+                                    "    pm.collectionVariables.set(\"closing_item_id\", item.id);",
+                                    "    pm.collectionVariables.set(\"closing_member_id\", item.member.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/items?filter[portfolio]=cga",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "items"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[portfolio]",
+                                    "value": "cga"
+                                }
+                            ]
+                        },
+                        "description": "Dossiers suivis, filtrables par portefeuille, agent, étape en cours et retard."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — filtre invalide (422)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Étape inconnue\", () => pm.expect(pm.response.json().errors).to.have.property(\"filter.step\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/items?filter[step]=bilan",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "items"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[step]",
+                                    "value": "bilan"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — livrable et agent du dossier",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"SMT\", () => pm.expect(pm.response.json().data.deliverable).to.eql(\"smt\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/items/{{closing_item_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "items",
+                                "{{closing_item_id}}"
+                            ]
+                        },
+                        "description": "Livrable proposé selon le régime, modifiable (décision 0006) ; agent choisi parmi les agents du centre.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"deliverable\": \"smt\",\n    \"assigned_to\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — étape hors ordre (409)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Hors ordre\", () => pm.expect(pm.response.json().code).to.eql(\"closing_step_out_of_order\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/items/{{closing_item_id}}/steps/finalisation",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "items",
+                                "{{closing_item_id}}",
+                                "steps",
+                                "finalisation"
+                            ]
+                        },
+                        "description": "Les étapes se font dans l'ordre (décision 0006).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"done_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — pièces reçues pour une sélection",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const body = pm.response.json();",
+                                    "    pm.test(\"Marqué ou écarté\", () => pm.expect(body.data.length + body.meta.skipped.length).to.eql(1));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/bulk/steps/pieces",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "bulk",
+                                "steps",
+                                "pieces"
+                            ]
+                        },
+                        "description": "Action groupée : les dossiers dont l'étape est déjà faite sont écartés avec leur motif (meta.skipped).",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"item_ids\": [\n        \"{{closing_item_id}}\"\n    ],\n    \"done_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — étape déjà faite (409)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 409\", () => pm.response.to.have.status(409));",
+                                    "    pm.test(\"Déjà faite\", () => pm.expect(pm.response.json().code).to.eql(\"closing_step_already_done\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/items/{{closing_item_id}}/steps/pieces",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "items",
+                                "{{closing_item_id}}",
+                                "steps",
+                                "pieces"
+                            ]
+                        },
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"done_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — affecter une sélection à personne",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Sans agent\", () => pm.expect(pm.response.json().data[0].assigned_to).to.eql(null));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/bulk/assign",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "bulk",
+                                "assign"
+                            ]
+                        },
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"item_ids\": [\n        \"{{closing_item_id}}\"\n    ],\n    \"assigned_to\": null\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — dépôt légal groupé refusé (422)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Étape refusée\", () => pm.expect(pm.response.json().errors).to.have.property(\"step\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/bulk/steps/filing",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "bulk",
+                                "steps",
+                                "filing"
+                            ]
+                        },
+                        "description": "Le dépôt légal se marque dossier par dossier : référence et accusé propres.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"item_ids\": [\n        \"{{closing_item_id}}\"\n    ],\n    \"done_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — dépôt légal sans accusé (422)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "    pm.test(\"Référence et accusé exigés\", () => pm.expect(pm.response.json().errors).to.include.all.keys(\"reference\", \"receipt\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/{{closing_campaign_id}}/items/{{closing_item_id}}/steps/filing",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "{{closing_campaign_id}}",
+                                "items",
+                                "{{closing_item_id}}",
+                                "steps",
+                                "filing"
+                            ]
+                        },
+                        "description": "",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"done_on\": \"{{today}}\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — onglet Clôture du dossier",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Pièces reçues\", () => pm.expect(pm.response.json().data[0].steps[0].done_on).to.be.a(\"string\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/members/{{closing_member_id}}/closing",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "members",
+                                "{{closing_member_id}}",
+                                "closing"
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — espace adhérent",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Sans donnée interne\", () => pm.response.json().data.forEach(item => pm.expect(item).to.not.have.property(\"portfolio\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/member/closing",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "member",
+                                "closing"
+                            ]
+                        },
+                        "description": "Campagnes ouvertes : étapes et dates, sans donnée interne (portefeuille, agent, actions)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clôture — refusée à l'adhérent côté CGA (403)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "adherent",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns"
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -42388,6 +43318,18 @@
         },
         {
             "key": "center_obligation_id",
+            "value": ""
+        },
+        {
+            "key": "closing_campaign_id",
+            "value": ""
+        },
+        {
+            "key": "closing_item_id",
+            "value": ""
+        },
+        {
+            "key": "closing_member_id",
             "value": ""
         }
     ]
