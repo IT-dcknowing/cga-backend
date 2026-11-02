@@ -179,6 +179,27 @@ class Member extends Model
     }
 
     /**
+     * Portefeuille CGA à une date passée (états du rapport trimestriel, arrêtés à la fin du trimestre) :
+     * le dossier y est quand son contrat CGA est en vigueur ce jour-là (RG-PTF-08) — entré au portefeuille
+     * au plus tard à cette date et sans radiation prenant effet à cette date ou avant. Un dossier radié ou
+     * basculé au Cabinet après la date y reste donc ; un dossier Cabinet sans contrat CGA n'y est jamais
+     * (RG-SEC-08). Pour la date du jour, regulatory() suffit (décision 0007).
+     *
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function regulatoryAt(Builder $query, CarbonInterface $date): void
+    {
+        $day = $date->toDateString();
+        $query->whereNotNull('cga_contract_signed_on')
+            ->whereNotNull('adhesion_date')
+            ->where('adhesion_date', '<=', $day)
+            ->where(static fn (Builder $contract) => $contract
+                ->where(static fn (Builder $current) => $current->where('portfolio', Portfolio::Cga)->whereNull('cga_contract_ended_on'))
+                ->orWhere('cga_contract_ended_on', '>', $day));
+    }
+
+    /**
      * Dossier ouvert : brouillon, actif ou radiation en cours.
      *
      * @param  Builder<self>  $query

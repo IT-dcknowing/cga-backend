@@ -36,6 +36,11 @@ Schedule::command('closing:open-campaign')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('reminders:reports')
+    ->dailyAt(config('schedule.reminders_reports'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('reminders:closing')
     ->dailyAt(config('schedule.reminders_closing'))
     ->withoutOverlapping()

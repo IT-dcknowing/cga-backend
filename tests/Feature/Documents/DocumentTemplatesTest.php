@@ -28,10 +28,11 @@ function realDataOfMockup(): array
     ];
 }
 
-dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
+// Bordereau de transmission du rapport ajouté à l'étape 5.5 (décision 0007).
+dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'report_transmission_slip', 'quarterly_report_xlsx']);
 
 it('déclare chaque modèle de la liste', function () {
-    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
+    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'report_transmission_slip', 'quarterly_report_xlsx']);
 });
 
 it('ne contient aucune donnée réelle de la maquette, même dans un attribut ou les propriétés', function (string $type) {

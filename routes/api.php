@@ -17,6 +17,7 @@ use App\Domain\Documents\Http\Controllers\MemberSpaceDocumentController;
 use App\Domain\Documents\Http\Controllers\VerificationController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
+use App\Domain\Members\Http\Controllers\AgreementLossController;
 use App\Domain\Members\Http\Controllers\MemberAccessController;
 use App\Domain\Members\Http\Controllers\MemberController;
 use App\Domain\Members\Http\Controllers\MemberHistoryController;
@@ -53,6 +54,9 @@ use App\Domain\Referentials\Http\Controllers\RegionalDirectorateController;
 use App\Domain\Referentials\Http\Controllers\SectorController;
 use App\Domain\Referentials\Http\Controllers\SectorProposalController;
 use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
+use App\Domain\Reports\Http\Controllers\NetworkReportController;
+use App\Domain\Reports\Http\Controllers\PermanentProfileController;
+use App\Domain\Reports\Http\Controllers\QuarterlyReportController;
 use App\Domain\Users\Http\Controllers\AgentController;
 use App\Domain\Users\Http\Controllers\RolePermissionController;
 use App\Domain\Users\Http\Controllers\UserPermissionController;
@@ -350,6 +354,39 @@ Route::prefix('v1')->group(function (): void {
         Route::get('center-obligations', [CenterObligationController::class, 'index'])->name('center-obligations.index');
         Route::post('center-obligations', [CenterObligationController::class, 'store'])->name('center-obligations.store');
         Route::put('center-obligations/{centerObligation}', [CenterObligationController::class, 'update'])->name('center-obligations.update');
+    });
+
+    // Fiche permanente du CGA (F-RPT-01) : présentation, dirigeants et personnel, moyens matériels.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/permanent-profile')->name('cga.permanent-profile.')->group(function (): void {
+        Route::get('/', [PermanentProfileController::class, 'show'])->name('show');
+        Route::put('presentation', [PermanentProfileController::class, 'updatePresentation'])->name('presentation');
+        Route::post('people', [PermanentProfileController::class, 'storePerson'])->name('people.store');
+        Route::put('people/{cgaPerson}', [PermanentProfileController::class, 'updatePerson'])->name('people.update');
+        Route::put('resources/{category}', [PermanentProfileController::class, 'saveResource'])->name('resources.save');
+    });
+
+    // Rapports trimestriels du centre (F-RPT-02 à 07) : préparation, complétude, états du portefeuille.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/quarterly-reports')->name('cga.quarterly-reports.')->group(function (): void {
+        Route::get('/', [QuarterlyReportController::class, 'index'])->name('index');
+        Route::post('/', [QuarterlyReportController::class, 'store'])->name('store');
+        Route::get('{quarterlyReport}', [QuarterlyReportController::class, 'show'])->name('show');
+        Route::patch('{quarterlyReport}', [QuarterlyReportController::class, 'update'])->name('update');
+        Route::get('{quarterlyReport}/states', [QuarterlyReportController::class, 'states'])->name('states');
+        Route::get('{quarterlyReport}/preview', [QuarterlyReportController::class, 'preview'])->name('preview');
+        Route::post('{quarterlyReport}/generate', [QuarterlyReportController::class, 'generate'])->name('generate');
+        Route::get('{quarterlyReport}/versions', [QuarterlyReportController::class, 'versions'])->name('versions');
+        Route::post('{quarterlyReport}/transmit', [QuarterlyReportController::class, 'transmit'])->name('transmit');
+        Route::post('{quarterlyReport}/acknowledge', [QuarterlyReportController::class, 'acknowledge'])->name('acknowledge');
+        Route::post('{quarterlyReport}/correct', [QuarterlyReportController::class, 'correct'])->name('correct');
+    });
+
+    // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).
+    Route::middleware(['auth', 'tenant'])->get('cga/agreement-loss/members', [AgreementLossController::class, 'index'])->name('cga.agreement-loss.members');
+
+    // Rapports trimestriels vus du réseau (RG-RPT-04) : état de transmission et tableau de synthèse agrégé.
+    Route::middleware(['auth', 'tenant'])->prefix('network/quarterly-reports')->name('network.quarterly-reports.')->group(function (): void {
+        Route::get('/', [NetworkReportController::class, 'index'])->name('index');
+        Route::get('{organization}/summary', [NetworkReportController::class, 'summary'])->name('summary');
     });
 
     // Apporteurs d'affaires du centre (sous-portefeuille « Accessoires », RG-PTF-06).

@@ -33,6 +33,9 @@ return [
     // Ouverture de la campagne de clôture de l'exercice précédent (F-OBL-08) : expression cron, le 2 janvier.
     'closing_open' => env('SCHEDULE_CLOSING_OPEN', '45 0 2 1 *'),
 
+    // Échéances des rapports trimestriels : relances J-15, J-5, J+5, retards (RG-RPT-06, 07).
+    'reminders_reports' => env('SCHEDULE_REMINDERS_REPORTS', '07:15'),
+
     // Rappels de la campagne de clôture (RG-OBL-11).
     'reminders_closing' => env('SCHEDULE_REMINDERS_CLOSING', '07:35'),
 

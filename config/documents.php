@@ -23,6 +23,9 @@ use App\Domain\Documents\Composers\MembershipCertificateComposer;
 use App\Domain\Documents\Composers\MembershipContractComposer;
 use App\Domain\Documents\Composers\RadiationNoticeComposer;
 use App\Domain\Documents\Composers\ReceiptComposer;
+use App\Domain\Reports\Composers\QuarterlyReportDocxComposer;
+use App\Domain\Reports\Composers\QuarterlyReportWorkbookComposer;
+use App\Domain\Reports\Composers\ReportTransmissionSlipComposer;
 
 $cga = ['cga_name', 'cga_ncc', 'cga_agreement'];
 $signature = ['cga_signature', 'cga_stamp', 'qr_code'];
@@ -135,6 +138,7 @@ return [
             'label' => 'Rapport trimestriel (Word)',
             'format' => 'docx',
             'path' => resource_path('templates/quarterly_report_docx.docx'),
+            'composer' => QuarterlyReportDocxComposer::class,
             'images' => ['cga_signature', 'cga_stamp', 'qr_code'],
             'rows' => [
                 'director_name' => ['director_index', 'director_name', 'director_profession', 'director_function', 'director_start_date', 'director_experience'],
@@ -155,11 +159,27 @@ return [
             ],
         ],
 
+        // Modèle provisoire (la maquette n'en a pas) : bordereau de transmission du rapport trimestriel au
+        // SP-CGA, produit à l'enregistrement de la transmission (F-RPT-04).
+        'report_transmission_slip' => [
+            'label' => 'Bordereau de transmission du rapport',
+            'format' => 'docx',
+            'path' => resource_path('templates/report_transmission_slip.docx'),
+            'composer' => ReportTransmissionSlipComposer::class,
+            'images' => $signature,
+            'variables' => [
+                ...$cga, 'cga_address', 'cga_signatory_name', 'cga_signatory_title',
+                'report_label', 'report_period', 'report_version', 'transmission_date', 'transmission_mode', 'transmission_reference',
+                'document_place', 'document_date',
+            ],
+        ],
+
         // Classeur officiel SP-CGA, 14 feuilles (02-TRD §8.3) : export de compatibilité.
         'quarterly_report_xlsx' => [
             'label' => 'Rapport trimestriel (classeur officiel)',
             'format' => 'xlsx',
             'path' => resource_path('templates/quarterly_report_xlsx.xlsx'),
+            'composer' => QuarterlyReportWorkbookComposer::class,
             'sheets' => 14,
             'variables' => [
                 'report_quarter_label', 'report_date', 'period_start', 'period_end', 'tax_office_name',
