@@ -31,6 +31,16 @@ Schedule::command('fne:retry')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('closing:open-campaign')
+    ->cron(config('schedule.closing_open'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::command('reminders:closing')
+    ->dailyAt(config('schedule.reminders_closing'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('members:radiation-expiry')
     ->dailyAt(config('schedule.radiation_expiry'))
     ->withoutOverlapping()

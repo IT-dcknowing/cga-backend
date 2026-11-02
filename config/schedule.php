@@ -30,4 +30,10 @@ return [
     // Fin de la consultation seule des adhérents radiés (RG-ADH-12).
     'radiation_expiry' => env('SCHEDULE_RADIATION_EXPIRY', '03:30'),
 
+    // Ouverture de la campagne de clôture de l'exercice précédent (F-OBL-08) : expression cron, le 2 janvier.
+    'closing_open' => env('SCHEDULE_CLOSING_OPEN', '45 0 2 1 *'),
+
+    // Rappels de la campagne de clôture (RG-OBL-11).
+    'reminders_closing' => env('SCHEDULE_REMINDERS_CLOSING', '07:35'),
+
 ];

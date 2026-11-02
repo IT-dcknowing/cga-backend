@@ -5,6 +5,8 @@ use App\Domain\Auth\Http\Controllers\MeController;
 use App\Domain\Auth\Http\Controllers\PasswordResetController;
 use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
+use App\Domain\Closing\Http\Controllers\ClosingCampaignController;
+use App\Domain\Closing\Http\Controllers\MemberClosingController;
 use App\Domain\Documents\Http\Controllers\AttestationBlockController;
 use App\Domain\Documents\Http\Controllers\CertificateCampaignController;
 use App\Domain\Documents\Http\Controllers\DocumentController;
@@ -324,6 +326,22 @@ Route::prefix('v1')->group(function (): void {
         Route::post('apply', [ObligationCatalogController::class, 'apply'])->name('apply');
         Route::post('{version}/validate', [ObligationCatalogController::class, 'validateVersion'])->name('validate');
     });
+
+    // Campagnes de clôture du centre (F-OBL-08, RG-OBL-10 à 12) : calendrier et tableau de suivi, dossiers,
+    // étapes marquées dans l'ordre, livrable et agent d'un dossier.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/closing-campaigns')->name('cga.closing-campaigns.')->group(function (): void {
+        Route::get('/', [ClosingCampaignController::class, 'index'])->name('index');
+        Route::get('{closingCampaign}', [ClosingCampaignController::class, 'show'])->name('show');
+        Route::get('{closingCampaign}/items', [ClosingCampaignController::class, 'items'])->name('items');
+        Route::post('{closingCampaign}/bulk/steps/{step}', [ClosingCampaignController::class, 'bulkStep'])->name('bulk.step');
+        Route::post('{closingCampaign}/bulk/assign', [ClosingCampaignController::class, 'bulkAssign'])->name('bulk.assign');
+        Route::scopeBindings()->group(function (): void {
+            Route::put('{closingCampaign}/items/{item}', [ClosingCampaignController::class, 'updateItem'])->name('items.update');
+            Route::post('{closingCampaign}/items/{item}/steps/{step}', [ClosingCampaignController::class, 'markStep'])->name('items.step');
+        });
+    });
+    Route::middleware(['auth', 'tenant'])->get('cga/members/{member}/closing', [MemberClosingController::class, 'forMember'])->name('cga.members.closing');
+    Route::middleware(['auth', 'tenant'])->get('member/closing', [MemberClosingController::class, 'own'])->name('member.closing');
 
     // Planning des échéances du portefeuille (F-OBL-06) et obligations propres du centre (F-OBL-07).
     Route::middleware(['auth', 'tenant'])->prefix('cga')->name('cga.')->group(function (): void {

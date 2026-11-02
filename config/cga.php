@@ -202,6 +202,28 @@ return [
             ],
         ],
 
+        // Campagne de clôture (F-OBL-08, RG-OBL-10, 11) : dates internes du réseau ajustables par chaque CGA
+        // (mois-jour de l'année N+1), date de dépôt légal réglée par le CNCGA seul, rappels de pièces.
+        'closing' => [
+            'calendar' => [
+                'type' => 'array', 'level' => ['network', 'cga'], 'permission' => 'network_settings.manage',
+                'default' => ['pieces' => '01-30', 'regularisation' => '02-28', 'finalisation' => '03-31'],
+                'rules' => ['' => ['array:pieces,regularisation,finalisation'], 'pieces' => ['required', 'date_format:m-d'], 'regularisation' => ['required', 'date_format:m-d'], 'finalisation' => ['required', 'date_format:m-d']],
+            ],
+            'filing_date' => [
+                'type' => 'string', 'level' => 'network', 'default' => '05-30', 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['string', 'date_format:m-d']],
+            ],
+            'reminder_offsets' => [
+                'type' => 'array', 'level' => ['network', 'cga'], 'default' => [-15, -5], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array', 'max:10'], '*' => ['integer', 'min:-90', 'max:-1']],
+            ],
+            'late_reminder_every_days' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 7, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:60']],
+            ],
+        ],
+
         'invitation' => [
             'validity_days' => [
                 'type' => 'integer', 'level' => 'platform', 'default' => 7, 'permission' => $platform,
