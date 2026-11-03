@@ -100,11 +100,12 @@ command -v composer > /dev/null || fail "composer introuvable"
 [[ -d "$DOCROOT" ]] || fail "dossier public introuvable : $DOCROOT"
 
 if [[ ! -f "$DOCROOT_MARK" ]]; then
+    # Fichiers que cPanel crée dans un dossier public neuf (gestionnaire PHP, réglages PHP) : gardés.
     unexpected=$(find "$DOCROOT" -mindepth 1 -maxdepth 1 ! -name cgi-bin ! -name .well-known \
-        ! -name .htaccess ! -name .user.ini -printf '%f ')
+        ! -name .htaccess ! -name .user.ini ! -name php.ini -printf '%f ')
     [[ -z "$unexpected" ]] \
         || fail "le dossier public $DOCROOT contient déjà : $unexpected; le vider ou choisir un autre dossier"
-    for existing in .htaccess .user.ini; do
+    for existing in .htaccess .user.ini php.ini; do
         if [[ -f "$DOCROOT/$existing" ]]; then
             mkdir -p "$APP_DIR/avant-installation"
             cp -a "$DOCROOT/$existing" "$APP_DIR/avant-installation/"
@@ -221,6 +222,8 @@ DirectoryIndex index.html
 
     # Fichiers cachés (.env, .user.ini, repère d’installation…) : interdits, sauf .well-known.
     RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    # Réglages PHP écrits par cPanel : jamais servis.
+    RewriteRule ^php\.ini\$ - [F,L]
 
     # API et Sanctum : Laravel.
     RewriteRule ^(api|sanctum)(/.*)?\$ index.php [L]

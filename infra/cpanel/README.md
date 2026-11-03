@@ -20,7 +20,7 @@ Le reste est identique : une version par dossier `releases/<date>`, configuratio
 - PHP 8.3 avec `pdo_pgsql`, `pgsql`, `intl`, `zip`, `gd`, `bcmath`, `mbstring`, `curl`, `fileinfo`, `sodium`, en ligne de commande **et** pour le domaine (MultiPHP Manager) ;
 - Composer, le Terminal (ou SSH) et les tâches cron ;
 - une base PostgreSQL **dédiée** et un utilisateur qui y a tous les droits ;
-- un domaine dont le dossier public est vide.
+- un domaine dont le dossier public ne contient que ce que cPanel y crée (`cgi-bin`, `.well-known`, `.htaccess`, `.user.ini`, `php.ini`) : ces fichiers sont gardés, et `php.ini` n'est jamais servi.
 
 ## 1. Construire le paquet (sur le poste)
 
