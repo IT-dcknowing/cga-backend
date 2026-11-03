@@ -380,6 +380,7 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth', 'tenant'])->prefix('cga')->name('cga.')->group(function (): void {
         Route::get('obligation-planning', [ObligationPlanningController::class, 'index'])->name('obligation-planning.index');
         Route::get('obligation-planning/members', [ObligationPlanningController::class, 'members'])->name('obligation-planning.members');
+        Route::get('obligation-planning/revenue', [ObligationPlanningController::class, 'revenue'])->name('obligation-planning.revenue');
         Route::get('center-obligations', [CenterObligationController::class, 'index'])->name('center-obligations.index');
         Route::post('center-obligations', [CenterObligationController::class, 'store'])->name('center-obligations.store');
         Route::put('center-obligations/{centerObligation}', [CenterObligationController::class, 'update'])->name('center-obligations.update');

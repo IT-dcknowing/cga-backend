@@ -485,6 +485,8 @@ return [
     'obligations' => [
         'local_catalog_version' => 'local',
         'max_amount' => 100_000_000_000,
+        // Mobilisation des recettes (/cga/echeances) : contribuables listés, les plus gros restes dus d'abord.
+        'revenue_members_limit' => (int) env('OBLIGATIONS_REVENUE_MEMBERS_LIMIT', 50),
     ],
 
     /*

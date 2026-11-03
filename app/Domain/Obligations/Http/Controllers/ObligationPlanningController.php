@@ -4,10 +4,13 @@ namespace App\Domain\Obligations\Http\Controllers;
 
 use App\Domain\Obligations\Http\Requests\ObligationPlanningRequest;
 use App\Domain\Obligations\Http\Requests\PlanningMembersRequest;
+use App\Domain\Obligations\Http\Requests\RevenueMobilizationRequest;
 use App\Domain\Obligations\Http\Resources\PlanningLineResource;
 use App\Domain\Obligations\Http\Resources\PlanningMemberResource;
+use App\Domain\Obligations\Http\Resources\RevenueMobilizationResource;
 use App\Domain\Obligations\Models\ObligationInstance;
 use App\Domain\Obligations\Support\ObligationPlanning;
+use App\Domain\Obligations\Support\RevenueMobilization;
 use App\Support\Config\SettingsService;
 use App\Support\Http\BaseApiController;
 use App\Support\Tenancy\TenantContext;
@@ -18,7 +21,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 /**
  * /api/v1/cga/obligation-planning : planning des échéances du portefeuille (/cga/echeances, F-OBL-06) —
  * lignes « date — obligation — n adhérents » avec faits / à faire, indicateur « Échéances sous n
- * jours », adhérents concernés par une ligne.
+ * jours », adhérents concernés par une ligne ; mobilisation des recettes (onglet de /cga/echeances).
  */
 class ObligationPlanningController extends BaseApiController
 {
@@ -56,5 +59,19 @@ class ObligationPlanningController extends BaseApiController
 
             return PlanningMemberResource::collection($instances);
         }, action: 'obligation_planning.members');
+    }
+
+    public function revenue(RevenueMobilizationRequest $request, RevenueMobilization $revenue): RevenueMobilizationResource|JsonResponse
+    {
+        return $this->handle(function () use ($request, $revenue): RevenueMobilizationResource {
+            $today = CarbonImmutable::today();
+
+            return new RevenueMobilizationResource($revenue->compute(
+                $request->dueFrom($today),
+                $request->dueTo($today),
+                $this->context->allows('members.cabinet.view'),
+                (int) config('cga.obligations.revenue_members_limit'),
+            ));
+        }, action: 'obligation_planning.revenue');
     }
 }
