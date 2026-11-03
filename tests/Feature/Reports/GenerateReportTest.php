@@ -84,7 +84,7 @@ it('RG-RPT-05 · génère la V1 : instantané de l\'objet de données, rapport W
         ->assertStatus(202)->assertJsonPath('data.status', 'generated')->assertJsonPath('data.current_version', 1)->assertJsonPath('data.can.transmit', true);
 
     $version = reportVersion($this->report);
-    expect(array_keys($version->snapshot))->toEqualCanonicalizing(['report', 'cga', 'people', 'resources', 'content', 'qualitative_analysis', 'states', 'increase_rule'])
+    expect(array_keys($version->snapshot))->toEqualCanonicalizing(['report', 'cga', 'people', 'resources', 'content', 'qualitative_analysis', 'states', 'trend', 'charts', 'synthesis', 'increase_rule'])
         ->and($version->snapshot['increase_rule'])->toEqual(['basis' => 'annual_due', 'min_increase_pct' => 0, 'amount' => 'net'])
         ->and($version->snapshot['people']['directors'][0]['taxes'])->toEqual(['its' => 120_000, 'igr' => 45_000, 'cnps' => 60_000])
         ->and($version->pdfDocument)->status->toBe(DocumentStatus::Valid)->number->toBe('GEN-RT-2026-T3')->visible_to_member->toBeFalse()

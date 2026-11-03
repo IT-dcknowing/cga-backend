@@ -55,6 +55,7 @@ class TemplateInspector
             ...(array) ($definition['variables'] ?? []),
             ...(array) ($definition['images'] ?? []),
             ...(array) ($definition['framed_images'] ?? []),
+            ...(array) ($definition['charts'] ?? []),
             ...array_merge([], ...array_map(static fn (mixed $row): array => (array) $row, $rows)),
         ]);
     }

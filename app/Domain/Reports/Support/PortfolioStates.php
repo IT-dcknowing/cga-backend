@@ -95,6 +95,26 @@ final class PortfolioStates
     }
 
     /**
+     * Adhérents actifs TEE et RME du portefeuille CGA à une date (évolution du rapport modernisé),
+     * selon les mêmes règles que les états : portefeuille CGA à la date, régime à la date.
+     *
+     * @return array{tee: int, rme: int}
+     */
+    public function activeByRegime(string $organizationId, CarbonImmutable $date): array
+    {
+        $counts = ['tee' => 0, 'rme' => 0];
+        Member::query()->with('regimeHistory')->where('organization_id', $organizationId)->regulatoryAt($date)->get()
+            ->each(function (Member $member) use ($date, &$counts): void {
+                $regime = $this->regimeOn($member, $date);
+                if ($regime === TaxRegime::Tee || $regime === TaxRegime::Rme) {
+                    $counts[strtolower($regime->value)]++;
+                }
+            });
+
+        return $counts;
+    }
+
+    /**
      * Régime du dossier à une date, d'après l'historique des régimes (F-ADH-05) ; sans historique, le
      * régime du dossier.
      */

@@ -76,7 +76,9 @@ class RenderDocument
             }
 
             $docxPath = $work.'/document.docx';
-            $this->renderer->render($templatePath, $docxPath, $content->values, $images, $content->rows);
+            // Graphiques que le modèle prévoit (variables ${chart_…}), rendus en natif (T-21).
+            $charts = array_intersect_key($content->charts, array_flip($template->variables));
+            $this->renderer->render($templatePath, $docxPath, $content->values, $images, $content->rows, $charts);
             $pdf = $this->converter->convert($docxPath);
             $docx = File::get($docxPath);
         } finally {

@@ -48,6 +48,9 @@ return [
     // (N-3 à N-1).
     'upgrade_history_years' => 3,
 
+    // Rapport modernisé (étape 5.11) : trimestres de la courbe d\'évolution des adhérents actifs.
+    'trend_quarters' => (int) env('REPORT_TREND_QUARTERS', 4),
+
     // Champs saisis des sections 4 et 6 (F-RPT-02, contenu jsonb du rapport) : type (text, integer) et
     // obligation pour la complétude (RG-RPT-02 ; un texte peut valoir « Néant »). Les nombres de SMT et
     // de bilans sont proposés depuis la campagne de clôture (RG-OBL-12).

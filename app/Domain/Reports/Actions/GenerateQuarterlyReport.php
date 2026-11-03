@@ -82,7 +82,7 @@ class GenerateQuarterlyReport
                 sourceId: $version->id,
             ), $requester);
 
-            $word = $issue(DocumentType::QuarterlyReportDocx);
+            $word = $issue(DocumentType::QuarterlyReportModern);
             $version->docx_document_id = $word->id;
             $version->pdf_document_id = $word->id;
             $version->xlsx_document_id = (bool) $this->settings->get('report.legacy_workbook_enabled')
