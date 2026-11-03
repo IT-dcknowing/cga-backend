@@ -2,9 +2,11 @@
 
 namespace App\Domain\Documents\Support;
 
+use App\Domain\Documents\Contracts\ChecksTemplateStructure;
 use App\Domain\Documents\Enums\DocumentType;
 use App\Domain\Documents\Templates\DocxTemplateRenderer;
 use Illuminate\Contracts\Config\Repository;
+use Illuminate\Contracts\Container\Container;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use RuntimeException;
@@ -24,6 +26,7 @@ class TemplateInspector
 
     public function __construct(
         private readonly Repository $config,
+        private readonly Container $container,
         private readonly DocxTemplateRenderer $renderer,
     ) {}
 
@@ -77,6 +80,20 @@ class TemplateInspector
         }
 
         return self::sorted([...$this->renderer->variables($path), ...array_keys($this->renderer->framedImages($path))]);
+    }
+
+    /**
+     * Écarts de structure d'un fichier (feuilles, blocs…), pour un type qui déclare son contrôle
+     * (`structure` dans config/documents.php, étape 5.10) ; une liste vide sinon.
+     *
+     * @return list<string>
+     */
+    public function structure(DocumentType $type, string $path): array
+    {
+        $checker = $this->config->get("documents.templates.{$type->value}.structure");
+        $instance = is_string($checker) ? $this->container->make($checker) : null;
+
+        return $instance instanceof ChecksTemplateStructure ? $instance->problems($path) : [];
     }
 
     /**

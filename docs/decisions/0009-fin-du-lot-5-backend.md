@@ -25,10 +25,16 @@ Le PRD décrit la reprise d'historique (F-IMP-03) en une phrase : « CA par ann�
 7. **Règle « augmentée » (RG-RPT-08)**, décalages des relances (RG-RPT-06), échéance réglementaire (RG-RPT-07), export du classeur (RG-RPT-10) : modifiables sans développement ; chaque modification est tracée avec l'avant et l'après ; une version de rapport déjà générée garde la règle de sa génération (instantané, décision 0007).
 8. Libellés et aides des clés dans `lang/fr/settings.php`.
 
+### 5.10 — Classeur officiel remplaçable (RG-RPT-10)
+
+9. Le classeur provisoire (maquette nettoyée) est la version 1 du modèle `quarterly_report_xlsx`. La version officielle du SP-CGA se dépose par l'écran des modèles (3.12) puis s'active ; les générations suivantes l'utilisent sans développement, les versions déjà produites gardent la leur.
+10. **Contrôle de structure au dépôt**, en plus du contrôle des variables : nombre de feuilles (`reports.workbook.sheet_count`, 14), feuilles nommées attendues par le remplissage (page de garde, fiche technique, RESUME, feuilles des blocs), dans chaque feuille de bloc une ligne `${tax_office_name}` suivie d'une ligne TOTAL, et une ligne TOTAL après chaque tableau de la feuille RESUME. Chaque écart est un motif de refus distinct (`lang/fr/report.php`, `workbook.*`) ; le contrôle est porté par le type de document (`documents.templates.*.structure`), donc extensible aux autres modèles.
+
 ## Preuve
 
-`tests/Feature/Imports/HistoryImportTest.php` (F-IMP-03, RG-DATA-06, RG-RPT-12), `tests/Feature/Platform/SettingsApiTest.php` (RG-RPT-06 à 08, RG-RPT-10).
+`tests/Feature/Imports/HistoryImportTest.php` (F-IMP-03, RG-DATA-06, RG-RPT-12), `tests/Feature/Platform/SettingsApiTest.php` (RG-RPT-06 à 08, RG-RPT-10), `tests/Feature/Reports/WorkbookTemplateTest.php` (RG-RPT-10).
 
 ## Points ouverts
 
 - Format du fichier d'historique à valider avec un vrai fichier DC-KNOWING anonymisé.
+- Classeur officiel du SP-CGA à déposer dès réception ; si sa mise en page diffère (feuilles renommées, tableaux déplacés), adapter `reports.workbook` (configuration, sans code).

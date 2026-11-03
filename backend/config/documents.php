@@ -27,6 +27,7 @@ use App\Domain\Dues\Composers\DuesReceiptComposer;
 use App\Domain\Reports\Composers\QuarterlyReportDocxComposer;
 use App\Domain\Reports\Composers\QuarterlyReportWorkbookComposer;
 use App\Domain\Reports\Composers\ReportTransmissionSlipComposer;
+use App\Domain\Reports\Workbook\WorkbookStructure;
 
 $cga = ['cga_name', 'cga_ncc', 'cga_agreement'];
 $signature = ['cga_signature', 'cga_stamp', 'qr_code'];
@@ -195,6 +196,8 @@ return [
             'format' => 'xlsx',
             'path' => resource_path('templates/quarterly_report_xlsx.xlsx'),
             'composer' => QuarterlyReportWorkbookComposer::class,
+            // Contrôle de structure d'une nouvelle version (étape 5.10) : feuilles et blocs attendus.
+            'structure' => WorkbookStructure::class,
             'sheets' => 14,
             'variables' => [
                 'report_quarter_label', 'report_date', 'period_start', 'period_end', 'tax_office_name',
