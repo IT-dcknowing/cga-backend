@@ -7,11 +7,14 @@ use App\Domain\Closing\Models\ClosingCampaignItem;
 use App\Domain\Documents\Models\DocumentTemplate;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
+use App\Domain\Dues\Models\NetworkDue;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
+use App\Domain\Notifications\Models\MessageCampaign;
+use App\Domain\Notifications\Models\MessagingProvider;
 use App\Domain\Obligations\Models\CenterObligation;
 use App\Domain\Obligations\Models\MemberObligation;
 use App\Domain\Obligations\Models\ObligationInstance;
@@ -75,6 +78,15 @@ final class CrossTenantObjects
             ClosingCampaign::class => static fn (Organization $other): ClosingCampaign => self::closingCampaignOf($other),
             ClosingCampaignItem::class => static fn (Organization $other): ClosingCampaignItem => ClosingCampaignItem::factory()->create(['campaign_id' => self::closingCampaignOf($other)->id]),
             CgaPerson::class => static fn (Organization $other): CgaPerson => CgaPerson::factory()->create(['organization_id' => $other->id]),
+            MessageCampaign::class => static fn (Organization $other): MessageCampaign => Tenancy::bypass(static function () use ($other): MessageCampaign {
+                $campaign = new MessageCampaign;
+                $campaign->forceFill(['organization_id' => $other->id, 'title' => 'Rappel', 'body' => 'Texte', 'channels' => ['platform'], 'recipient_filter' => [], 'recipients_count' => 0, 'status' => 'draft', 'requested_by' => User::factory()->create()->id])->save();
+
+                return $campaign;
+            }, 'Test de cloisonnement : envoi groupé du CGA B.'),
+            // Une cotisation par CGA et par année : réutilisée si elle existe.
+            NetworkDue::class => static fn (Organization $other): NetworkDue => Tenancy::bypass(static fn (): ?NetworkDue => NetworkDue::query()->where('organization_id', $other->id)->first(), 'Test de cloisonnement : cotisation du CGA B.')
+                ?? NetworkDue::factory()->create(['organization_id' => $other->id]),
             // Un rapport par CGA et par trimestre : réutilisé s'il existe.
             QuarterlyReport::class => static fn (Organization $other): QuarterlyReport => Tenancy::bypass(static fn (): ?QuarterlyReport => QuarterlyReport::query()->where('organization_id', $other->id)->first(), 'Test de cloisonnement : rapport du CGA B.')
                 ?? QuarterlyReport::factory()->create(['organization_id' => $other->id]),
@@ -135,6 +147,7 @@ final class CrossTenantObjects
             Holiday::class => $referential,
             NationalReference::class => $referential,
             DocumentTemplate::class => 'Modèle de document du réseau, commun à tous les centres, géré par l\'administrateur de la plateforme (F-ADM-02).',
+            MessagingProvider::class => 'Compte d\'envoi de la plateforme (écran « Envois », RG-NOT-05), géré par l\'administrateur seul ; un centre reçoit 403.',
         ];
     }
 
@@ -170,7 +183,15 @@ final class CrossTenantObjects
             'auth.invitations.accept:invitationToken' => $invitationToken,
             'public.verify:verificationCode' => 'Code aléatoire du QR d\'un document (page publique, F-DOC-04) : il désigne le document sans identifiant ; un code inconnu répond 404.',
             'cga.members.pieces.store:pieceType' => 'Type de pièce du dossier (F-PJ-01) : il ne désigne aucun objet, le dossier est contrôlé par {member} ; une valeur inconnue répond 404.',
+            'network.profile.images.store:kind' => 'Type d\'image de la fiche du CNCGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',
             'cga.profile.images.store:kind' => 'Type d\'image (logo, signature, cachet) de la fiche du CGA de l\'espace actif : la route ne désigne aucun objet, une valeur inconnue répond 404.',
+            'network.dues.show:dueId' => 'Cotisation lue par le CNCGA, qui voit celles de tous les centres (05-BACKEND-SCHEMA §10) ; un CGA reçoit 403 (Policy).',
+            'network.dues.payments.record:dueId' => 'Cotisation d\'un centre, saisie par le CNCGA seul ; un CGA reçoit 403 (Policy).',
+            'network.dues.invoice:dueId' => 'Cotisation d\'un centre, facturée par le CNCGA seul ; un CGA reçoit 403 (Policy).',
+            'network.dues.remind:dueId' => 'Cotisation d\'un centre, relancée par le CNCGA seul ; un CGA reçoit 403 (Policy).',
+            'network.dues.payments.confirm:paymentId' => 'Paiement de cotisation confirmé par le CNCGA seul ; un CGA reçoit 403 (Policy).',
+            'network.dues.payments.reject:paymentId' => 'Paiement de cotisation rejeté par le CNCGA seul ; un CGA reçoit 403 (Policy).',
+            'me.notifications.read:notificationId' => 'Notification de la cloche (PRD M13) : cherchée parmi celles de l\'utilisateur connecté dans son espace actif ; toute autre répond 404.',
             'cga.permanent-profile.resources.save:category' => 'Catégorie de moyens matériels de la fiche permanente (F-RPT-01) : la ligne est cherchée dans le CGA de l\'espace actif ; une valeur inconnue répond 404.',
         ];
     }

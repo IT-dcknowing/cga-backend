@@ -30,8 +30,10 @@ class InvoiceComposer implements DocumentComposer
     public function compose(GeneratedDocument $document): DocumentContent
     {
         $organization = Organization::query()->with(['logo', 'signature', 'stamp'])->findOrFail($document->organization_id);
-        $invoice = Invoice::query()->with(['member', 'original'])->findOrFail($document->source_id);
+        $invoice = Invoice::query()->with(['member', 'original', 'billedOrganization'])->findOrFail($document->source_id);
         $member = $invoice->member;
+        // Facture de cotisation du CNCGA (étape 6.9) : le client est le centre facturé.
+        $billed = $invoice->billedOrganization;
 
         $lines = array_map(static fn (array $line): array => [
             'line_label' => $line['label'],
@@ -49,10 +51,10 @@ class InvoiceComposer implements DocumentComposer
             'invoice_reference' => $invoice->type === InvoiceType::CreditNote && $invoice->original !== null
                 ? (string) __('payments.credit_note_reference', ['number' => $invoice->original->number, 'date' => DocumentFormat::date($invoice->original->issue_date)])
                 : '',
-            'member_name' => DocumentFormat::text($member?->company_name),
-            'member_ncc' => DocumentFormat::text($member?->ncc),
-            'member_number' => DocumentFormat::text($member->membership_number ?? $member?->client_number),
-            'member_address' => DocumentFormat::text($member?->address),
+            'member_name' => DocumentFormat::text($member->company_name ?? $billed?->name),
+            'member_ncc' => DocumentFormat::text($member->ncc ?? $billed?->ncc),
+            'member_number' => DocumentFormat::text($member === null ? $billed?->agreement_number : ($member->membership_number ?? $member->client_number)),
+            'member_address' => DocumentFormat::text($member->address ?? $billed?->address),
             'amount_excl_tax' => DocumentFormat::amount($invoice->amount_excl_tax),
             'tax_amount' => DocumentFormat::amount($invoice->tax_amount),
             'amount_incl_tax' => DocumentFormat::amount($invoice->amount_incl_tax),

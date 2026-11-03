@@ -18,11 +18,16 @@ return [
     'network_user_permissions' => ['manage' => 'Ajuster les habilitations d\'un utilisateur du CNCGA'],
     'network_permissions' => ['manage' => 'Gérer les droits de tout le réseau'],
     'network_settings' => ['manage' => 'Paramétrer les règles du réseau (rapport, cotisation, bancabilité)'],
+    'network_profile' => [
+        'view' => 'Consulter la fiche d\'identité du CNCGA',
+        'manage' => 'Compléter la fiche d\'identité du CNCGA (logo, signature, cachet)',
+    ],
     'referentials' => ['manage' => 'Gérer les données de référence'],
     'dues' => [
         'view' => 'Consulter les cotisations',
         'payments' => ['manage' => 'Enregistrer ou confirmer un paiement de cotisation'],
         'remind' => 'Relancer une cotisation',
+        'own' => ['view' => 'Consulter la cotisation du centre', 'declare' => 'Déclarer un paiement de cotisation'],
     ],
     'announcements' => ['network' => ['publish' => 'Publier une annonce réseau']],
     'trainings' => [

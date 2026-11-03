@@ -15,6 +15,8 @@ use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Documents\Http\Controllers\MemberDocumentController;
 use App\Domain\Documents\Http\Controllers\MemberSpaceDocumentController;
 use App\Domain\Documents\Http\Controllers\VerificationController;
+use App\Domain\Dues\Http\Controllers\CgaDuesController;
+use App\Domain\Dues\Http\Controllers\NetworkDuesController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
 use App\Domain\Members\Http\Controllers\AgreementLossController;
@@ -28,6 +30,9 @@ use App\Domain\Members\Http\Controllers\PortfolioController;
 use App\Domain\Members\Http\Controllers\RadiationController;
 use App\Domain\Members\Http\Controllers\ReferrerController;
 use App\Domain\Members\Http\Controllers\RegimeController;
+use App\Domain\Notifications\Http\Controllers\MessageCampaignController;
+use App\Domain\Notifications\Http\Controllers\MessagingProviderController;
+use App\Domain\Notifications\Http\Controllers\NotificationController;
 use App\Domain\Obligations\Http\Controllers\CenterObligationController;
 use App\Domain\Obligations\Http\Controllers\MemberObligationController;
 use App\Domain\Obligations\Http\Controllers\MemberSpaceObligationController;
@@ -94,6 +99,13 @@ Route::prefix('v1')->group(function (): void {
         Route::post('phone/code', [ProfileSecurityController::class, 'phoneCode'])->name('phone.code');
         Route::post('phone', [ProfileSecurityController::class, 'phone'])->name('phone');
         Route::patch('preferences', [ProfileSecurityController::class, 'preferences'])->name('preferences');
+    });
+
+    // Cloche de notifications (PRD M13) : notifications de l'utilisateur dans son espace actif.
+    Route::prefix('me/notifications')->name('me.notifications.')->middleware(['auth', 'tenant'])->group(function (): void {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('read-all', [NotificationController::class, 'readAll'])->name('read-all');
+        Route::post('{notificationId}/read', [NotificationController::class, 'read'])->name('read');
     });
 
     // Référentiels nationaux (F-REF-01 à 04, 05-BACKEND-SCHEMA §4) : lus dans tout espace, gérés par le CNCGA.
@@ -195,6 +207,16 @@ Route::prefix('v1')->group(function (): void {
         Route::put('/', [UserPermissionController::class, 'update'])->name('update');
         Route::post('reset', [UserPermissionController::class, 'reset'])->name('reset');
     });
+    // Écran « Envois » de l'administrateur (F-ADM-06, RG-NOT-05) : comptes SMS, WhatsApp et e-mail.
+    Route::middleware(['auth', 'tenant'])->prefix('platform/messaging')->name('platform.messaging.')->group(function (): void {
+        Route::get('/', [MessagingProviderController::class, 'index'])->name('index');
+        Route::post('/', [MessagingProviderController::class, 'store'])->name('store');
+        Route::put('{messagingProvider}', [MessagingProviderController::class, 'update'])->name('update');
+        Route::post('{messagingProvider}/activate', [MessagingProviderController::class, 'activate'])->name('activate');
+        Route::post('{messagingProvider}/deactivate', [MessagingProviderController::class, 'deactivate'])->name('deactivate');
+        Route::post('{messagingProvider}/test', [MessagingProviderController::class, 'test'])->name('test');
+    });
+
     Route::middleware(['auth', 'tenant'])->prefix('platform/network-users')->name('platform.network-users.')->group(function (): void {
         Route::get('/', [UserPermissionController::class, 'networkUsers'])->name('index');
         Route::get('{agent}/permissions', [UserPermissionController::class, 'show'])->name('permissions.show');
@@ -380,6 +402,31 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{quarterlyReport}/correct', [QuarterlyReportController::class, 'correct'])->name('correct');
     });
 
+    // Cotisation CNCGA (PRD M14) : tableau, paiements, confirmation, rejet, relance (CNCGA) ; cotisation du centre.
+    Route::middleware(['auth', 'tenant'])->prefix('network/dues')->name('network.dues.')->group(function (): void {
+        Route::get('/', [NetworkDuesController::class, 'index'])->name('index');
+        Route::post('payments/{paymentId}/confirm', [NetworkDuesController::class, 'confirm'])->name('payments.confirm');
+        Route::post('payments/{paymentId}/reject', [NetworkDuesController::class, 'reject'])->name('payments.reject');
+        Route::get('{dueId}', [NetworkDuesController::class, 'show'])->name('show');
+        Route::post('{dueId}/payments', [NetworkDuesController::class, 'record'])->name('payments.record');
+        Route::post('{dueId}/remind', [NetworkDuesController::class, 'remind'])->name('remind');
+        Route::post('{dueId}/invoice', [NetworkDuesController::class, 'invoice'])->name('invoice');
+    });
+    Route::middleware(['auth', 'tenant'])->prefix('cga/dues')->name('cga.dues.')->group(function (): void {
+        Route::get('/', [CgaDuesController::class, 'index'])->name('index');
+        Route::post('{networkDue}/payments', [CgaDuesController::class, 'declare'])->name('declare');
+    });
+
+    // Envois groupés du centre (F-COM-03, RG-COM-01, 02).
+    Route::middleware(['auth', 'tenant'])->prefix('cga/campaigns')->name('cga.campaigns.')->group(function (): void {
+        Route::get('/', [MessageCampaignController::class, 'index'])->name('index');
+        Route::post('/', [MessageCampaignController::class, 'store'])->name('store');
+        Route::post('preview', [MessageCampaignController::class, 'preview'])->name('preview');
+        Route::post('{campaign}/send', [MessageCampaignController::class, 'send'])->name('send');
+        Route::post('{campaign}/approve', [MessageCampaignController::class, 'approve'])->name('approve');
+        Route::post('{campaign}/reject', [MessageCampaignController::class, 'reject'])->name('reject');
+    });
+
     // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).
     Route::middleware(['auth', 'tenant'])->get('cga/agreement-loss/members', [AgreementLossController::class, 'index'])->name('cga.agreement-loss.members');
 
@@ -399,6 +446,14 @@ Route::prefix('v1')->group(function (): void {
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).
     Route::middleware(['auth', 'tenant'])->prefix('cga/profile')->name('cga.profile.')->group(function (): void {
+        Route::get('/', [CgaProfileController::class, 'show'])->name('show');
+        Route::put('/', [CgaProfileController::class, 'update'])->name('update');
+        Route::post('images/{kind}', [CgaProfileController::class, 'storeImage'])->name('images.store');
+    });
+
+    // Fiche d'identité du CNCGA, émetteur des reçus et factures de cotisation (étape 6.9) : mêmes écrans
+    // que la fiche d'un CGA, sans agrément ni expert-comptable.
+    Route::middleware(['auth', 'tenant'])->prefix('network/profile')->name('network.profile.')->group(function (): void {
         Route::get('/', [CgaProfileController::class, 'show'])->name('show');
         Route::put('/', [CgaProfileController::class, 'update'])->name('update');
         Route::post('images/{kind}', [CgaProfileController::class, 'storeImage'])->name('images.store');

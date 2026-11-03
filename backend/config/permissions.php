@@ -46,10 +46,16 @@ return [
         'network_user_permissions.manage' => ['locked' => true, 'roles' => [$admin]],
         'network_permissions.manage' => ['locked' => true, 'roles' => [$admin]],
         'network_settings.manage' => ['locked' => false, 'roles' => [$president, $networkManager]],
+        // Fiche d'identité du CNCGA, émetteur des reçus et factures de cotisation (étape 6.9).
+        'network_profile.view' => ['locked' => false, 'roles' => [$president, $networkManager]],
+        'network_profile.manage' => ['locked' => false, 'roles' => [$president, $networkManager]],
         'referentials.manage' => ['locked' => false, 'roles' => [$president, $networkManager, $admin]],
         'dues.view' => ['locked' => false, 'roles' => [$president, $networkManager, $dues, $board]],
         'dues.payments.manage' => ['locked' => false, 'roles' => [$president, $networkManager, $dues]],
         'dues.remind' => ['locked' => false, 'roles' => [$president, $networkManager, $dues]],
+        // Côté CGA (F-COT-06) : sa cotisation lue par le gérant et l'expert-comptable, déclarée par le gérant.
+        'dues.own.view' => ['locked' => false, 'roles' => [$manager, $expert]],
+        'dues.own.declare' => ['locked' => false, 'roles' => [$manager]],
         'announcements.network.publish' => ['locked' => false, 'roles' => [$president, $networkManager, $training]],
         'trainings.network.manage' => ['locked' => false, 'roles' => [$president, $networkManager, $training]],
         'network_concerns.view' => ['locked' => false, 'roles' => [$president, $networkManager, $board]],
@@ -128,7 +134,7 @@ return [
      * code. Libellés : lang/fr/permission_modules.php.
      */
     'modules' => [
-        'network' => ['organizations', 'network_users', 'network_user_permissions', 'network_permissions', 'network_settings', 'referentials'],
+        'network' => ['organizations', 'network_users', 'network_user_permissions', 'network_permissions', 'network_settings', 'network_profile', 'referentials'],
         'centre' => ['cga', 'cga_users', 'cga_permissions', 'cga_user_permissions', 'integrations', 'internal'],
         'members' => ['members'],
         'documents' => ['documents', 'attestations'],

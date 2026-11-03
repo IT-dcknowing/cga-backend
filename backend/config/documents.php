@@ -23,6 +23,7 @@ use App\Domain\Documents\Composers\MembershipCertificateComposer;
 use App\Domain\Documents\Composers\MembershipContractComposer;
 use App\Domain\Documents\Composers\RadiationNoticeComposer;
 use App\Domain\Documents\Composers\ReceiptComposer;
+use App\Domain\Dues\Composers\DuesReceiptComposer;
 use App\Domain\Reports\Composers\QuarterlyReportDocxComposer;
 use App\Domain\Reports\Composers\QuarterlyReportWorkbookComposer;
 use App\Domain\Reports\Composers\ReportTransmissionSlipComposer;
@@ -171,6 +172,20 @@ return [
                 ...$cga, 'cga_address', 'cga_signatory_name', 'cga_signatory_title',
                 'report_label', 'report_period', 'report_version', 'transmission_date', 'transmission_mode', 'transmission_reference',
                 'document_place', 'document_date',
+            ],
+        ],
+
+        // Modèle provisoire (la maquette n'en a pas) : reçu d'un paiement de cotisation au CNCGA (F-COT-03, 04).
+        'dues_receipt' => [
+            'label' => 'Reçu de cotisation',
+            'format' => 'docx',
+            'path' => resource_path('templates/dues_receipt.docx'),
+            'composer' => DuesReceiptComposer::class,
+            'images' => $signature,
+            'variables' => [
+                ...$cga, 'cga_address', 'cga_signatory_name', 'cga_signatory_title',
+                'receipt_number', 'debtor_name', 'debtor_agreement', 'dues_year', 'payment_amount', 'payment_amount_words',
+                'payment_date', 'payment_method', 'payment_reference', 'document_place', 'document_date',
             ],
         ],
 

@@ -478,6 +478,27 @@ return [
         'filing' => 'Dépôt légal',
     ],
 
+    'dues_status' => [
+        'due' => 'À régler',
+        'partial' => 'Partielle',
+        'paid' => 'À jour',
+        'unpaid' => 'Impayée',
+    ],
+
+    'dues_payment_source' => [
+        'cga_declaration' => 'Déclaré par le CGA',
+        'cncga_entry' => 'Saisi par le CNCGA',
+    ],
+
+    'campaign_status' => [
+        'draft' => 'Brouillon',
+        'pending_approval' => 'En attente de validation',
+        'approved' => 'Validé',
+        'sending' => 'Envoi en cours',
+        'sent' => 'Envoyé',
+        'rejected' => 'Refusé',
+    ],
+
     'cga_person_kind' => [
         'director' => 'Dirigeant',
         'employee' => 'Salarié permanent',

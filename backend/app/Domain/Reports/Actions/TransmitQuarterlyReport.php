@@ -8,6 +8,7 @@ use App\Domain\Documents\Enums\DocumentType;
 use App\Domain\Reports\Composers\ReportSnapshot;
 use App\Domain\Reports\Enums\ReportStatus;
 use App\Domain\Reports\Enums\TransmissionMode;
+use App\Domain\Reports\Events\ReportTransmitted;
 use App\Domain\Reports\Models\QuarterlyReport;
 use App\Domain\Reports\Models\QuarterlyReportVersion;
 use App\Domain\Users\Models\Membership;
@@ -66,6 +67,7 @@ class TransmitQuarterlyReport
             $version->transmitted_at = $now;
             $version->slip_document_id = $slip->id;
             $version->save();
+            ReportTransmitted::dispatch($report->organization_id, $report->year, $report->quarter);
 
             return $report;
         });

@@ -2,6 +2,8 @@
 
 namespace App\Domain\Organizations\Http\Requests;
 
+use App\Domain\Organizations\Enums\OrganizationType;
+use App\Domain\Organizations\Policies\OrganizationPolicy;
 use App\Domain\Referentials\Rules\TaxOfficeOfDirectorate;
 use App\Support\Phones\PhoneNormalizer;
 use App\Support\Tenancy\TenantContext;
@@ -18,7 +20,7 @@ class CgaProfileRequest extends FormRequest
 {
     public function authorize(TenantContext $context): bool
     {
-        return $context->has() && Gate::allows('updateProfile', $context->organization());
+        return $context->has() && Gate::allows(OrganizationPolicy::profileAbility($this, 'update'), $context->organization());
     }
 
     /**
@@ -27,14 +29,16 @@ class CgaProfileRequest extends FormRequest
     public function rules(PhoneNormalizer $phones, TenantContext $context): array
     {
         $organizationId = $context->organizationId();
+        // Fiche du CNCGA (étape 6.9) : ni agrément ni expert-comptable référent.
+        $network = $context->organizationType() === OrganizationType::Cncga;
 
         return [
             'legal_form' => ['nullable', 'string', 'max:40'],
             'share_capital' => ['nullable', 'integer', 'min:0'],
             'ncc' => ['nullable', 'string', 'max:20'],
             'rccm' => ['nullable', 'string', 'max:50'],
-            'agreement_number' => ['nullable', 'string', 'max:60', Rule::unique('organizations', 'agreement_number')->ignore($organizationId)],
-            'agreement_date' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
+            'agreement_number' => $network ? ['prohibited'] : ['nullable', 'string', 'max:60', Rule::unique('organizations', 'agreement_number')->ignore($organizationId)],
+            'agreement_date' => $network ? ['prohibited'] : ['nullable', 'date_format:Y-m-d', 'before_or_equal:today'],
             'regional_directorate_id' => ['nullable', 'required_with:tax_office_id', 'string', 'ulid', Rule::exists('regional_directorates', 'id')],
             'tax_office_id' => ['nullable', 'string', 'ulid', new TaxOfficeOfDirectorate],
             'said' => ['nullable', 'string', 'max:100'],
@@ -45,7 +49,7 @@ class CgaProfileRequest extends FormRequest
             'phone_2' => ['nullable', 'string', 'max:30', $phones->rule()],
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'manager_name' => ['nullable', 'string', 'max:150'],
-            'expert_name' => ['nullable', 'string', 'max:150'],
+            'expert_name' => $network ? ['prohibited'] : ['nullable', 'string', 'max:150'],
             'signatory_name' => ['nullable', 'string', 'max:150'],
             'signatory_title' => ['nullable', 'string', 'max:100'],
             'numbering_abbreviation' => ['nullable', 'string', 'regex:/^[A-Z]{2,6}$/', Rule::unique('organizations', 'numbering_abbreviation')->ignore($organizationId)],

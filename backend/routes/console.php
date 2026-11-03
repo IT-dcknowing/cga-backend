@@ -36,6 +36,23 @@ Schedule::command('closing:open-campaign')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('dues:open-year')
+    ->cron(config('schedule.dues_open_year'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::command('reminders:dues')
+    ->dailyAt(config('schedule.reminders_dues'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
+foreach (['obligations', 'fees', 'documents', 'agreements'] as $reminders) {
+    Schedule::command("reminders:{$reminders}")
+        ->dailyAt(config("schedule.reminders_{$reminders}"))
+        ->withoutOverlapping()
+        ->onOneServer();
+}
+
 Schedule::command('reminders:reports')
     ->dailyAt(config('schedule.reminders_reports'))
     ->withoutOverlapping()
