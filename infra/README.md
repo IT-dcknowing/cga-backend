@@ -2,7 +2,7 @@
 
 Installation classique, sans Docker ni S3 (02-TRD §2, §12.2, T-10, T-11). La production s'installe de la même façon, avec `DEPLOY_ENV=production`, ses propres variables et un déploiement par étiquette `vX.Y.Z`.
 
-Un hébergement mutualisé (cPanel) ne convient pas : il faut Supervisor pour les workers, un cron chaque minute, LibreOffice et PostgreSQL 16.
+Un hébergement mutualisé (cPanel) ne convient pas : il faut Supervisor pour les workers, un cron chaque minute, LibreOffice et PostgreSQL 16. Pour une **recette** seulement, sans PDF, voir `infra/cpanel/README.md` (décision 0011).
 
 ## Contenu de `infra/`
 
