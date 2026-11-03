@@ -41193,6 +41193,77 @@
                         "description": "401."
                     },
                     "response": []
+                },
+                {
+                    "name": "Mobilisation des recettes du portefeuille (étape 4.7)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test('200 et totaux', function () {",
+                                    "        pm.response.to.have.status(200);",
+                                    "        const data = pm.response.json().data;",
+                                    "        pm.expect(data).to.have.property('totals');",
+                                    "        pm.expect(data.natures).to.be.an('array');",
+                                    "        pm.expect(data.members).to.be.an('array');",
+                                    "    });",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/obligation-planning/revenue?from=2026-01-01&to=2026-12-31",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "obligation-planning",
+                                "revenue"
+                            ],
+                            "query": [
+                                {
+                                    "key": "from",
+                                    "value": "2026-01-01"
+                                },
+                                {
+                                    "key": "to",
+                                    "value": "2026-12-31"
+                                }
+                            ]
+                        },
+                        "description": "Onglet « Mobilisation des recettes » de /cga/echeances : dû, payé, reste et taux de recouvrement des échéances de paiement de la période, par nature d'impôt et par contribuable (les plus gros restes d'abord, au plus cga.obligations.revenue_members_limit). Sans période : du 1er janvier au jour. Cabinet compté avec members.cabinet.view seulement."
+                    },
+                    "response": []
                 }
             ]
         },
