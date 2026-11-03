@@ -51,6 +51,7 @@ use App\Domain\Payments\Http\Controllers\MemberPaymentController;
 use App\Domain\Payments\Http\Controllers\MemberSpacePaymentController;
 use App\Domain\Payments\Http\Controllers\PaymentController;
 use App\Domain\Platform\Http\Controllers\HealthController;
+use App\Domain\Platform\Http\Controllers\SettingsController;
 use App\Domain\Referentials\Http\Controllers\CommuneController;
 use App\Domain\Referentials\Http\Controllers\HolidayController;
 use App\Domain\Referentials\Http\Controllers\MergeController;
@@ -456,6 +457,16 @@ Route::prefix('v1')->group(function (): void {
         Route::put('/', [CgaProfileController::class, 'update'])->name('update');
         Route::post('images/{kind}', [CgaProfileController::class, 'storeImage'])->name('images.store');
     });
+
+    // Paramètres du réseau (CNCGA : « Paramètres réseau », « Règles du rapport », étapes 5.6b et 5.13) et de
+    // la plateforme (administrateur, 03-APPFLOW §6) : lecture par groupe, modification, retour au défaut.
+    foreach (['network', 'platform'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/settings")->name("{$space}.settings.")->group(function (): void {
+            Route::get('/', [SettingsController::class, 'index'])->name('index');
+            Route::put('{settingKey}', [SettingsController::class, 'update'])->name('update')->where('settingKey', '[a-z0-9_.]+');
+            Route::delete('{settingKey}', [SettingsController::class, 'reset'])->name('reset')->where('settingKey', '[a-z0-9_.]+');
+        });
+    }
 
     // Fiche d'identité du CNCGA, émetteur des reçus et factures de cotisation (étape 6.9) : mêmes écrans
     // que la fiche d'un CGA, sans agrément ni expert-comptable.

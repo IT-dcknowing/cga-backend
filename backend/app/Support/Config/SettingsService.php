@@ -85,6 +85,16 @@ class SettingsService
     }
 
     /**
+     * Une valeur est-elle enregistrée pour cette clé (réseau ou plateforme, ou CGA) ?
+     */
+    public function overridden(string $key, ?string $organizationId = null): bool
+    {
+        $this->definition($key);
+
+        return $this->stored($key, $organizationId)['found'];
+    }
+
+    /**
      * Revient à la valeur héritée (réseau ou registre) en supprimant la valeur enregistrée.
      */
     public function reset(string $key, ?string $organizationId = null): void

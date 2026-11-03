@@ -55,6 +55,8 @@ use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Payments\Policies\InvoicePolicy;
 use App\Domain\Payments\Policies\InvoicingProviderPolicy;
 use App\Domain\Payments\Policies\PaymentPolicy;
+use App\Domain\Platform\Models\Setting;
+use App\Domain\Platform\Policies\SettingPolicy;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
 use App\Domain\Referentials\Models\NationalReference;
@@ -191,6 +193,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(DatabaseNotification::class, NotificationPolicy::class);
         Gate::policy(MessagingProvider::class, MessagingProviderPolicy::class);
         Gate::policy(MessageCampaign::class, MessageCampaignPolicy::class);
+
+        // Paramètres du réseau et de la plateforme (02-TRD §7.5).
+        Gate::policy(Setting::class, SettingPolicy::class);
 
         // Cotisation CNCGA (PRD M14).
         Gate::policy(NetworkDue::class, NetworkDuePolicy::class);

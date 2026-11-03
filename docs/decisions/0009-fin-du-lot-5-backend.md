@@ -19,9 +19,15 @@ Le PRD décrit la reprise d'historique (F-IMP-03) en une phrase : « CA par ann�
 4. **Paiements d'impôts** : nature (code ou libellé), période au format des échéances (`2025`, `2025-S1`, `2025-T3`, `2025-03` ou `03/2025`), montant payé, date, montant dû et référence facultatifs. Le paiement, confirmé d'office (source `import`), est rattaché à l'échéance de même nature et de même période, sinon à celle dont l'échéance tombe dans la période ; à défaut, une **échéance d'historique** est créée (échéance réputée à la fin de la période, montant dû déclaré ou, à défaut, montant payé). Il ne dépasse jamais le reste dû.
 5. **Doublons** : un paiement ne s'importe qu'une fois — par sa référence, ou à défaut par l'empreinte de la ligne (dossier, nature, période, date, montant). Une échéance déjà réglée par Compta Flow n'accepte pas d'import.
 
+### 5.6b et 5.13 — Paramètres du réseau et de la plateforme
+
+6. **Une API de paramètres par espace**, sur le registre `config/cga.php` : `/network/settings` (CNCGA, droit `network_settings.manage` et droit propre de chaque clé) pour les clés de niveau réseau ; `/platform/settings` (administrateur, `platform.settings.manage`) pour les clés de niveau plateforme et réseau (03-APPFLOW §6). Lecture par groupe (`report`, `dues`, `closing`…), modification contrôlée par les règles du registre, retour à la valeur par défaut. Les valeurs propres d'un CGA ne passent pas par ici.
+7. **Règle « augmentée » (RG-RPT-08)**, décalages des relances (RG-RPT-06), échéance réglementaire (RG-RPT-07), export du classeur (RG-RPT-10) : modifiables sans développement ; chaque modification est tracée avec l'avant et l'après ; une version de rapport déjà générée garde la règle de sa génération (instantané, décision 0007).
+8. Libellés et aides des clés dans `lang/fr/settings.php`.
+
 ## Preuve
 
-`tests/Feature/Imports/HistoryImportTest.php` (F-IMP-03, RG-DATA-06, RG-RPT-12).
+`tests/Feature/Imports/HistoryImportTest.php` (F-IMP-03, RG-DATA-06, RG-RPT-12), `tests/Feature/Platform/SettingsApiTest.php` (RG-RPT-06 à 08, RG-RPT-10).
 
 ## Points ouverts
 
