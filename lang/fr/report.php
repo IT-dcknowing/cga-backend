@@ -67,6 +67,14 @@ return [
         'late' => 'En retard',
         'not_transmitted' => 'Non transmis',
     ],
+    // Contrôle de structure d'une version du classeur officiel (étape 5.10).
+    'workbook' => [
+        'sheet_count' => 'Le classeur doit compter :expected feuilles (:found trouvées).',
+        'missing_sheet' => 'Feuille « :sheet » absente.',
+        'missing_block' => 'Feuille « :sheet » : bloc par CDI introuvable (titre ${tax_office_name}, puis ligne TOTAL en colonne A).',
+        'missing_summary_total' => 'Feuille « :sheet », tableau :table : ligne TOTAL attendue à partir de la ligne :row.',
+    ],
+
     'slip_title' => 'Bordereau de transmission du rapport :label',
     'period' => 'du :start au :end',
 
