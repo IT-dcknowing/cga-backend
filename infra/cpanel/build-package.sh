@@ -32,9 +32,14 @@ PACKAGE="$WORK/cga-connect-recette"
 mkdir -p "$PACKAGE"
 
 echo "Backend et scripts de la version $SHORT"
-git archive HEAD backend | tar -x -C "$PACKAGE"
-git archive HEAD infra/cpanel | tar -x -C "$WORK"
-cp "$WORK/infra/cpanel/install.sh" "$WORK/infra/cpanel/set-env.php" "$WORK/infra/cpanel/db-check.php" "$PACKAGE/"
+# Fichiers suivis, pris dans le dossier de travail (propre, donc égal à HEAD) : sous Windows,
+# git archive convertit les fins de ligne en CRLF malgré .gitattributes, ce que bash refuse.
+git ls-files -z backend | tar --null -T - -c | tar -x -C "$PACKAGE"
+cp infra/cpanel/install.sh infra/cpanel/set-env.php infra/cpanel/db-check.php "$PACKAGE/"
+if grep -rlI $'\r' "$PACKAGE" > /dev/null; then
+    echo "Fins de ligne CRLF dans le paquet : refusé." >&2
+    exit 1
+fi
 
 echo "SPA (npm run build, même domaine que l'API : frontend/.env.production)"
 (
