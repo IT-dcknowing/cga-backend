@@ -13,7 +13,7 @@ use RuntimeException;
 /**
  * Données fictives des échantillons de documents (étapes 0.11 et 0.12, contrôle visuel par la QA) :
  * un CGA, un adhérent et un rapport inventés, des images de remplacement (logo, signature, cachet,
- * QR) et les trois graphiques du rapport modernisé (secteurs, barres, courbe).
+ * QR) et les graphiques du rapport modernisé (secteurs, colonnes, barres, courbe).
  */
 class SampleDocumentData
 {
@@ -87,6 +87,11 @@ class SampleDocumentData
             'receipt' => [...$cga, ...$receipt],
             'radiation_notice' => [...$cga, ...$notice],
             'quarterly_report_docx' => [...$cga, ...$report],
+            'quarterly_report_modern' => [...$cga, ...$report,
+                'synthesis' => 'Au 30 septembre 2026, le portefeuille CGA compte 165 adhérents actifs (120 TEE, 45 RME), en hausse de 12 par rapport au trimestre précédent.',
+                'highlights' => 'Ouverture d\'une antenne à Yopougon.', 'outlook' => 'Campagne d\'adhésion du trimestre suivant.',
+                'tee_due_total' => '1 500 000 FCFA', 'tee_paid_total' => '1 000 000 FCFA', 'tee_rate_total' => '66,7 %', 'rme_total' => '2 000 000 FCFA',
+                'data_sources' => 'Chiffres d\'affaires : 150 de source « saisie ». Paiements du trimestre : 80 de source « saisie du CGA ».'],
             'dues_receipt' => [...$cga, 'receipt_number' => 'COT-2026-00001', 'debtor_name' => 'CGA EXEMPLE BOUAKÉ', 'debtor_agreement' => '000/SEPMBPE/DGI',
                 'dues_year' => '2026', 'payment_amount' => '750 000 FCFA', 'payment_amount_words' => 'sept cent cinquante mille francs CFA',
                 'payment_date' => '20 octobre 2026', 'payment_method' => 'Virement', 'payment_reference' => 'VIR-EXEMPLE-0001'],
@@ -97,7 +102,8 @@ class SampleDocumentData
     }
 
     /**
-     * Lignes répétées : deux lignes du reçu ; pour le rapport Word, dirigeants, salariés, un occasionnel, deux mouvements.
+     * Lignes répétées : deux lignes du reçu ; pour le rapport Word, dirigeants, salariés, un occasionnel, deux mouvements ;
+     * pour le rapport modernisé, adhérents et TEE par CDI, paiements RME par nature, sans occasionnel.
      *
      * @return array<string, list<array<string, string>>>
      */
@@ -115,11 +121,11 @@ class SampleDocumentData
                 ['line_label' => 'Honoraires du 01/10/2026 au 31/10/2026', 'line_quantity' => '1', 'line_unit_amount' => '15 000 FCFA', 'line_tax_rate' => '18 %', 'line_amount' => '15 000 FCFA'],
             ]];
         }
-        if ($type !== 'quarterly_report_docx') {
+        if (! in_array($type, ['quarterly_report_docx', 'quarterly_report_modern'], true)) {
             return [];
         }
 
-        return [
+        $rows = [
             'director_name' => [
                 ['director_index' => '1', 'director_name' => 'EXEMPLE Awa', 'director_profession' => 'Expert-comptable', 'director_function' => 'Gérante', 'director_start_date' => '02/01/2025', 'director_experience' => '15 ans'],
                 ['director_index' => '2', 'director_name' => 'EXEMPLE Koné', 'director_profession' => 'Juriste', 'director_function' => 'Associé', 'director_start_date' => '02/01/2025', 'director_experience' => '10 ans'],
@@ -135,6 +141,26 @@ class SampleDocumentData
                 ['movement_name' => 'ENTREPRISE EXEMPLE', 'movement_ncc' => '1111111 B', 'movement_regime' => 'RSI', 'movement_number' => 'EXA-2026-B00001', 'movement_status' => 'Nouvel adhérent'],
                 ['movement_name' => 'BOUTIQUE EXEMPLE', 'movement_ncc' => '2222222 C', 'movement_regime' => 'TEE', 'movement_number' => 'EXA-2026-A00007', 'movement_status' => 'Résilié'],
             ],
+        ];
+        if ($type === 'quarterly_report_docx') {
+            return $rows;
+        }
+        unset($rows['occasional_name']);
+
+        return [
+            'summary_office' => [
+                ['summary_office' => 'CDI Nord', 'summary_active_tee' => '70', 'summary_active_rme' => '25', 'summary_new_total' => '6', 'summary_terminated_total' => '1'],
+                ['summary_office' => 'CDI Sud', 'summary_active_tee' => '50', 'summary_active_rme' => '20', 'summary_new_total' => '5', 'summary_terminated_total' => '2'],
+            ],
+            'tee_office' => [
+                ['tee_office' => 'CDI Nord', 'tee_due' => '900 000 FCFA', 'tee_paid' => '600 000 FCFA', 'tee_balance' => '300 000 FCFA', 'tee_rate' => '66,7 %'],
+                ['tee_office' => 'CDI Sud', 'tee_due' => '600 000 FCFA', 'tee_paid' => '400 000 FCFA', 'tee_balance' => '200 000 FCFA', 'tee_rate' => '66,7 %'],
+            ],
+            'rme_nature' => [
+                ['rme_nature' => 'Patente', 'rme_amount' => '800 000 FCFA'],
+                ['rme_nature' => 'TVA', 'rme_amount' => '1 200 000 FCFA'],
+            ],
+            ...$rows,
         ];
     }
 
@@ -199,6 +225,23 @@ class SampleDocumentData
                 'Nouveaux du trimestre' => [5, 8, 2],
             ], 'Nombre d\'adhérents'),
             'chart_trend' => new ReportChart('line', 'Adhérents actifs par trimestre', ['T4 2025', 'T1 2026', 'T2 2026', 'T3 2026'], ['Adhérents actifs' => [140, 150, 165, 177]]),
+        ];
+    }
+
+    /**
+     * Les sept graphiques du rapport modernisé (étape 5.11) : les trois de l'essai, puis mouvements du
+     * trimestre, recouvrement de la TEE, paiements RME par nature et campagne de clôture.
+     *
+     * @return array<string, ReportChart>
+     */
+    public function reportCharts(): array
+    {
+        return [
+            ...$this->charts(),
+            'chart_movements' => new ReportChart('column', 'Nouveaux adhérents et résiliations', ['TEE', 'RME'], ['Nouveaux' => [8, 3], 'Résiliés' => [2, 1]], 'Adhérents'),
+            'chart_tee_recovery' => new ReportChart('column', 'Recouvrement de la TEE par CDI', ['CDI Nord', 'CDI Sud'], ['Exigible' => [900_000, 600_000], 'Acquitté' => [600_000, 400_000]], 'Montant (F)'),
+            'chart_rme_natures' => new ReportChart('bar', 'Paiements RME par nature', ['Patente', 'TVA'], ['Montant (F)' => [800_000, 1_200_000]], 'Montant (F)'),
+            'chart_closing' => new ReportChart('column', 'Campagne de clôture', ['SMT', 'Bilans'], ['Établis' => [42, 12], 'Transmis' => [40, 10]], 'Adhérents'),
         ];
     }
 

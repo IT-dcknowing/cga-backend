@@ -22,6 +22,8 @@ final class QuarterlyReportCalculator
     public function __construct(
         private readonly PortfolioStates $states,
         private readonly SettingsService $settings,
+        private readonly ReportCharts $charts,
+        private readonly ReportSynthesis $synthesis,
     ) {}
 
     /**
@@ -33,6 +35,8 @@ final class QuarterlyReportCalculator
         /** @var array{basis: string, min_increase_pct: int|float, amount: string} $rule */
         $rule = (array) $this->settings->get('report.increase_rule');
         $taxes = collect($report->people_taxes)->keyBy('person_id');
+        $states = $this->states->compute($report->organization_id, $report->year, $report->quarter, $rule);
+        $trend = $this->trend($report);
 
         $people = CgaPerson::query()
             ->where('organization_id', $report->organization_id)
@@ -106,8 +110,31 @@ final class QuarterlyReportCalculator
                 ->all(),
             'content' => $report->content,
             'qualitative_analysis' => $report->qualitative_analysis,
-            'states' => $this->states->compute($report->organization_id, $report->year, $report->quarter, $rule),
+            'states' => $states,
+            // Rapport modernisé (étape 5.11) : séries des graphiques et synthèse chiffrée pré-rédigée, tirées
+            // des mêmes états que le classeur.
+            'trend' => $trend,
+            'charts' => $this->charts->build($states, $report->content, $trend),
+            'synthesis' => $this->synthesis->propose($states, $report->content, $trend, $report->periodEnd()->toDateString()),
             'increase_rule' => $rule,
         ];
+    }
+
+    /**
+     * Adhérents actifs du portefeuille CGA à la fin des derniers trimestres (reports.trend_quarters), le
+     * dernier étant celui du rapport.
+     *
+     * @return list<array{label: string, tee: int, rme: int, total: int}>
+     */
+    private function trend(QuarterlyReport $report): array
+    {
+        $trend = [];
+        for ($back = (int) config('reports.trend_quarters') - 1; $back >= 0; $back--) {
+            $start = CarbonImmutable::create($report->year, ($report->quarter - 1) * 3 + 1, 1)->subMonthsNoOverflow($back * 3);
+            ['tee' => $tee, 'rme' => $rme] = $this->states->activeByRegime($report->organization_id, $start->addMonthsNoOverflow(2)->endOfMonth()->startOfDay());
+            $trend[] = ['label' => (string) __('report.quarter_label', ['quarter' => $start->quarter, 'year' => $start->year]), 'tee' => $tee, 'rme' => $rme, 'total' => $tee + $rme];
+        }
+
+        return $trend;
     }
 }

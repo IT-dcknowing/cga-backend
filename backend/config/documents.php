@@ -25,6 +25,7 @@ use App\Domain\Documents\Composers\RadiationNoticeComposer;
 use App\Domain\Documents\Composers\ReceiptComposer;
 use App\Domain\Dues\Composers\DuesReceiptComposer;
 use App\Domain\Reports\Composers\QuarterlyReportDocxComposer;
+use App\Domain\Reports\Composers\QuarterlyReportModernComposer;
 use App\Domain\Reports\Composers\QuarterlyReportWorkbookComposer;
 use App\Domain\Reports\Composers\ReportTransmissionSlipComposer;
 use App\Domain\Reports\Workbook\WorkbookStructure;
@@ -157,6 +158,36 @@ return [
                 'active_tee', 'active_rme', 'active_total', 'new_tee', 'new_rme', 'new_total',
                 'terminated_tee', 'terminated_rme', 'terminated_total',
                 'tax_tee', 'tax_rme', 'tax_vat', 'tax_its', 'tax_cnps', 'tax_total',
+                'signatory_name', 'signatory_title', 'verification_reference',
+            ],
+        ],
+
+        // Rapport trimestriel modernisé (étape 5.11, RG-RPT-09 à 12, 02-TRD §8.4) : modèle provisoire, remplaçable
+        // par l'écran des modèles ; graphiques natifs à la place des variables ${chart_…} (T-21).
+        'quarterly_report_modern' => [
+            'label' => 'Rapport trimestriel modernisé',
+            'format' => 'docx',
+            'path' => resource_path('templates/quarterly_report_modern.docx'),
+            'composer' => QuarterlyReportModernComposer::class,
+            'images' => ['cga_logo', 'cga_signature', 'cga_stamp', 'qr_code'],
+            'rows' => [
+                'summary_office' => ['summary_office', 'summary_active_tee', 'summary_active_rme', 'summary_new_total', 'summary_terminated_total'],
+                'tee_office' => ['tee_office', 'tee_due', 'tee_paid', 'tee_balance', 'tee_rate'],
+                'rme_nature' => ['rme_nature', 'rme_amount'],
+                'director_name' => ['director_index', 'director_name', 'director_profession', 'director_function', 'director_start_date', 'director_experience'],
+                'employee_name' => ['employee_index', 'employee_name', 'employee_profession', 'employee_function', 'employee_start_date', 'employee_cnps'],
+                'movement_name' => ['movement_name', 'movement_ncc', 'movement_regime', 'movement_number', 'movement_status'],
+            ],
+            'charts' => ['chart_regimes', 'chart_tax_offices', 'chart_trend', 'chart_movements', 'chart_tee_recovery', 'chart_rme_natures', 'chart_closing'],
+            'variables' => [
+                ...$cga, 'cga_address', 'cga_contacts', 'regional_directorate', 'report_quarter', 'report_date', 'document_place',
+                'synthesis', 'highlights', 'outlook',
+                'active_tee', 'active_rme', 'active_total', 'new_tee', 'new_rme', 'new_total', 'terminated_tee', 'terminated_rme', 'terminated_total',
+                'tee_due_total', 'tee_paid_total', 'tee_rate_total', 'rme_total',
+                'tax_tee', 'tax_rme', 'tax_vat', 'tax_its', 'tax_cnps', 'tax_total',
+                'trainings', 'smt_count', 'balance_sheet_count', 'meetings',
+                'res_rooms', 'res_training_rooms', 'res_furniture', 'res_computers', 'res_software', 'res_projectors', 'res_vehicles',
+                'difficulties', 'suggestions', 'forecasts', 'data_sources',
                 'signatory_name', 'signatory_title', 'verification_reference',
             ],
         ],

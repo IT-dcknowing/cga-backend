@@ -30,11 +30,22 @@ Le PRD décrit la reprise d'historique (F-IMP-03) en une phrase : « CA par ann�
 9. Le classeur provisoire (maquette nettoyée) est la version 1 du modèle `quarterly_report_xlsx`. La version officielle du SP-CGA se dépose par l'écran des modèles (3.12) puis s'active ; les générations suivantes l'utilisent sans développement, les versions déjà produites gardent la leur.
 10. **Contrôle de structure au dépôt**, en plus du contrôle des variables : nombre de feuilles (`reports.workbook.sheet_count`, 14), feuilles nommées attendues par le remplissage (page de garde, fiche technique, RESUME, feuilles des blocs), dans chaque feuille de bloc une ligne `${tax_office_name}` suivie d'une ligne TOTAL, et une ligne TOTAL après chaque tableau de la feuille RESUME. Chaque écart est un motif de refus distinct (`lang/fr/report.php`, `workbook.*`) ; le contrôle est porté par le type de document (`documents.templates.*.structure`), donc extensible aux autres modèles.
 
+### 5.11 — Rapport modernisé (RG-RPT-09 à 12, 02-TRD §8.4)
+
+11. **La génération produit le rapport modernisé** (modèle `quarterly_report_modern`, Word et PDF) à la place du rapport Word repris de la maquette, plus le classeur de compatibilité tant que le réseau le garde (RG-RPT-10). Le modèle Word de la maquette (`quarterly_report_docx`) reste déclaré mais n'est plus produit.
+12. **Un seul objet de données** : l'instantané de la version porte les états du portefeuille, et en plus l'évolution des adhérents actifs à la fin des `reports.trend_quarters` derniers trimestres (4 par défaut, même règle de portefeuille que les états), les séries des graphiques et la synthèse pré-rédigée. Rapport modernisé et classeur lisent les mêmes états : agrégats identiques, vérifiés par un test de comparaison.
+13. **Sept graphiques natifs** (méthode 0.12) : portefeuille par régime (secteurs), par CDI (colonnes), évolution trimestrielle (courbe), nouveaux et résiliés, recouvrement de la TEE par CDI, paiements RME par nature (barres), SMT et bilans établis et transmis (compteurs de la campagne de clôture, repris à la création du rapport). Titres et séries dans `lang/fr/report.php` ; un modèle ne reçoit que les graphiques dont il porte la variable.
+14. **Synthèse chiffrée pré-rédigée** (phrases de `lang/fr/report.php`) : portefeuille et variation sur le trimestre précédent, mouvements, recouvrement de la TEE, paiements RME, campagne de clôture. Elle est proposée par la prévisualisation (`GET /cga/quarterly-reports/{id}/preview`, `data.synthesis`) ; le CGA la reprend ou la modifie dans son analyse qualitative (obligatoire) et c'est son texte qui figure au rapport. La proposition reste dans l'instantané.
+15. **Source des données** (RG-RPT-12) : en fin de rapport, nombre de chiffres d'affaires et de paiements du trimestre par source (saisie, import, Compta Flow…).
+16. Seul le portefeuille CGA (`regulatoryAt`) alimente le rapport : aucun dossier Cabinet, aucun apporteur.
+
 ## Preuve
 
-`tests/Feature/Imports/HistoryImportTest.php` (F-IMP-03, RG-DATA-06, RG-RPT-12), `tests/Feature/Platform/SettingsApiTest.php` (RG-RPT-06 à 08, RG-RPT-10), `tests/Feature/Reports/WorkbookTemplateTest.php` (RG-RPT-10).
+`tests/Feature/Imports/HistoryImportTest.php` (F-IMP-03, RG-DATA-06, RG-RPT-12), `tests/Feature/Platform/SettingsApiTest.php` (RG-RPT-06 à 08, RG-RPT-10), `tests/Feature/Reports/WorkbookTemplateTest.php` (RG-RPT-10), `tests/Feature/Reports/ModernReportTest.php` (RG-RPT-09, 11, 12).
 
 ## Points ouverts
 
 - Format du fichier d'historique à valider avec un vrai fichier DC-KNOWING anonymisé.
+- Mise en page du rapport modernisé (modèle provisoire) à valider par DC-KNOWING et le CNCGA ; remplaçable par l'écran des modèles.
+- Acceptation du rapport modernisé seul par le SP-CGA : tant qu'elle n'est pas confirmée, le classeur reste produit (paramètre réseau).
 - Classeur officiel du SP-CGA à déposer dès réception ; si sa mise en page diffère (feuilles renommées, tableaux déplacés), adapter `reports.workbook` (configuration, sans code).
