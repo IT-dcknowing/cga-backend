@@ -83,6 +83,8 @@ return [
         'members.update' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
         'members.access.manage' => ['locked' => false, 'roles' => [$manager]],
         'members.import' => ['locked' => false, 'roles' => [$manager]],
+        // Reprise d'historique : CA et paiements d'impôts (F-IMP-03), par les agents qui suivent les obligations.
+        'members.history.import' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
         'members.radiation.request' => ['locked' => false, 'roles' => [$manager, $expert]],
         'members.radiation.validate' => ['locked' => false, 'roles' => [$manager, $expert]],
         'members.radiation.cancel' => ['locked' => true, 'roles' => [$manager]],

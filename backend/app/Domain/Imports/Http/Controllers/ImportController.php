@@ -32,6 +32,7 @@ class ImportController extends BaseApiController
     public function index(ListImportsRequest $request, SettingsService $settings): AnonymousResourceCollection|JsonResponse
     {
         return $this->handle(function () use ($request, $settings): AnonymousResourceCollection {
+            Gate::authorize('viewAny', [ImportBatch::class, $request->importType()]);
             $batches = QueryBuilder::for(ImportBatch::query()->with(['file', 'report', 'creator'])->where('type', $request->importType()), $request->listQuery())
                 ->allowedFilters(...$request->queryFilters())
                 ->allowedSorts(...$request->sorts())
