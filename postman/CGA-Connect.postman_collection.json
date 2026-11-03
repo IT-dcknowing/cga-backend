@@ -47587,6 +47587,494 @@
             ]
         },
         {
+            "name": "42. Étape 5.6 — Reprise d'historique : CA et paiements d'impôts",
+            "description": "F-IMP-03, RG-DATA-06, RG-DATA-07 : modèles Excel, dépôt en file « imports » (le traitement demande un worker : `php artisan queue:work --queue=imports`), avancement et rapport par les routes communes. Le CA alimente le CA de référence et les surclassements ; les paiements alimentent les états du rapport (Suivi TEE, Suivi RME). Rejouable : le CA est remplacé, un paiement déjà importé (même référence) est rejeté.",
+            "item": [
+                {
+                    "name": "Historique — modèle du CA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Classeur Excel\", () => pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"modele-import-historique-ca.xlsx\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports/revenues/template",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports",
+                                "revenues",
+                                "template"
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Historique — modèle des paiements d'impôts",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Classeur Excel\", () => pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"modele-import-historique-paiements.xlsx\"));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports/tax-payments/template",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports",
+                                "tax-payments",
+                                "template"
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Historique — déposer le CA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 202\", () => pm.response.to.have.status(202));",
+                                    "    pm.collectionVariables.set(\"history_import_id\", pm.response.json().data.id);",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports/revenues",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports",
+                                "revenues"
+                            ]
+                        },
+                        "description": "",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/historique-ca-demo.xlsx"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Historique — avancement de l'import du CA",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports/{{history_import_id}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports",
+                                "{{history_import_id}}"
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Historique — déposer les paiements d'impôts",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 202\", () => pm.response.to.have.status(202));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "comptable",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports/tax-payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports",
+                                "tax-payments"
+                            ]
+                        },
+                        "description": "",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/historique-paiements-demo.xlsx"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Historique — imports de paiements du centre",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    pm.test(\"Imports de paiements seulement\", () => pm.response.json().data.forEach((batch) => pm.expect(batch.type).to.eql(\"tax_payments\")));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports?filter[type]=tax_payments",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports"
+                            ],
+                            "query": [
+                                {
+                                    "key": "filter[type]",
+                                    "value": "tax_payments"
+                                }
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Historique — fichier non Excel (422)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 422\", () => pm.response.to.have.status(422));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports/revenues",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports",
+                                "revenues"
+                            ]
+                        },
+                        "description": "",
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "file",
+                                    "type": "file",
+                                    "src": "postman/files/pas-une-image.txt"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Historique — refusé à la Présidente du CNCGA (403)",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 403\", () => pm.response.to.have.status(403));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "presidente",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/imports/revenues/template",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "imports",
+                                "revenues",
+                                "template"
+                            ]
+                        },
+                        "description": ""
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [
@@ -48378,6 +48866,10 @@
         },
         {
             "key": "dues_invoice_id",
+            "value": ""
+        },
+        {
+            "key": "history_import_id",
             "value": ""
         }
     ]

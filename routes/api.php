@@ -17,6 +17,7 @@ use App\Domain\Documents\Http\Controllers\MemberSpaceDocumentController;
 use App\Domain\Documents\Http\Controllers\VerificationController;
 use App\Domain\Dues\Http\Controllers\CgaDuesController;
 use App\Domain\Dues\Http\Controllers\NetworkDuesController;
+use App\Domain\Imports\Http\Controllers\HistoryImportController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
 use App\Domain\Members\Http\Controllers\AgreementLossController;
@@ -169,6 +170,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('members/template', [MemberImportController::class, 'template'])->name('members.template');
         Route::post('members/preview', [MemberImportController::class, 'preview'])->name('members.preview');
         Route::post('members', [MemberImportController::class, 'store'])->name('members.store');
+        // Reprise d'historique (F-IMP-03) : chiffres d'affaires, paiements d'impôts.
+        Route::get('revenues/template', [HistoryImportController::class, 'revenuesTemplate'])->name('revenues.template');
+        Route::post('revenues', [HistoryImportController::class, 'store'])->name('revenues.store');
+        Route::get('tax-payments/template', [HistoryImportController::class, 'taxPaymentsTemplate'])->name('tax-payments.template');
+        Route::post('tax-payments', [HistoryImportController::class, 'store'])->name('tax-payments.store');
         Route::get('{importBatch}', [ImportController::class, 'show'])->name('show');
         Route::get('{importBatch}/rows', [ImportController::class, 'rows'])->name('rows');
     });

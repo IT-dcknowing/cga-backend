@@ -70,6 +70,7 @@ return [
         'update' => 'Modifier un adhérent',
         'access' => ['manage' => 'Inviter les adhérents en ligne et gérer leurs accès'],
         'import' => 'Importer un portefeuille d\'adhérents',
+        'history' => ['import' => 'Importer l\'historique des chiffres d\'affaires et des paiements d\'impôts'],
         'radiation' => [
             'request' => 'Demander une radiation',
             'validate' => 'Valider une radiation',

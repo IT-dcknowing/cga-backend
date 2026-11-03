@@ -59,6 +59,48 @@ return [
         'unknown_directorate' => 'Direction régionale « :value » inconnue du référentiel : à renseigner sur la fiche.',
     ],
 
+    // Reprise d'historique (F-IMP-03) : chiffres d'affaires et paiements d'impôts.
+    'history' => [
+        'help' => [
+            'member' => 'N° CGA Connect (adhésion ou client), ancien n° repris, ou NCC du dossier, dans le centre.',
+        ],
+        'required' => ':field : champ obligatoire.',
+        'unknown_member' => 'Dossier « :value » inconnu dans le centre.',
+        'ambiguous_member' => '« :value » désigne plusieurs dossiers : utilisez le n° CGA Connect.',
+        'invalid_amount' => ':field : montant entier en FCFA attendu.',
+        'compta_flow' => 'Donnée reçue de Compta Flow : elle fait foi et ne se remplace pas par un import.',
+    ],
+
+    'revenues' => [
+        'help' => [
+            'year' => 'Exercice, sur quatre chiffres (ex. 2024).',
+            'amount' => 'Chiffre d\'affaires de l\'année, en FCFA, sans décimales.',
+            'kind' => 'Réalisé (par défaut) ou Prévisionnel.',
+        ],
+        'invalid_year' => 'Année illisible : quatre chiffres attendus.',
+        'year_out_of_range' => 'Année hors de la plage acceptée (:first à :last).',
+        'invalid_kind' => 'Nature « :value » inconnue : Réalisé ou Prévisionnel.',
+    ],
+
+    'tax_payments' => [
+        'help' => [
+            'nature' => 'Code ou libellé de la nature d\'impôt : TEE, Impôt microentreprise (RME), Patente, TVA, BIC, ITS, IGR, CNPS, CMU, FDFP…',
+            'period' => 'Période payée : 2025 (année), 2025-S1 (semestre), 2025-T3 (trimestre), 2025-03 ou 03/2025 (mois).',
+            'amount' => 'Montant payé, en FCFA, sans décimales.',
+            'paid_on' => 'Date du paiement (cellule date, ou jj/mm/aaaa).',
+            'amount_due' => 'Montant dû de la période (facultatif) : à défaut, le montant payé.',
+            'reference' => 'Référence du paiement (quittance), facultative : un même paiement ne s\'importe qu\'une fois.',
+        ],
+        'invalid_nature' => 'Nature d\'impôt « :value » inconnue.',
+        'invalid_period' => 'Période « :value » illisible : 2025, 2025-S1, 2025-T3, 2025-03 ou 03/2025.',
+        'invalid_date' => 'Date du paiement illisible : utilisez une cellule date ou le format jj/mm/aaaa.',
+        'future_date' => 'La date du paiement est dans le futur.',
+        'reference_too_long' => 'Référence : 100 caractères au plus.',
+        'already_imported' => 'Paiement déjà importé (même référence, ou même ligne).',
+        'exceeds_balance' => 'Le paiement dépasse le reste dû de l\'échéance (:balance F).',
+        'instance_label' => ':nature :period (historique importé)',
+    ],
+
     'members' => [
         'help' => [
             'portfolio' => 'CGA ou Cabinet. Le portefeuille CGA suppose un contrat CGA signé et un régime RME ou TEE.',

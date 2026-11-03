@@ -36,7 +36,8 @@ class ImportBatchPolicy
         return match ($type) {
             ImportType::Cgas => $this->allows('organizations.manage'),
             ImportType::Members => $this->allows('members.import'),
-            default => false,
+            // Reprise d'historique par les agents du centre (F-IMP-03).
+            ImportType::Revenues, ImportType::TaxPayments => $this->allows('members.history.import'),
         };
     }
 
