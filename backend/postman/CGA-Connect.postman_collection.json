@@ -41791,6 +41791,64 @@
                     "response": []
                 },
                 {
+                    "name": "Clôture — agents à qui affecter des dossiers",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "(function () {",
+                                    "    pm.test(\"Statut HTTP 200\", () => pm.response.to.have.status(200));",
+                                    "    const agents = pm.response.json().data;",
+                                    "    pm.test(\"Agents du centre, identifiant et nom\", () => pm.expect(agents[0]).to.have.all.keys(\"id\", \"name\"));",
+                                    "    pm.test(\"Triés par nom\", () => pm.expect(agents.map(a => a.name)).to.eql([...agents.map(a => a.name)].sort((a, b) => a.localeCompare(b))));",
+                                    "})();"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant",
+                                "description": "Compte de démo de la requête (retiré avant l'envoi) ; « aucun » : sans session."
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/closing-campaigns/agents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "closing-campaigns",
+                                "agents"
+                            ]
+                        },
+                        "description": "Agents actifs du centre (hors accès adhérent), par nom : « Affecter à un agent » et filtre par agent de /cga/cloture. Droit closing.view."
+                    },
+                    "response": []
+                },
+                {
                     "name": "Clôture — tableau de suivi (portefeuille CGA)",
                     "event": [
                         {
