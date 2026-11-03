@@ -7,7 +7,7 @@ Variante **de recette seulement** de l'installation décrite dans `infra/README.
 | Serveur dédié (`infra/README.md`) | cPanel (ce dossier) |
 |---|---|
 | Nginx | Apache : `.htaccess` produit par `install.sh` (mêmes règles et en-têtes) |
-| Supervisor, un worker par file | un cron chaque minute : `queue:work --stop-when-empty`, sous verrou `flock` |
+| Supervisor, un worker par file | un cron chaque minute : `queue:work --stop-when-empty`, sous verrou `flock` (sans `flock` : passage limité à `WORKER_NO_LOCK_MAX_TIME_SECONDS`) |
 | LibreOffice : PDF | **absent : aucun PDF** ; le contrôle `libreoffice` du point de santé est en échec, c'est attendu |
 | Build du SPA sur le serveur | SPA construit sur le poste (`build-package.sh`), le serveur n'a pas Node |
 | `systemctl reload php8.3-fpm` | sans objet ; `queue:restart` seulement |

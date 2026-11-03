@@ -13,9 +13,13 @@
 set -euo pipefail
 
 PACKAGE_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-# Fichier éventuellement édité sous Windows : retours chariot retirés.
-# shellcheck disable=SC1090
-source <(tr -d '\r' < "$PACKAGE_DIR/cpanel.env")
+# Fichier éventuellement édité sous Windows : retours chariot retirés, sans substitution de processus
+# (/dev/fd est absent de l'environnement isolé de cPanel, CageFS).
+if grep -q $'\r' "$PACKAGE_DIR/cpanel.env"; then
+    sed -i 's/\r$//' "$PACKAGE_DIR/cpanel.env"
+fi
+# shellcheck disable=SC1091
+source "$PACKAGE_DIR/cpanel.env"
 
 PHP_BIN=${PHP_BIN:-$(command -v php || true)}
 REVISION=$(cat "$PACKAGE_DIR/REVISION")
@@ -83,12 +87,24 @@ replace_block() {
     mv -f "$file.cga-new" "$file"
 }
 
-exec 9> "$APP_DIR/.deploy.lock"
-flock -n 9 || fail "une autre installation est en cours"
-
 log "Installation de la version $REVISION ($DEPLOY_ENV) pour https://$DOMAIN"
 
 # 1. Prérequis du serveur.
+for tool in awk find tar curl crontab mktemp install sed grep sort tail; do
+    command -v "$tool" > /dev/null || fail "commande absente du serveur : $tool"
+done
+# Verrou : une seule installation à la fois, un seul worker à la fois. Sans flock, chaque passage
+# du worker se termine avant le cron suivant (WORKER_NO_LOCK_MAX_TIME_SECONDS).
+if command -v flock > /dev/null; then
+    exec 9> "$APP_DIR/.deploy.lock"
+    flock -n 9 || fail "une autre installation est en cours"
+    QUEUE_LOCK="flock -n $APP_DIR/queue.lock "
+    QUEUE_MAX_TIME=$WORKER_MAX_TIME_SECONDS
+else
+    log "flock absent : installation sans verrou ; passage du worker limité à ${WORKER_NO_LOCK_MAX_TIME_SECONDS} s"
+    QUEUE_LOCK=""
+    QUEUE_MAX_TIME=$WORKER_NO_LOCK_MAX_TIME_SECONDS
+fi
 [[ -n "$PHP_BIN" && -x "$PHP_BIN" ]] || fail "php introuvable : renseigner PHP_BIN dans cpanel.env"
 "$PHP_BIN" -r 'exit(version_compare(PHP_VERSION, "8.3.0", ">=") ? 0 : 1);' \
     || fail "PHP 8.3 ou plus exigé ($PHP_BIN est en $("$PHP_BIN" -r 'echo PHP_VERSION;'))"
@@ -160,7 +176,13 @@ ln -s "$ENV_FILE" "$RELEASE_DIR/backend/.env"
 log "Dépendances PHP (composer install --no-dev)"
 (cd "$RELEASE_DIR/backend" && COMPOSER_MEMORY_LIMIT=-1 composer install --no-dev --prefer-dist \
     --no-interaction --no-progress --optimize-autoloader)
-grep -qE '^APP_KEY=.+' "$ENV_FILE" || artisan key:generate --force --no-interaction
+# Clé de l'application écrite directement dans le .env partagé (pas à travers le lien de la version).
+if ! grep -qE '^APP_KEY=.+' "$ENV_FILE"; then
+    app_key=$(artisan key:generate --show --no-ansi --no-interaction | tr -d '[:space:]')
+    [[ "$app_key" =~ ^base64:[A-Za-z0-9+/]+=*$ ]] || fail "clé de l'application illisible (artisan key:generate --show)"
+    set_env APP_KEY "$app_key"
+    unset app_key
+fi
 
 # 5. Base : contrôle (sans rien modifier), migrations, données de base à la première installation.
 log "Contrôle de la base $DB_DATABASE"
@@ -287,7 +309,7 @@ shopt -u nullglob
 #    lignes du crontab sont gardées telles quelles ; une copie est faite avant modification.
 CRON_BLOCK=$(cat <<CRON
 * * * * * cd $APP_DIR/current/backend && $PHP_BIN artisan schedule:run >> /dev/null 2>&1
-* * * * * cd $APP_DIR/current/backend && flock -n $APP_DIR/queue.lock $PHP_BIN artisan queue:work --queue=$QUEUES --stop-when-empty --max-time=$WORKER_MAX_TIME_SECONDS --sleep=$WORKER_SLEEP_SECONDS >> /dev/null 2>&1
+* * * * * cd $APP_DIR/current/backend && ${QUEUE_LOCK}$PHP_BIN artisan queue:work --queue=$QUEUES --stop-when-empty --max-time=$QUEUE_MAX_TIME --sleep=$WORKER_SLEEP_SECONDS >> /dev/null 2>&1
 CRON
 )
 current_cron=$(crontab -l 2>/dev/null || true)
