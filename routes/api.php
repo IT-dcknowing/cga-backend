@@ -364,6 +364,7 @@ Route::prefix('v1')->group(function (): void {
     // étapes marquées dans l'ordre, livrable et agent d'un dossier.
     Route::middleware(['auth', 'tenant'])->prefix('cga/closing-campaigns')->name('cga.closing-campaigns.')->group(function (): void {
         Route::get('/', [ClosingCampaignController::class, 'index'])->name('index');
+        Route::get('agents', [ClosingCampaignController::class, 'agents'])->name('agents');
         Route::get('{closingCampaign}', [ClosingCampaignController::class, 'show'])->name('show');
         Route::get('{closingCampaign}/items', [ClosingCampaignController::class, 'items'])->name('items');
         Route::post('{closingCampaign}/bulk/steps/{step}', [ClosingCampaignController::class, 'bulkStep'])->name('bulk.step');

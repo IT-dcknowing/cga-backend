@@ -12,13 +12,18 @@ use App\Domain\Closing\Http\Requests\ClosingItemsRequest;
 use App\Domain\Closing\Http\Requests\ClosingSelectionRequest;
 use App\Domain\Closing\Http\Requests\MarkClosingStepRequest;
 use App\Domain\Closing\Http\Requests\UpdateClosingItemRequest;
+use App\Domain\Closing\Http\Resources\ClosingAgentResource;
 use App\Domain\Closing\Http\Resources\ClosingCampaignResource;
 use App\Domain\Closing\Http\Resources\ClosingItemResource;
 use App\Domain\Closing\Models\ClosingCampaign;
 use App\Domain\Closing\Models\ClosingCampaignItem;
 use App\Domain\Closing\Support\ClosingProgress;
+use App\Domain\Users\Enums\MembershipStatus;
+use App\Domain\Users\Models\Membership;
+use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
 use App\Support\Http\BaseApiController;
+use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -42,6 +47,29 @@ class ClosingCampaignController extends BaseApiController
 
             return ClosingCampaignResource::collection(ClosingCampaign::query()->orderByDesc('fiscal_year')->get());
         }, action: 'closing_campaigns.index');
+    }
+
+    /**
+     * Agents actifs du centre, par nom : à qui affecter des dossiers, et filtre par agent du tableau.
+     */
+    public function agents(TenantContext $context): AnonymousResourceCollection|JsonResponse
+    {
+        return $this->handle(function () use ($context): AnonymousResourceCollection {
+            Gate::authorize('view', ClosingCampaign::class);
+
+            $agents = Membership::query()
+                ->with('user')
+                ->where('organization_id', $context->organizationId())
+                ->whereNull('member_id')
+                ->where('status', MembershipStatus::Active)
+                ->get()
+                ->map(static fn (Membership $membership): User => $membership->user)
+                ->unique('id')
+                ->sortBy(static fn (User $user): string => $user->fullName())
+                ->values();
+
+            return ClosingAgentResource::collection($agents);
+        }, action: 'closing_campaigns.agents');
     }
 
     public function show(ClosingBoardRequest $request, ClosingCampaign $closingCampaign): ClosingCampaignResource|JsonResponse
