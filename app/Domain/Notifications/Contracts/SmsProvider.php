@@ -12,8 +12,9 @@ interface SmsProvider
 {
     /**
      * @param  string  $to  numéro au format E.164 (+225…)
+     * @return string|null identifiant du message chez le fournisseur
      *
      * @throws ExternalServiceException fournisseur indisponible ou envoi refusé
      */
-    public function send(string $to, string $text): void;
+    public function send(string $to, string $text): ?string;
 }

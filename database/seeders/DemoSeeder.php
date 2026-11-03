@@ -7,6 +7,7 @@ use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Models\Invitation;
 use App\Domain\Closing\Actions\OpenClosingCampaign;
 use App\Domain\Documents\Samples\SampleDocumentData;
+use App\Domain\Dues\Actions\OpenDuesYear;
 use App\Domain\Members\Enums\EntityType;
 use App\Domain\Members\Enums\FeesPeriodicity;
 use App\Domain\Members\Enums\LegalForm;
@@ -65,6 +66,7 @@ class DemoSeeder extends Seeder
         private readonly StorageService $storage,
         private readonly SampleDocumentData $samples,
         private readonly OpenClosingCampaign $openClosing,
+        private readonly OpenDuesYear $openDues,
     ) {}
 
     public function run(): void
@@ -75,7 +77,17 @@ class DemoSeeder extends Seeder
         $bouake = $this->cga('CGA Démo Bouaké', 'DEMOB', 'Bouaké', '+2252731630102', 'contact@cga-bouake.demo');
         $suspended = $this->suspended($this->cga('CGA Démo Suspendu', 'DEMOS', 'Korhogo', '+2252722445502', 'contact@cga-suspendu.demo'));
         $this->referentials();
-        $this->completeProfile($dck);
+        $this->completeProfile($dck, [
+            'legal_form' => 'SARL', 'share_capital' => 5_000_000, 'ncc' => '9900001K', 'rccm' => 'CI-ABJ-2020-B-00001',
+            'agreement_number' => 'AGR-DEMO-0001', 'agreement_date' => '2020-01-06', 'address' => 'Plateau, avenue Chardy, immeuble Démo',
+            'manager_name' => 'Koffi Gérant', 'expert_name' => 'Yao Multi-rôles', 'signatory_name' => 'Koffi Gérant', 'signatory_title' => 'Le Gérant',
+        ]);
+        // Fiche du CNCGA, émetteur des reçus et factures de cotisation (étape 6.9) : sans agrément ni expert-comptable.
+        $this->completeProfile($cncga, [
+            'legal_form' => 'Association', 'share_capital' => 0, 'ncc' => '9900000C', 'rccm' => 'CI-ABJ-2010-W-00001',
+            'address' => 'Cocody, Riviera 3, siège du CNCGA', 'city' => 'Abidjan', 'manager_name' => 'Aminata Présidente', 'numbering_abbreviation' => 'CNCGA',
+            'signatory_name' => 'Aminata Présidente', 'signatory_title' => 'La Présidente', 'phone_1' => '+2252722445500', 'email' => 'contact@cncga.demo',
+        ]);
         $this->mockupRegistry();
 
         $this->account('0700000001', 'Aminata', 'Présidente', [[$cncga, Role::CncgaPresident]]);
@@ -95,6 +107,9 @@ class DemoSeeder extends Seeder
         $this->formerMember($bouake);
         $this->onlineMember($dck);
         $this->closingCampaign($dck);
+        // Appel de cotisation de l'année, comme dues:open-year le 1er janvier (F-COT-01) : /cncga/cotisations,
+        // /cga/cotisation et la collection Postman s'y appuient. Rejouable (une cotisation par centre et par an).
+        $this->openDues->execute(now()->year);
 
         // Fenêtre des demandes de code ramenée à une minute : la collection Postman se rejoue.
         $this->settings->set('rate_limit.otp', ['max_attempts' => 3, 'decay_minutes' => (int) config('cga.seed.demo.otp_decay_minutes')]);
@@ -251,19 +266,17 @@ class DemoSeeder extends Seeder
      * (logo, signature, cachet), pour que ses documents se produisent dès l'installation (F-DOC-01).
      * Seuls les champs encore vides sont remplis.
      */
-    private function completeProfile(Organization $organization): void
+    /**
+     * @param  array<string, mixed>  $identity  champs de la fiche, posés s'ils sont vides
+     */
+    private function completeProfile(Organization $organization, array $identity): void
     {
         if ($organization->missingProfileFields() === []) {
             return;
         }
 
         $office = TaxOffice::query()->where('code', 'DEMO-PLT')->sole();
-        $identity = [
-            'legal_form' => 'SARL', 'share_capital' => 5_000_000, 'ncc' => '9900001K', 'rccm' => 'CI-ABJ-2020-B-00001',
-            'agreement_number' => 'AGR-DEMO-0001', 'agreement_date' => '2020-01-06', 'regional_directorate_id' => $office->regional_directorate_id,
-            'tax_office_id' => $office->id, 'address' => 'Plateau, avenue Chardy, immeuble Démo', 'manager_name' => 'Koffi Gérant',
-            'expert_name' => 'Yao Multi-rôles', 'signatory_name' => 'Koffi Gérant', 'signatory_title' => 'Le Gérant',
-        ];
+        $identity += ['regional_directorate_id' => $office->regional_directorate_id, 'tax_office_id' => $office->id];
         foreach ($identity as $field => $value) {
             if (blank($organization->getAttribute($field))) {
                 $organization->setAttribute($field, $value);

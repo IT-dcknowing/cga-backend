@@ -111,6 +111,57 @@ return [
             ],
         ],
 
+        // Cotisation des CGA au CNCGA (PRD M14) : montant de l'année, date butoir (mois-jour), modalité,
+        // prorata d'un CGA agréé en cours d'année (RG-COT-01, 02), relances après la date butoir et alerte
+        // à la Présidente (RG-COT-05, 06). Niveau réseau, réglé par le CNCGA.
+        'dues' => [
+            'amount' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 750_000, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:0', 'max:1000000000']],
+            ],
+            'deadline' => [
+                'type' => 'string', 'level' => 'network', 'default' => '06-30', 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['string', 'date_format:m-d']],
+            ],
+            'mode' => [
+                'type' => 'string', 'level' => 'network', 'default' => 'free', 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['string', 'in:free,single,quarterly']],
+            ],
+            'prorata' => [
+                'type' => 'string', 'level' => 'network', 'default' => 'semester', 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['string', 'in:semester,none']],
+            ],
+            'reminder_offsets' => [
+                'type' => 'array', 'level' => 'network', 'default' => [30, 60, 90], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array', 'max:10'], '*' => ['integer', 'min:1', 'max:365', 'distinct']],
+            ],
+            // Taux de TVA des factures de cotisation (étape 6.9), en % ; la cotisation statutaire est hors taxe par défaut.
+            'tax_rate' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 0, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:0', 'max:100']],
+            ],
+            'alert_offset' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 90, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:365']],
+            ],
+        ],
+
+        // Envois groupés (F-COM-03) : au-delà de ce nombre de destinataires, validation du gérant (RG-COM-01).
+        'campaign' => [
+            'approval_threshold' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 50, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:100000']],
+            ],
+        ],
+
+        // Quota de SMS inclus par centre et par mois (02-TRD §10) ; les packs achetés s'y ajoutent.
+        'sms' => [
+            'monthly_quota' => [
+                'type' => 'integer', 'level' => ['platform', 'cga'], 'default' => 200, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:0', 'max:100000']],
+            ],
+        ],
+
         'logs' => [
             'activity_retention_months' => [
                 'type' => 'integer', 'level' => 'platform', 'default' => 24, 'permission' => $platform,
@@ -158,6 +209,11 @@ return [
 
         // Barème (F-PAY-01) : droit d'adhésion proposé tant que le CGA n'a pas saisi le sien.
         'fees' => [
+            // Rappel des honoraires impayés à l'adhérent : le jour du passage en impayé, puis tous les n jours.
+            'reminder_every_days' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 30, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:365']],
+            ],
             'default_entry_fee' => [
                 'type' => 'integer', 'level' => 'network', 'default' => 25_000, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:0', 'max:100000000']],
@@ -182,7 +238,28 @@ return [
 
         // Adhérent du portefeuille CGA reclassé au régime réel (RG-ADH-08, 09) : alerte au gérant passé ce délai
         // sans radiation, jamais de blocage ni de radiation automatique (CR-04, RG-ADH-18).
+        // Pièces attendues d'un dossier : rappel à J+n puis tous les n jours (PRD M13).
+        'pieces' => [
+            'reminder_days' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 30, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:365']],
+            ],
+        ],
+
+        // Échéance de l'agrément d'un CGA : alertes n mois avant (RG-ORG-10).
+        'agreements' => [
+            'alert_months' => [
+                'type' => 'array', 'level' => 'network', 'default' => [6, 3], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array', 'max:6'], '*' => ['integer', 'min:1', 'max:24', 'distinct']],
+            ],
+        ],
+
         'rsi' => [
+            // Alertes d'un dossier RSI ou RNI resté au portefeuille CGA, n jours après le reclassement.
+            'alert_days' => [
+                'type' => 'array', 'level' => ['network', 'cga'], 'default' => [60, 90], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array', 'max:6'], '*' => ['integer', 'min:1', 'max:365', 'distinct']],
+            ],
             'radiation_deadline_days' => [
                 'type' => 'integer', 'level' => 'network', 'default' => 90, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:1', 'max:365']],
@@ -191,6 +268,11 @@ return [
 
         // Échéances des obligations confirmées générées chaque nuit sur ce nombre de mois glissants (RG-OBL-04).
         'obligations' => [
+            // Rappels d'échéance à l'adhérent : premier et dernier rappel, en jours avant l'échéance (PRD M13).
+            'reminder_days' => [
+                'type' => 'array', 'level' => ['network', 'cga'], 'default' => ['first' => 7, 'last' => 1], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array:first,last'], 'first' => ['required', 'integer', 'min:1', 'max:60'], 'last' => ['required', 'integer', 'min:0', 'max:60']],
+            ],
             'horizon_months' => [
                 'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 3, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:1', 'max:24']],
@@ -314,6 +396,14 @@ return [
         // Formats de numérotation (02-TRD §7.1, RG-ADH-03) : {YYYY} année, {ABR} abréviation du CGA,
         // {N:4} numéro sur 4 chiffres au moins.
         'numbering' => [
+            // Reçus des paiements de cotisation émis par le CNCGA (F-COT-03, 04, PRD F-DOC-01 « CNC-AAAA-NNNNN ») :
+            // séquence propre par année.
+            'dues_receipt' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => 'CNC-{YYYY}-{N:5}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
             'membership' => [
                 'pattern' => [
                     'type' => 'string', 'level' => 'platform', 'default' => '{YYYY}-{ABR}-{N:4}', 'permission' => $platform,

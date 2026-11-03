@@ -37,6 +37,12 @@ return [
 
     'mailers' => [
 
+        // Compte e-mail actif de l'écran « Envois » (RG-NOT-05) ; à défaut, le mailer de repli.
+        'platform' => [
+            'transport' => 'platform',
+            'fallback' => env('MAIL_FALLBACK_MAILER', 'log'),
+        ],
+
         'smtp' => [
             'transport' => 'smtp',
             'scheme' => env('MAIL_SCHEME'),

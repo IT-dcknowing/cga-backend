@@ -5,6 +5,7 @@ namespace App\Domain\Auth\Support;
 use App\Domain\Auth\Data\IssuedCode;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Notifications\Contracts\SmsProvider;
+use App\Domain\Notifications\Providers\ConfiguredSmsProvider;
 use App\Domain\Notifications\Providers\LogSmsProvider;
 use App\Domain\Users\Models\User;
 use Illuminate\Contracts\Config\Repository;
@@ -58,7 +59,7 @@ class DevMessages
         }
 
         return $channel === 'sms'
-            ? $this->sms instanceof LogSmsProvider
+            ? $this->sms instanceof LogSmsProvider || ($this->sms instanceof ConfiguredSmsProvider && $this->sms->sendsNothing())
             : in_array($this->config->string('mail.default'), ['log', 'array'], true);
     }
 }
