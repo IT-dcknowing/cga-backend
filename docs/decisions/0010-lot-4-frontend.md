@@ -26,9 +26,18 @@ Les API du Lot 4 sont en place (étapes 4.1 à 4.4, 4.9, 4.10). Ce lot les relie
 5. **Mobilisation des recettes** — aucune API ne la couvrait : ajout de `GET /cga/obligation-planning/revenue` (backend). Sur les échéances de **paiement** dont l'échéance tombe dans la période (par défaut du 1er janvier de l'année au jour), hors annulées : montant dû, payé, reste et **taux de recouvrement = payé / dû** (une décimale), au total, par nature d'impôt (CNPS et CMU comprises) et par contribuable (les plus gros restes d'abord, au plus `cga.obligations.revenue_members_limit`, 50 par défaut). Une échéance **sans montant dû** n'entre pas dans les montants : elle est comptée à part (« montants à saisir », RG-OBL-08). Les dossiers du portefeuille **Cabinet** n'y figurent qu'avec le droit `members.cabinet.view` (RG-PTF-02). Indicateur interne au centre : il n'alimente aucun document officiel.
 6. L'onglet « Obligations du centre » ouvre `/cga/gestion-interne` ; l'onglet « Fiche permanente » s'y ajoutera à l'étape 5.7.
 
+### 4.8 — Espace adhérent : obligations et accueil
+
+7. `/adherent/obligations` présente les échéances de l'adhérent par catégorie, en blocs repliables (total dû de la catégorie en tête). « Signaler comme payé » (paiement) ou « Signaler comme fait » (déclaration) n'apparaît que si le serveur l'autorise (`can.declare`) ; pour un paiement, l'adhérent indique le montant, la date et, s'il le souhaite, une preuve (PDF, JPEG ou PNG) ; pour une déclaration, il confirme simplement l'avoir faite. Le signalement **reste à confirmer par le CGA** : la ligne affiche « Déclaré — en attente de confirmation par votre CGA » et l'état officiel ne change qu'à la confirmation (étape 4.6) ; un rejet s'affiche avec son motif.
+8. Accueil adhérent, sans sélecteur de période : prochaine échéance à traiter, ce que l'adhérent doit (impôts, CNPS et CMU), échéances du mois, reste des honoraires, documents récents. Une échéance **déjà signalée** au CGA ou une **diligence du CGA** ne demande rien à l'adhérent : elle n'est pas comptée « à traiter ».
+
+### 4.9 — Catalogue national des obligations
+
+9. L'écran du catalogue est un onglet « Catalogue des obligations » de `/cncga/parametres`, à côté des référentiels, réservé au droit `referentials.manage`. Il liste les versions chargées (en vigueur, provisoire ou validée). Le chargement se fait en deux temps : **aperçu** des effets du fichier, en nombres (types ajoutés, retirés, modifiés ; obligations proposées, retirées, terminées, échéances recalculées ; dossiers et centres touchés), puis **application** après confirmation. Une version provisoire se valide explicitement. Aucun nom d'adhérent n'est affiché au CNCGA.
+
 ## Preuve
 
-Frontend : `new-member-page.test.tsx` (bloc 4.5), `obligations-tab.test.tsx`, `planning-page.test.tsx`, `internal-page.test.tsx`. Backend : `tests/Feature/Obligations/RevenueMobilizationTest.php`.
+Frontend : `new-member-page.test.tsx` (bloc 4.5), `obligations-tab.test.tsx`, `planning-page.test.tsx`, `internal-page.test.tsx`, `member-obligations-page.test.tsx`, `member-home-page.test.tsx`, `catalog-tab.test.tsx`. Backend : `tests/Feature/Obligations/RevenueMobilizationTest.php`.
 
 ## Points ouverts
 
