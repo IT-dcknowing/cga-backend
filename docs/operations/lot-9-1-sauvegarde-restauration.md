@@ -20,11 +20,11 @@ umask 077
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
 STAGING="/var/backups/cga-staging/$STAMP"
 FILES_ROOT="/srv/cga/storage/app/private"
-DB_NAME="\${DB_DATABASE:?DB_DATABASE requis}"
-DB_HOST="\${DB_HOST:?DB_HOST requis}"
-DB_PORT="\${DB_PORT:-5432}"
-DB_USER="\${DB_USERNAME:?DB_USERNAME requis}"
-AGE_RECIPIENT="\${BACKUP_AGE_RECIPIENT:?destinataire age requis}"
+DB_NAME="${DB_DATABASE:?DB_DATABASE requis}"
+DB_HOST="${DB_HOST:?DB_HOST requis}"
+DB_PORT="${DB_PORT:-5432}"
+DB_USER="${DB_USERNAME:?DB_USERNAME requis}"
+AGE_RECIPIENT="${BACKUP_AGE_RECIPIENT:?destinataire age requis}"
 
 install -d -m 0700 "$STAGING"
 pg_dump --format=custom --no-owner --no-acl \
@@ -39,7 +39,7 @@ tar --create --file="$STAGING/private-files.tar" \
   sha256sum database.dump private-files.tar > SHA256SUMS
   printf 'created_at_utc=%s\n' "$STAMP" > MANIFEST.txt
   printf 'database=%s\n' "$DB_NAME" >> MANIFEST.txt
-  printf 'application_release=%s\n' "\${SENTRY_RELEASE:-unknown}" >> MANIFEST.txt
+  printf 'application_release=%s\n' "${SENTRY_RELEASE:-unknown}" >> MANIFEST.txt
 )
 
 tar --create --file="$STAGING/cga-backup.tar" \
