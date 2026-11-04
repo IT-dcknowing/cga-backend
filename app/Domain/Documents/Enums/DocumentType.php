@@ -24,6 +24,7 @@ enum DocumentType: string
     case DuesReceipt = 'dues_receipt';
     case DuesInvoice = 'dues_invoice';
     case TrainingCertificate = 'training_certificate';
+    case TrainingReceipt = 'training_receipt';
     case BankingFile = 'banking_file';
     case Uploaded = 'uploaded';
 }

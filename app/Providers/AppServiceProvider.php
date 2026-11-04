@@ -73,6 +73,9 @@ use App\Domain\Reports\Models\CgaResource;
 use App\Domain\Reports\Models\QuarterlyReport;
 use App\Domain\Reports\Policies\PermanentProfilePolicy;
 use App\Domain\Reports\Policies\QuarterlyReportPolicy;
+use App\Domain\Trainings\Models\Training;
+use App\Domain\Trainings\Models\TrainingRegistration;
+use App\Domain\Trainings\Policies\TrainingPolicy;
 use App\Domain\Users\Http\Controllers\UserPermissionController;
 use App\Domain\Users\Models\RolePermission;
 use App\Domain\Users\Models\User;
@@ -201,6 +204,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Préoccupations (PRD M10).
         Gate::policy(Concern::class, ConcernPolicy::class);
+
+        // Formations (PRD M11).
+        Gate::policy(Training::class, TrainingPolicy::class);
+        Gate::policy(TrainingRegistration::class, TrainingPolicy::class);
 
         // Cotisation CNCGA (PRD M14).
         Gate::policy(NetworkDue::class, NetworkDuePolicy::class);

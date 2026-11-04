@@ -49,6 +49,11 @@ return [
     // Préoccupations d'adhérents sans réponse : alerte interne au CGA (RG-PRE-02).
     'reminders_concerns' => env('SCHEDULE_REMINDERS_CONCERNS', '07:30'),
 
+    // Formations : promotion des listes d'attente (RG-FOR-03, expression cron, toutes les 15 minutes) et rappel
+    // aux inscrits avant la session (PRD M13).
+    'trainings_waitlist' => env('SCHEDULE_TRAININGS_WAITLIST', '*/15 * * * *'),
+    'reminders_trainings' => env('SCHEDULE_REMINDERS_TRAININGS', '07:40'),
+
     // Rappels de la campagne de clôture (RG-OBL-11).
     'reminders_closing' => env('SCHEDULE_REMINDERS_CLOSING', '07:35'),
 

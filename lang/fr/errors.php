@@ -151,6 +151,23 @@ return [
     'concern_not_closed' => 'Seule une demande traitée ou rejetée peut être rouverte.',
     'concern_already_transferred' => 'Cette demande a déjà été transmise au CNCGA.',
 
+    // Formations (F-FOR-01 à 04)
+    'training_locked' => 'Une formation commencée, terminée ou annulée ne se modifie plus.',
+    'training_capacity_below_registered' => 'Le nombre de places ne peut pas être inférieur au nombre d\'inscrits (:registered).',
+    'training_not_draft' => 'Seule une formation en brouillon se publie.',
+    'training_already_started' => 'Cette formation a déjà commencé.',
+    'training_not_cancellable' => 'Une session clôturée ou une formation déjà annulée ne s\'annule plus.',
+    'training_registration_closed' => 'Les inscriptions à cette formation sont closes.',
+    'training_not_targeted' => 'Cette formation ne s\'adresse pas à ces personnes.',
+    'training_already_registered' => 'Vous êtes déjà inscrit à cette formation.',
+    'training_registration_not_active' => 'Cette inscription n\'est plus en cours.',
+    'training_cancellation_closed' => 'La désinscription n\'est plus possible à moins de :days jours de la session.',
+    'training_registration_not_pending' => 'Cette inscription n\'attend pas de validation.',
+    'training_payment_not_due' => 'Aucun paiement n\'est attendu pour cette inscription.',
+    'training_not_in_session' => 'L\'émargement et la clôture se font à partir du début d\'une session publiée.',
+    'training_attendance_incomplete' => 'Émargez chaque inscrit avant de clôturer la session (:unmarked restant(s)).',
+    'training_evaluation_closed' => 'Seule une personne présente évalue une session clôturée.',
+
     // Authentification (F-AUTH-01 à 05, 03-APPFLOW §2)
     'too_many_attempts' => 'Trop de tentatives, réessayez dans :minutes minutes.',
     'inactive_account' => 'Votre accès n\'est pas actif. Contactez votre CGA.',

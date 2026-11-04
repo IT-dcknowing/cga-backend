@@ -29,6 +29,8 @@ use App\Domain\Reports\Composers\QuarterlyReportModernComposer;
 use App\Domain\Reports\Composers\QuarterlyReportWorkbookComposer;
 use App\Domain\Reports\Composers\ReportTransmissionSlipComposer;
 use App\Domain\Reports\Workbook\WorkbookStructure;
+use App\Domain\Trainings\Composers\TrainingCertificateComposer;
+use App\Domain\Trainings\Composers\TrainingReceiptComposer;
 
 $cga = ['cga_name', 'cga_ncc', 'cga_agreement'];
 $signature = ['cga_signature', 'cga_stamp', 'qr_code'];
@@ -217,6 +219,34 @@ return [
             'variables' => [
                 ...$cga, 'cga_address', 'cga_signatory_name', 'cga_signatory_title',
                 'receipt_number', 'debtor_name', 'debtor_agreement', 'dues_year', 'payment_amount', 'payment_amount_words',
+                'payment_date', 'payment_method', 'payment_reference', 'document_place', 'document_date',
+            ],
+        ],
+
+        // Modèle provisoire (la maquette n'en a pas) : attestation de participation d'un présent à une formation (F-FOR-04).
+        'training_certificate' => [
+            'label' => 'Attestation de participation',
+            'format' => 'docx',
+            'path' => resource_path('templates/training_certificate.docx'),
+            'composer' => TrainingCertificateComposer::class,
+            'images' => $signature,
+            'variables' => [
+                ...$cga, 'cga_address', 'cga_signatory_name', 'cga_signatory_title',
+                'attendee_name', 'attendee_organization', 'training_title', 'training_dates', 'training_format', 'training_location',
+                'training_trainer', 'training_duration', 'document_place', 'document_date',
+            ],
+        ],
+
+        // Modèle provisoire (la maquette n'en a pas) : reçu du paiement d'une formation (RG-FOR-06).
+        'training_receipt' => [
+            'label' => 'Reçu de formation',
+            'format' => 'docx',
+            'path' => resource_path('templates/training_receipt.docx'),
+            'composer' => TrainingReceiptComposer::class,
+            'images' => $signature,
+            'variables' => [
+                ...$cga, 'cga_address', 'cga_signatory_name', 'cga_signatory_title',
+                'receipt_number', 'payer_name', 'training_title', 'training_dates', 'payment_amount', 'payment_amount_words',
                 'payment_date', 'payment_method', 'payment_reference', 'document_place', 'document_date',
             ],
         ],

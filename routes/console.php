@@ -68,6 +68,16 @@ Schedule::command('reminders:concerns')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('trainings:waitlist')
+    ->cron(config('schedule.trainings_waitlist'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::command('reminders:trainings')
+    ->dailyAt(config('schedule.reminders_trainings'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('members:radiation-expiry')
     ->dailyAt(config('schedule.radiation_expiry'))
     ->withoutOverlapping()
