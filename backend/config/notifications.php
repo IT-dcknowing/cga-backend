@@ -33,6 +33,7 @@ return [
         'training_published' => ['channels' => ['database', 'mail'], 'essential' => false],
         'training_registration' => ['channels' => ['database', 'mail', 'sms'], 'essential' => false],
         'announcement_published' => ['channels' => ['database', 'mail'], 'essential' => false],
+        'export_ready' => ['channels' => ['database'], 'essential' => false],
         'dues_reminder' => ['channels' => ['database', 'mail'], 'essential' => true],
         'dues_payment_reviewed' => ['channels' => ['database', 'mail'], 'essential' => true],
         'dues_payment_declared' => ['channels' => ['database'], 'essential' => false],

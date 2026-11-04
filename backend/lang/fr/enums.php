@@ -346,6 +346,7 @@ return [
         'dues_invoice' => 'Facture de cotisation',
         'training_certificate' => 'Attestation de formation',
         'training_receipt' => 'Reçu de formation',
+        'statistics_brochure' => 'Plaquette statistique',
         'banking_file' => 'Dossier de bancabilité',
         'uploaded' => 'Document déposé',
     ],
@@ -470,6 +471,23 @@ return [
     'closing_deliverable' => [
         'smt' => 'SMT',
         'financial_statements' => 'États financiers',
+    ],
+
+    'export_type' => [
+        'members' => 'Adhérents',
+        'concerns' => 'Préoccupations',
+        'network_concerns' => 'Préoccupations des CGA',
+        'training_registrations' => 'Inscrits aux formations',
+        'obligations' => 'Échéances',
+        'dues' => 'Cotisations',
+        'statistics' => 'Statistiques',
+    ],
+
+    'export_status' => [
+        'queued' => 'En file d\'attente',
+        'processing' => 'En cours',
+        'done' => 'Prêt',
+        'failed' => 'En échec',
     ],
 
     'announcement_audience' => [

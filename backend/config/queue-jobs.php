@@ -38,4 +38,12 @@ return [
         'lock_store' => env('REFRESH_STATS_LOCK_STORE'),
     ],
 
+    // Production d'un export Excel (F-EXP-01, file « imports », avec les imports) : un seul essai, l'export passe en
+    // échec et se redemande.
+    'generate_export' => [
+        'queue' => env('EXPORTS_QUEUE', 'imports'),
+        'tries' => (int) env('GENERATE_EXPORT_TRIES', 1),
+        'timeout' => (int) env('GENERATE_EXPORT_TIMEOUT', 900),
+    ],
+
 ];

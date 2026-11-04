@@ -45,6 +45,12 @@ class StatisticsPolicy
         return $this->agentOf(OrganizationType::Cga) && $this->context->allows('statistics.position.view');
     }
 
+    /** « Exporter la plaquette PDF » (F-STA-03) : statistiques nationales et exports.run. */
+    public function brochure(User $user): bool
+    {
+        return $this->viewNational($user) && $this->context->allows('exports.run');
+    }
+
     public function refresh(User $user): bool
     {
         return $this->agentOf(OrganizationType::Cncga) || $this->agentOf(OrganizationType::Cga);

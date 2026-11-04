@@ -33,6 +33,9 @@ return [
         'concerns_unanswered' => '{0} Aucune préoccupation sans réponse|{1} 1 préoccupation sans réponse|[2,*] :count préoccupations sans réponse',
     ],
 
+    // Plaquette annuelle (F-STA-03).
+    'brochure_title' => 'Plaquette statistique :year',
+
     // Indicateur macro sans référence nationale de l'année (RG-STA-03).
     'macro_unavailable' => 'Non disponible — saisir les références :year',
 

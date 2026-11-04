@@ -10,6 +10,7 @@ use App\Domain\Documents\Models\DocumentTemplate;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Dues\Models\NetworkDue;
+use App\Domain\Exports\Models\Export;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
 use App\Domain\Imports\Models\ImportBatch;
@@ -84,6 +85,8 @@ final class CrossTenantObjects
             ClosingCampaignItem::class => static fn (Organization $other): ClosingCampaignItem => ClosingCampaignItem::factory()->create(['campaign_id' => self::closingCampaignOf($other)->id]),
             // Annonce du CGA B à ses adhérents (PRD M12).
             Announcement::class => static fn (Organization $other): Announcement => Announcement::factory()->create(['organization_id' => $other->id]),
+            // Export demandé par un agent du CGA B (F-EXP-01).
+            Export::class => static fn (Organization $other): Export => Export::factory()->create(['membership_id' => Membership::factory()->role(Role::CgaManager)->create(['organization_id' => $other->id])->id]),
             // Formation organisée par le CGA B et inscription d'un de ses agents (PRD M11).
             Training::class => static fn (Organization $other): Training => Training::factory()->create(['organization_id' => $other->id]),
             TrainingRegistration::class => static fn (Organization $other): TrainingRegistration => Tenancy::bypass(static function () use ($other): TrainingRegistration {

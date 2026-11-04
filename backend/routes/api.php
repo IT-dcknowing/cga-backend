@@ -22,6 +22,7 @@ use App\Domain\Documents\Http\Controllers\MemberSpaceDocumentController;
 use App\Domain\Documents\Http\Controllers\VerificationController;
 use App\Domain\Dues\Http\Controllers\CgaDuesController;
 use App\Domain\Dues\Http\Controllers\NetworkDuesController;
+use App\Domain\Exports\Http\Controllers\ExportController;
 use App\Domain\Imports\Http\Controllers\HistoryImportController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
@@ -538,11 +539,23 @@ Route::prefix('v1')->group(function (): void {
         Route::get('network/statistics/map', [NetworkStatisticsController::class, 'map'])->name('network.statistics.map');
         Route::get('network/statistics/map/{regionalDirectorate}', [NetworkStatisticsController::class, 'communes'])->name('network.statistics.communes');
         Route::post('network/statistics/refresh', [NetworkStatisticsController::class, 'refresh'])->name('network.statistics.refresh');
+        Route::get('network/statistics/brochures', [NetworkStatisticsController::class, 'brochures'])->name('network.statistics.brochures.index');
+        Route::post('network/statistics/brochures', [NetworkStatisticsController::class, 'produceBrochure'])->name('network.statistics.brochures.store');
         Route::get('cga/dashboard', [CgaStatisticsController::class, 'dashboard'])->name('cga.dashboard');
         Route::get('cga/statistics', [CgaStatisticsController::class, 'position'])->name('cga.statistics.show');
         Route::post('cga/statistics/refresh', [CgaStatisticsController::class, 'refresh'])->name('cga.statistics.refresh');
         Route::get('member/dashboard', [MemberDashboardController::class, 'show'])->name('member.dashboard');
     });
+
+    // Exports Excel en tâche de fond (F-EXP-01, RG-SEC-06) : demande (202), derniers exports de la personne, suivi et
+    // téléchargement, dans l'espace actif (CNCGA : /network/exports ; CGA : /cga/exports).
+    foreach (['network', 'cga'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/exports")->name("{$space}.exports.")->group(function (): void {
+            Route::get('/', [ExportController::class, 'index'])->name('index');
+            Route::post('/', [ExportController::class, 'store'])->name('store');
+            Route::get('{export}', [ExportController::class, 'show'])->name('show');
+        });
+    }
 
     // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).
     Route::middleware(['auth', 'tenant'])->get('cga/agreement-loss/members', [AgreementLossController::class, 'index'])->name('cga.agreement-loss.members');

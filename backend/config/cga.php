@@ -569,7 +569,18 @@ return [
         // Période personnalisée la plus longue d'un tableau de bord (jours) ; lignes des listes du tableau de bord de
         // l'adhérent (échéances du mois, documents récents).
         'max_period_days' => (int) env('STATS_MAX_PERIOD_DAYS', 3660),
+        // Première année d'une plaquette statistique (F-STA-03).
+        'first_year' => (int) env('STATS_FIRST_YEAR', 2020),
         'member_dashboard_items' => (int) env('STATS_MEMBER_DASHBOARD_ITEMS', 5),
+    ],
+
+    // Exports Excel (M17, F-EXP-01) : derniers exports listés par personne, formats des dates et de l'horodatage du nom
+    // de fichier.
+    'exports' => [
+        'history_items' => (int) env('EXPORTS_HISTORY_ITEMS', 20),
+        'date_format' => 'd/m/Y',
+        'datetime_format' => 'd/m/Y H:i',
+        'file_timestamp' => 'Ymd-Hi',
     ],
 
     // Annonces (M12) : longueur du texte.

@@ -29,11 +29,11 @@ function realDataOfMockup(): array
 }
 
 // Bordereau de transmission du rapport (étape 5.5, décision 0007), reçu de cotisation (étape 6.4), rapport modernisé (étape 5.11),
-// attestation de participation et reçu de formation (étape 7.2) ajoutés.
-dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_modern', 'report_transmission_slip', 'dues_receipt', 'training_certificate', 'training_receipt', 'quarterly_report_xlsx']);
+// attestation de participation et reçu de formation (étape 7.2), plaquette statistique (étape 8.3) ajoutés.
+dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_modern', 'report_transmission_slip', 'dues_receipt', 'training_certificate', 'training_receipt', 'statistics_brochure', 'quarterly_report_xlsx']);
 
 it('déclare chaque modèle de la liste', function () {
-    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_modern', 'report_transmission_slip', 'dues_receipt', 'training_certificate', 'training_receipt', 'quarterly_report_xlsx']);
+    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_modern', 'report_transmission_slip', 'dues_receipt', 'training_certificate', 'training_receipt', 'statistics_brochure', 'quarterly_report_xlsx']);
 });
 
 it('ne contient aucune donnée réelle de la maquette, même dans un attribut ou les propriétés', function (string $type) {

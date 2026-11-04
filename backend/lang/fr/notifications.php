@@ -79,6 +79,11 @@ return [
             'body' => 'Formation « :title » : :event.',
             'sms' => 'CGA Connect, formation « :title » : :event.',
         ],
+        'export_ready' => [
+            'title' => 'Export prêt',
+            'body' => 'Votre export « :list » est prêt à télécharger.',
+            'sms' => 'CGA Connect : export « :list » prêt.',
+        ],
         'announcement_published' => [
             'title' => 'Nouvelle annonce',
             'body' => ':author : « :title ».',
