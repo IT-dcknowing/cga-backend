@@ -69,8 +69,16 @@ return [
             'body' => ':count demande(s) d\'adhérent attendent une réponse depuis plus de :days jours.',
             'sms' => 'CGA Connect : :count préoccupation(s) sans réponse depuis :days jours.',
         ],
-        'training_published' => ['title' => 'Nouvelle formation', 'body' => 'Une nouvelle formation est ouverte aux inscriptions.', 'sms' => 'CGA Connect : nouvelle formation ouverte.'],
-        'training_registration' => ['title' => 'Inscription à une formation', 'body' => 'Votre inscription à une formation a évolué.', 'sms' => 'CGA Connect : votre inscription à une formation a évolué.'],
+        'training_published' => [
+            'title' => 'Nouvelle formation',
+            'body' => '« :title », le :date : les inscriptions sont ouvertes.',
+            'sms' => 'CGA Connect : nouvelle formation « :title » le :date.',
+        ],
+        'training_registration' => [
+            'title' => 'Formation « :title »',
+            'body' => 'Formation « :title » : :event.',
+            'sms' => 'CGA Connect, formation « :title » : :event.',
+        ],
         'announcement_published' => ['title' => 'Nouvelle annonce', 'body' => 'Une nouvelle annonce vous est adressée.', 'sms' => 'CGA Connect : nouvelle annonce.'],
         'dues_reminder' => [
             'title' => 'Cotisation :year à régler',

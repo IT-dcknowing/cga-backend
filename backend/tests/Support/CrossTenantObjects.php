@@ -34,6 +34,9 @@ use App\Domain\Referentials\Models\Sector;
 use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Reports\Models\CgaPerson;
 use App\Domain\Reports\Models\QuarterlyReport;
+use App\Domain\Trainings\Enums\RegistrationStatus;
+use App\Domain\Trainings\Models\Training;
+use App\Domain\Trainings\Models\TrainingRegistration;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
@@ -78,6 +81,18 @@ final class CrossTenantObjects
             // Une campagne par CGA et par exercice : le dossier suivi reprend la campagne du CGA B si elle existe.
             ClosingCampaign::class => static fn (Organization $other): ClosingCampaign => self::closingCampaignOf($other),
             ClosingCampaignItem::class => static fn (Organization $other): ClosingCampaignItem => ClosingCampaignItem::factory()->create(['campaign_id' => self::closingCampaignOf($other)->id]),
+            // Formation organisée par le CGA B et inscription d'un de ses agents (PRD M11).
+            Training::class => static fn (Organization $other): Training => Training::factory()->create(['organization_id' => $other->id]),
+            TrainingRegistration::class => static fn (Organization $other): TrainingRegistration => Tenancy::bypass(static function () use ($other): TrainingRegistration {
+                $agent = Membership::factory()->create(['organization_id' => $other->id]);
+                $registration = new TrainingRegistration;
+                $registration->forceFill([
+                    'organization_id' => $other->id, 'training_id' => Training::factory()->create(['organization_id' => $other->id])->id,
+                    'membership_id' => $agent->id, 'user_id' => $agent->user_id, 'registered_by' => $agent->user_id, 'status' => RegistrationStatus::Registered,
+                ])->save();
+
+                return $registration;
+            }, 'Test de cloisonnement : inscription du CGA B.'),
             // Demande d'un adhérent du CGA B à son centre (PRD M10).
             Concern::class => static fn (Organization $other): Concern => Concern::factory()->create(['organization_id' => $other->id]),
             CgaPerson::class => static fn (Organization $other): CgaPerson => CgaPerson::factory()->create(['organization_id' => $other->id]),
@@ -164,6 +179,8 @@ final class CrossTenantObjects
         $invitationToken = 'Jeton secret du lien d\'invitation (route publique, F-AUTH-02) : il désigne l\'invitation sans identifiant ; un jeton inconnu répond 404.';
 
         $dataset = 'Jeu de données de référence (valeur de la liste des jeux) : la route ne désigne aucun objet d\'une organisation ; un jeu inconnu répond 404.';
+        $registrationId = 'Inscription cherchée parmi celles de la formation {training}, elle-même cherchée dans le centre de l\'espace actif ; une autre répond 404.';
+        $networkTraining = 'Formation du réseau (CNCGA) lue par un CGA ; une formation d\'un autre CGA ou un brouillon répond 404.';
         $role = 'Rôle de la plateforme (valeur de la liste des rôles) : la route ne désigne aucun objet d\'une organisation ; un rôle inconnu répond 404.';
 
         return [
@@ -201,6 +218,17 @@ final class CrossTenantObjects
             'network.concerns.show:concernId' => 'Demande d\'un CGA lue par le CNCGA, qui voit celles de tous les centres (05-BACKEND-SCHEMA §12) ; un CGA reçoit 403.',
             'network.concerns.messages.store:concernId' => 'Demande d\'un CGA à laquelle répond le CNCGA seul ; un CGA reçoit 403.',
             'network.concerns.status:concernId' => 'Demande d\'un CGA dont le CNCGA seul change le statut ; un CGA reçoit 403.',
+            'network.trainings.registrations.approve:registrationId' => $registrationId,
+            'network.trainings.registrations.reject:registrationId' => $registrationId,
+            'network.trainings.registrations.payment:registrationId' => $registrationId,
+            'cga.trainings.registrations.approve:registrationId' => $registrationId,
+            'cga.trainings.registrations.reject:registrationId' => $registrationId,
+            'cga.trainings.registrations.payment:registrationId' => $registrationId,
+            'cga.network-trainings.show:trainingId' => $networkTraining,
+            'cga.network-trainings.registrations.index:trainingId' => $networkTraining,
+            'cga.network-trainings.registrations.store:trainingId' => $networkTraining,
+            'cga.network-trainings.candidates:trainingId' => $networkTraining,
+            'me.trainings.register:trainingId' => 'Formation ouverte à la personne de l\'espace actif : cherchée parmi celles de son CGA et du CNCGA qui la ciblent ; toute autre répond 404.',
             'me.notifications.read:notificationId' => 'Notification de la cloche (PRD M13) : cherchée parmi celles de l\'utilisateur connecté dans son espace actif ; toute autre répond 404.',
             'cga.permanent-profile.resources.save:category' => 'Catégorie de moyens matériels de la fiche permanente (F-RPT-01) : la ligne est cherchée dans le CGA de l\'espace actif ; une valeur inconnue répond 404.',
         ];

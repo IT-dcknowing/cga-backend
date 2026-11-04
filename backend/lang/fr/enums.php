@@ -345,6 +345,7 @@ return [
         'dues_receipt' => 'Reçu de cotisation',
         'dues_invoice' => 'Facture de cotisation',
         'training_certificate' => 'Attestation de formation',
+        'training_receipt' => 'Reçu de formation',
         'banking_file' => 'Dossier de bancabilité',
         'uploaded' => 'Document déposé',
     ],
@@ -469,6 +470,47 @@ return [
     'closing_deliverable' => [
         'smt' => 'SMT',
         'financial_statements' => 'États financiers',
+    ],
+
+    'training_format' => [
+        'in_person' => 'Présentiel',
+        'online' => 'En ligne',
+        'workshop' => 'Atelier',
+    ],
+
+    'training_status' => [
+        'draft' => 'Brouillon',
+        'published' => 'Publiée',
+        'cancelled' => 'Annulée',
+        'completed' => 'Terminée',
+    ],
+
+    'audience_type' => [
+        'cga_managers' => 'Responsables CGA',
+        'cga_staff' => 'Tous les agents CGA',
+        'cga_accountants' => 'Comptables CGA',
+        'all_members' => 'Tous les adhérents',
+        'members_by_regime' => 'Adhérents d\'un régime',
+        'new_members' => 'Nouveaux adhérents',
+    ],
+
+    'registration_status' => [
+        'pending_approval' => 'En attente de validation',
+        'registered' => 'Inscrit',
+        'waitlisted' => 'En liste d\'attente',
+        'cancelled' => 'Désinscrit',
+        'rejected' => 'Refusée',
+    ],
+
+    'training_payment_status' => [
+        'not_applicable' => 'Gratuite',
+        'to_pay' => 'À payer',
+        'paid' => 'Payée',
+    ],
+
+    'attendance' => [
+        'present' => 'Présent',
+        'absent' => 'Absent',
     ],
 
     'concern_level' => [

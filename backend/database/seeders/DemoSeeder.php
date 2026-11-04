@@ -28,6 +28,12 @@ use App\Domain\Organizations\Models\Organization;
 use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Trainings\Actions\PublishTraining;
+use App\Domain\Trainings\Actions\SaveTraining;
+use App\Domain\Trainings\Enums\AudienceType;
+use App\Domain\Trainings\Enums\TrainingFormat;
+use App\Domain\Trainings\Models\Training;
+use App\Domain\Trainings\Support\TrainingData;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Enums\UserStatus;
@@ -59,7 +65,8 @@ use Illuminate\Support\Str;
  * 0700000011 est l'accès principal en ligne d'un adhérent actif de DC-KNOWING (espace adhérent).
  * La fiche de DC-KNOWING est complète (images de remplacement) : ses documents se produisent ; sa
  * campagne de clôture de l'exercice précédent est ouverte ; une préoccupation de l'adhérent en ligne attend
- * une réponse, une demande du gérant attend celle du CNCGA.
+ * une réponse, une demande du gérant attend celle du CNCGA ; une formation du réseau et une de DC-KNOWING sont
+ * publiées.
  */
 class DemoSeeder extends Seeder
 {
@@ -74,6 +81,8 @@ class DemoSeeder extends Seeder
         private readonly OpenClosingCampaign $openClosing,
         private readonly OpenDuesYear $openDues,
         private readonly SubmitConcern $submitConcern,
+        private readonly SaveTraining $saveTraining,
+        private readonly PublishTraining $publishTraining,
         private readonly TenantContext $context,
     ) {}
 
@@ -116,6 +125,7 @@ class DemoSeeder extends Seeder
         $this->onlineMember($dck);
         $this->closingCampaign($dck);
         $this->concerns($dck);
+        $this->trainings($cncga, $dck);
         // Appel de cotisation de l'année, comme dues:open-year le 1er janvier (F-COT-01) : /cncga/cotisations,
         // /cga/cotisation et la collection Postman s'y appuient. Rejouable (une cotisation par centre et par an).
         $this->openDues->execute(now()->year);
@@ -238,6 +248,33 @@ class DemoSeeder extends Seeder
             fn () => $this->openClosing->execute($organization->id, now()->year - 1, CarbonImmutable::now()),
             'Jeu de démonstration : campagne de clôture de DC-KNOWING.',
         );
+    }
+
+    /**
+     * Formations publiées (PRD M11) : une du CNCGA pour tous les adhérents et agents du réseau, une de DC-KNOWING
+     * pour ses adhérents, dans trois semaines. /cncga/formations, /cga/formations, /adherent/formations et la
+     * collection Postman s'y appuient. Rejouable.
+     */
+    private function trainings(Organization $cncga, Organization $dck): void
+    {
+        $exists = Tenancy::bypass(static fn (): bool => Training::query()->whereIn('organization_id', [$cncga->id, $dck->id])->exists(), 'Jeu de démonstration : formations.');
+        if ($exists) {
+            return;
+        }
+
+        $start = CarbonImmutable::now()->addWeeks(3)->setTime(9, 0);
+        $organizers = [
+            [$cncga, Role::CncgaPresident, 'Fiscalité des TEE : nouveautés de l\'année', 30, [AudienceType::AllMembers, AudienceType::CgaStaff]],
+            [$dck, Role::CgaManager, 'Tenue de la comptabilité SMT', 15, [AudienceType::AllMembers]],
+        ];
+        foreach ($organizers as [$organization, $role, $title, $capacity, $audiences]) {
+            $organizer = Membership::query()->where('organization_id', $organization->id)->where('role', $role)->firstOrFail();
+            $this->context->runAs($organizer, fn (): int => $this->publishTraining->execute($this->saveTraining->create(new TrainingData(
+                title: $title, description: 'Session de démonstration.', format: TrainingFormat::InPerson, location: 'Abidjan, Plateau', onlineUrl: null,
+                trainer: 'Formateur de démonstration', startsAt: $start, endsAt: $start->setTime(17, 0), capacity: $capacity, price: 0, requiresApproval: false,
+                audiences: array_map(static fn (AudienceType $type): array => ['type' => $type, 'regime' => null], $audiences),
+            ), $organizer)));
+        }
     }
 
     /**

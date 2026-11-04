@@ -40,6 +40,7 @@ return [
         'session' => 'Sessions',
         'sms' => 'SMS',
         'subscription' => 'Abonnement',
+        'trainings' => 'Formations',
     ],
 
     'labels' => [
@@ -87,6 +88,7 @@ return [
         'numbering.membership.pattern' => 'Format des numéros d\'adhésion',
         'numbering.radiation_notice.pattern' => 'Format des numéros de courrier de radiation',
         'numbering.receipt.pattern' => 'Format des numéros de reçu',
+        'numbering.training_receipt.pattern' => 'Format des numéros de reçu de formation',
         'numbering.sector_proposal.pattern' => 'Format des numéros de proposition de secteur',
         'obligations.horizon_months' => 'Horizon de génération des échéances (mois)',
         'obligations.reminder_days' => 'Rappels avant une échéance (jours)',
@@ -114,6 +116,9 @@ return [
         'sms.monthly_quota' => 'Quota mensuel de SMS d\'un centre',
         'subscription.data_retention_months' => 'Conservation des données après résiliation (mois)',
         'subscription.trial_months' => 'Durée de l\'essai (mois)',
+        'trainings.cancellation_days' => 'Désinscription possible jusqu\'à J-n (jours)',
+        'trainings.new_member_months' => '« Nouveaux adhérents » : adhésion depuis moins de (mois)',
+        'trainings.reminder_days' => 'Rappel aux inscrits avant la session (jours)',
     ],
 
     'help' => [

@@ -8,6 +8,7 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Organizations\Enums\OrganizationStatus;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Trainings\Models\Training;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
@@ -42,6 +43,7 @@ it('crée les CGA et les comptes de démonstration, rejouable sans doublon', fun
         ->and(ClosingCampaign::query()->withoutGlobalScopes()->where('fiscal_year', now()->year - 1)->count())->toBe(1)
         ->and(ClosingCampaignItem::query()->withoutGlobalScopes()->whereHas('member', fn ($q) => $q->withoutGlobalScopes()->where('ncc', '9300001D'))->count())->toBe(1)
         ->and(Concern::query()->withoutGlobalScopes()->pluck('level')->map->value->sort()->values()->all())->toBe(['cga_to_cncga', 'member_to_cga'])
+        ->and(Training::query()->withoutGlobalScopes()->where('status', 'published')->count())->toBe(2)
         ->and(app(SettingsService::class)->get('rate_limit.otp'))->toBe(['max_attempts' => 3, 'decay_minutes' => 1]);
 });
 

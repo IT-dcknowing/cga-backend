@@ -264,6 +264,23 @@ return [
             ],
         ],
 
+        // Formations (PRD M11) : désinscription possible jusqu'à J-n (RG-FOR-04), « nouveaux adhérents » (adhésion
+        // depuis moins de n mois, F-FOR-01), rappel aux inscrits n jours avant la session (PRD M13 : J-1).
+        'trainings' => [
+            'cancellation_days' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 2, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:0', 'max:30']],
+            ],
+            'new_member_months' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 6, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:36']],
+            ],
+            'reminder_days' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 1, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:14']],
+            ],
+        ],
+
         // Échéance de l'agrément d'un CGA : alertes n mois avant (RG-ORG-10).
         'agreements' => [
             'alert_months' => [
@@ -441,6 +458,13 @@ return [
                     'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
                 ],
             ],
+            // Reçus des paiements de formation (RG-FOR-06) : séquence de l'organisateur (CNCGA ou CGA) par année.
+            'training_receipt' => [
+                'pattern' => [
+                    'type' => 'string', 'level' => 'platform', 'default' => 'FOR-{ABR}-{YYYY}-{N:5}', 'permission' => $platform,
+                    'rules' => ['' => ['string', 'max:60', 'regex:/\{N(:\d)?\}/']],
+                ],
+            ],
             // Attestations d'adhésion (F-DOC-01) : séquence « attestation » par CGA et par année.
             'certificate' => [
                 'pattern' => [
@@ -505,6 +529,17 @@ return [
         'max_amount' => 100_000_000_000,
         // Mobilisation des recettes (/cga/echeances) : contribuables listés, les plus gros restes dus d'abord.
         'revenue_members_limit' => (int) env('OBLIGATIONS_REVENUE_MEMBERS_LIMIT', 50),
+    ],
+
+    // Formations (M11) : rôles de chaque public « agents » (F-FOR-01, décision 0013), longueurs saisies.
+    'trainings' => [
+        'audience_roles' => [
+            'cga_managers' => ['cga_manager', 'cga_accountant_expert'],
+            'cga_accountants' => ['cga_accountant_expert', 'cga_accountant'],
+            'cga_staff' => ['cga_manager', 'cga_accountant_expert', 'cga_accountant', 'cga_legal', 'cga_tax_advisor', 'cga_billing_officer', 'cga_trainer', 'cga_secretary'],
+        ],
+        'text_max_length' => (int) env('TRAININGS_TEXT_MAX_LENGTH', 10000),
+        'max_capacity' => (int) env('TRAININGS_MAX_CAPACITY', 10000),
     ],
 
     // Préoccupations (M10) : longueurs saisies (l'objet suit la colonne concerns.subject).

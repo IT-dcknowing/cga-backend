@@ -67,6 +67,9 @@ use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
 use App\Domain\Reports\Http\Controllers\NetworkReportController;
 use App\Domain\Reports\Http\Controllers\PermanentProfileController;
 use App\Domain\Reports\Http\Controllers\QuarterlyReportController;
+use App\Domain\Trainings\Http\Controllers\MyTrainingController;
+use App\Domain\Trainings\Http\Controllers\NetworkTrainingCatalogController;
+use App\Domain\Trainings\Http\Controllers\OrganizerTrainingController;
 use App\Domain\Users\Http\Controllers\AgentController;
 use App\Domain\Users\Http\Controllers\RolePermissionController;
 use App\Domain\Users\Http\Controllers\UserPermissionController;
@@ -467,6 +470,44 @@ Route::prefix('v1')->group(function (): void {
         Route::post('concerns/{concern}/messages', [MemberConcernController::class, 'reply'])->name('concerns.messages.store');
         Route::post('concerns/{concern}/reopen', [MemberConcernController::class, 'reopen'])->name('concerns.reopen');
         Route::post('document-requests', [MemberConcernController::class, 'requestDocument'])->name('document-requests.store');
+    });
+
+    // Formations (PRD M11, F-FOR-01 à 04) : formations de l'organisateur (CNCGA : /network/trainings ; CGA :
+    // /cga/trainings) ; formations du réseau vues d'un CGA, qui y inscrit ses agents et adhérents ; formations
+    // ouvertes à la personne de l'espace actif, inscription, désinscription, évaluation.
+    foreach (['network', 'cga'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/trainings")->name("{$space}.trainings.")->group(function (): void {
+            Route::get('/', [OrganizerTrainingController::class, 'index'])->name('index');
+            Route::post('/', [OrganizerTrainingController::class, 'store'])->name('store');
+            Route::get('{training}', [OrganizerTrainingController::class, 'show'])->name('show');
+            Route::put('{training}', [OrganizerTrainingController::class, 'update'])->name('update');
+            Route::post('{training}/publish', [OrganizerTrainingController::class, 'publish'])->name('publish');
+            Route::post('{training}/cancel', [OrganizerTrainingController::class, 'cancel'])->name('cancel');
+            Route::get('{training}/registrations', [OrganizerTrainingController::class, 'registrations'])->name('registrations.index');
+            Route::post('{training}/registrations', [OrganizerTrainingController::class, 'register'])->name('registrations.store');
+            Route::get('{training}/candidates', [OrganizerTrainingController::class, 'candidates'])->name('candidates');
+            Route::post('{training}/registrations/{registrationId}/approve', [OrganizerTrainingController::class, 'approve'])->name('registrations.approve');
+            Route::post('{training}/registrations/{registrationId}/reject', [OrganizerTrainingController::class, 'reject'])->name('registrations.reject');
+            Route::post('{training}/registrations/{registrationId}/payment', [OrganizerTrainingController::class, 'payment'])->name('registrations.payment');
+            Route::put('{training}/attendance', [OrganizerTrainingController::class, 'attendance'])->name('attendance');
+            Route::post('{training}/complete', [OrganizerTrainingController::class, 'complete'])->name('complete');
+            Route::get('{training}/evaluations', [OrganizerTrainingController::class, 'evaluations'])->name('evaluations');
+        });
+    }
+    Route::middleware(['auth', 'tenant'])->prefix('cga/network-trainings')->name('cga.network-trainings.')->group(function (): void {
+        Route::get('/', [NetworkTrainingCatalogController::class, 'index'])->name('index');
+        Route::get('{trainingId}', [NetworkTrainingCatalogController::class, 'show'])->name('show');
+        Route::get('{trainingId}/registrations', [NetworkTrainingCatalogController::class, 'registrations'])->name('registrations.index');
+        Route::post('{trainingId}/registrations', [NetworkTrainingCatalogController::class, 'register'])->name('registrations.store');
+        Route::get('{trainingId}/candidates', [NetworkTrainingCatalogController::class, 'candidates'])->name('candidates');
+    });
+    Route::middleware(['auth', 'tenant'])->post('cga/training-registrations/{registration}/cancel', [NetworkTrainingCatalogController::class, 'cancel'])->name('cga.training-registrations.cancel');
+    Route::middleware(['auth', 'tenant'])->prefix('me')->name('me.')->group(function (): void {
+        Route::get('trainings', [MyTrainingController::class, 'index'])->name('trainings.index');
+        Route::post('trainings/{trainingId}/register', [MyTrainingController::class, 'register'])->name('trainings.register');
+        Route::get('training-registrations', [MyTrainingController::class, 'registrations'])->name('training-registrations.index');
+        Route::post('training-registrations/{registration}/cancel', [MyTrainingController::class, 'cancel'])->name('training-registrations.cancel');
+        Route::post('training-registrations/{registration}/evaluation', [MyTrainingController::class, 'evaluate'])->name('training-registrations.evaluation');
     });
 
     // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).
