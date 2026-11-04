@@ -4,17 +4,17 @@ Cette procédure est manuelle : elle ne prouve pas qu'une sauvegarde a été ex�
 
 ## Pré-requis
 
-- Installer \`pg_dump\`, \`pg_restore\`, \`tar\`, \`sha256sum\` et \`age\` sur l'hôte d'exploitation.
+- Installer `pg_dump`, `pg_restore`, `tar`, `sha256sum` et `age` sur l'hôte d'exploitation.
 - Définir un compte PostgreSQL dédié, un staging privé en mode 0700 et un stockage distant privé.
 - Conserver le destinataire age public dans la configuration ; conserver la clé privée hors serveur et hors sauvegardes.
-- Coordonner une fenêtre de maintenance ou des snapshots cohérents entre PostgreSQL et \`FILES_ROOT\`.
-- Ne jamais inclure \`.env\`, les secrets applicatifs ou la clé privée dans l'archive.
+- Coordonner une fenêtre de maintenance ou des snapshots cohérents entre PostgreSQL et `FILES_ROOT`.
+- Ne jamais inclure `.env`, les secrets applicatifs ou la clé privée dans l'archive.
 
 ## Sauvegarde
 
 Exécuter avec un compte de service dédié et les variables d'environnement PostgreSQL requises :
 
-\`\`\`bash
+```bash
 set -euo pipefail
 umask 077
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
@@ -47,18 +47,18 @@ tar --create --file="$STAGING/cga-backup.tar" \
 age --recipient "$AGE_RECIPIENT" \
   --output="$STAGING/cga-backup.tar.age" "$STAGING/cga-backup.tar"
 sha256sum "$STAGING/cga-backup.tar.age" > "$STAGING/cga-backup.tar.age.sha256"
-\`\`\`
+```
 
-Transférer uniquement l'archive \`.age\` et son empreinte vers le stockage distant. Vérifier le transfert avant de supprimer le staging en clair. Les opérations doivent être coordonnées : \`pg_dump\` puis \`tar\` ne garantissent pas à eux seuls la cohérence des fichiers modifiés simultanément.
+Transférer uniquement l'archive `.age` et son empreinte vers le stockage distant. Vérifier le transfert avant de supprimer le staging en clair. Les opérations doivent être coordonnées : `pg_dump` puis `tar` ne garantissent pas à eux seuls la cohérence des fichiers modifiés simultanément.
 
 ## Vérification et restauration isolée
 
 1. Télécharger l'archive distante dans un environnement isolé.
-2. Vérifier son empreinte, déchiffrer avec la clé privée hors ligne, puis vérifier \`SHA256SUMS\`.
-3. Contrôler l'archive PostgreSQL avec \`pg_restore --list database.dump\`.
+2. Vérifier son empreinte, déchiffrer avec la clé privée hors ligne, puis vérifier `SHA256SUMS`.
+3. Contrôler l'archive PostgreSQL avec `pg_restore --list database.dump`.
 4. Restaurer dans une base dédiée, jamais directement en production :
 
-\`\`\`bash
+```bash
 age --decrypt --identity "$BACKUP_AGE_IDENTITY" \
   --output cga-backup.tar archive/cga-backup.tar.age
 tar --extract --file=cga-backup.tar
@@ -67,7 +67,7 @@ createdb --host="$RESTORE_DB_HOST" --username="$RESTORE_DB_USER" cga_restore
 pg_restore --exit-on-error --no-owner --no-acl \
   --host="$RESTORE_DB_HOST" --username="$RESTORE_DB_USER" \
   --dbname=cga_restore extracted/database.dump
-\`\`\`
+```
 
 5. Extraire les fichiers dans un répertoire privé isolé, sans connecter l'application de production à ce stockage.
 
@@ -75,7 +75,7 @@ pg_restore --exit-on-error --no-owner --no-acl \
 
 - Vérifier extensions PostgreSQL, migrations et tables critiques.
 - Comparer les volumes de données des organisations, adhérents, adhésions, documents, fichiers et journaux.
-- Vérifier des échantillons de \`files.path\` et recalculer leur SHA-256 pour les comparer à \`files.sha256\`.
+- Vérifier des échantillons de `files.path` et recalculer leur SHA-256 pour les comparer à `files.sha256`.
 - Vérifier les références de fichiers (logo, signature, cachet, pièces, versions documentaires).
 - Exécuter les tests de santé, d'authentification et d'isolation multi-CGA.
 - Consigner le résultat, les durées et les écarts sans journaliser de secret.
