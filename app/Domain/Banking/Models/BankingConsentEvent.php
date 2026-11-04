@@ -11,6 +11,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use LogicException;
 
 /**
  * Événement historique de consentement bancaire. Les Actions ajoutent des événements sans les réécrire.
@@ -30,6 +31,17 @@ class BankingConsentEvent extends Model
     use Auditable, BelongsToOrganization, HasUlids;
 
     protected $fillable = [];
+
+    protected static function booted(): void
+    {
+        static::updating(static function (): never {
+            throw new LogicException('Un événement de consentement est immuable.');
+        });
+
+        static::deleting(static function (): never {
+            throw new LogicException('Un événement de consentement ne peut pas être supprimé.');
+        });
+    }
 
     protected function casts(): array
     {
