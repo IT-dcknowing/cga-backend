@@ -23,6 +23,17 @@ it('prévisualise les partitions échues puis ne les supprime qu’avec --execut
     }
 
     $this->artisan('logs:prune', ['--execute' => true])
+        ->assertFailed()
+        ->expectsOutputToContain('Purge bloquée');
+
+    foreach ([...$activityPartitions, ...$auditPartitions] as $partition) {
+        expect(Schema::hasTable($partition))->toBeTrue();
+    }
+
+    $this->artisan('logs:prune', [
+        '--execute' => true,
+        '--confirm-no-legal-hold' => true,
+    ])
         ->assertSuccessful()
         ->expectsOutputToContain('Supprimée');
 
