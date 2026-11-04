@@ -101,7 +101,8 @@ class PruneLogPartitions extends Command
 
         $rows = DB::select(
             <<<'SQL'
-                SELECT child.relname AS partition_name
+                SELECT child.relname AS partition_name,
+                       pg_get_expr(child.relpartbound, child.oid) AS partition_bound
                 FROM pg_inherits
                 INNER JOIN pg_class parent ON parent.oid = pg_inherits.inhparent
                 INNER JOIN pg_class child ON child.oid = pg_inherits.inhrelid
@@ -124,8 +125,25 @@ class PruneLogPartitions extends Command
                 continue;
             }
 
-            $partitionStart = CarbonImmutable::create($year, $month, 1, 0, 0, 0, 'UTC');
-            if ($partitionStart->addMonth()->lessThanOrEqualTo($cutoff)) {
+            // Le nom ne suffit pas : on vérifie aussi la vraie borne déclarée dans le catalogue.
+            // Une partition renommée ou créée avec une plage incohérente ne doit jamais être purgée.
+            $bound = (string) ($row->partition_bound ?? '');
+            if (! preg_match("/\\bFROM \\('([^']+)'\\) TO \\('([^']+)'\\)/", $bound, $boundMatches)) {
+                continue;
+            }
+
+            try {
+                $partitionStart = CarbonImmutable::parse($boundMatches[1], 'UTC')->utc();
+                $partitionEnd = CarbonImmutable::parse($boundMatches[2], 'UTC')->utc();
+            } catch (Throwable) {
+                continue;
+            }
+
+            $expectedStart = CarbonImmutable::create($year, $month, 1, 0, 0, 0, 'UTC');
+            $expectedEnd = $expectedStart->addMonth();
+            if (! $partitionStart->equalTo($expectedStart)
+                || ! $partitionEnd->equalTo($expectedEnd)
+                || $partitionEnd->lessThanOrEqualTo($cutoff)) {
                 $eligible[] = $name;
             }
         }
