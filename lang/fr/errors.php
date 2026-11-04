@@ -145,6 +145,12 @@ return [
     'merge_target_inactive' => 'La valeur cible doit être active (ou validée pour un secteur).',
     'referential_in_use' => 'Cette valeur est déjà utilisée : elle ne peut pas être supprimée. Désactivez-la ou fusionnez-la plutôt.',
 
+    // Préoccupations (F-PRE-02, 03)
+    'concern_closed' => 'Cette demande est traitée ou rejetée : elle doit être rouverte avant tout nouveau message.',
+    'concern_status_invalid' => 'Ce changement de statut n\'est pas possible depuis le statut actuel de la demande.',
+    'concern_not_closed' => 'Seule une demande traitée ou rejetée peut être rouverte.',
+    'concern_already_transferred' => 'Cette demande a déjà été transmise au CNCGA.',
+
     // Authentification (F-AUTH-01 à 05, 03-APPFLOW §2)
     'too_many_attempts' => 'Trop de tentatives, réessayez dans :minutes minutes.',
     'inactive_account' => 'Votre accès n\'est pas actif. Contactez votre CGA.',

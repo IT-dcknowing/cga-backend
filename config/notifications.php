@@ -27,6 +27,8 @@ return [
         'pieces_pending' => ['channels' => ['database', 'mail'], 'essential' => false],
         'concern_new' => ['channels' => ['database', 'mail'], 'essential' => false],
         'concern_updated' => ['channels' => ['database', 'mail'], 'essential' => false],
+        // Activité du demandeur (nouveau message, demande rouverte), pour qui traite la demande (décision 0012).
+        'concern_followup' => ['channels' => ['database', 'mail'], 'essential' => false],
         'concern_stale' => ['channels' => ['database'], 'essential' => false],
         'training_published' => ['channels' => ['database', 'mail'], 'essential' => false],
         'training_registration' => ['channels' => ['database', 'mail', 'sms'], 'essential' => false],

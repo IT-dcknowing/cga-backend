@@ -7,6 +7,8 @@ use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
 use App\Domain\Closing\Models\ClosingCampaign;
 use App\Domain\Closing\Policies\ClosingCampaignPolicy;
+use App\Domain\Concerns\Models\Concern;
+use App\Domain\Concerns\Policies\ConcernPolicy;
 use App\Domain\Documents\Listeners\CancelCertificatesOnRadiation;
 use App\Domain\Documents\Listeners\ProduceRadiationNoticeOnValidation;
 use App\Domain\Documents\Listeners\ProduceReceiptOnConfirmation;
@@ -196,6 +198,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Paramètres du réseau et de la plateforme (02-TRD §7.5).
         Gate::policy(Setting::class, SettingPolicy::class);
+
+        // Préoccupations (PRD M10).
+        Gate::policy(Concern::class, ConcernPolicy::class);
 
         // Cotisation CNCGA (PRD M14).
         Gate::policy(NetworkDue::class, NetworkDuePolicy::class);

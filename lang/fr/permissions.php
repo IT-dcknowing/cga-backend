@@ -101,6 +101,7 @@ return [
     'concerns' => [
         'reply' => 'Répondre aux préoccupations des adhérents',
         'network' => ['write' => 'Écrire au CNCGA ou lui transférer une demande'],
+        'indicators' => ['view' => 'Consulter le tableau des délais des préoccupations'],
     ],
     'banking' => ['manage' => 'Bancabilité (si activée)'],
     'member' => [

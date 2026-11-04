@@ -246,6 +246,24 @@ return [
             ],
         ],
 
+        // Préoccupations (PRD M10) : délais de réponse visés, indicatifs et non bloquants, par niveau (RG-PRE-01) ;
+        // alerte interne au CGA d'une demande d'adhérent sans réponse depuis n jours (RG-PRE-02) ; pièces jointes
+        // d'un message.
+        'concerns' => [
+            'target_days' => [
+                'type' => 'array', 'level' => 'network', 'default' => ['member_to_cga' => 7, 'cga_to_cncga' => 15], 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['array:member_to_cga,cga_to_cncga'], 'member_to_cga' => ['required', 'integer', 'min:1', 'max:90'], 'cga_to_cncga' => ['required', 'integer', 'min:1', 'max:90']],
+            ],
+            'stale_days' => [
+                'type' => 'integer', 'level' => ['network', 'cga'], 'default' => 15, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:90']],
+            ],
+            'max_attachments' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 5, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:20']],
+            ],
+        ],
+
         // Échéance de l'agrément d'un CGA : alertes n mois avant (RG-ORG-10).
         'agreements' => [
             'alert_months' => [
@@ -487,6 +505,13 @@ return [
         'max_amount' => 100_000_000_000,
         // Mobilisation des recettes (/cga/echeances) : contribuables listés, les plus gros restes dus d'abord.
         'revenue_members_limit' => (int) env('OBLIGATIONS_REVENUE_MEMBERS_LIMIT', 50),
+    ],
+
+    // Préoccupations (M10) : longueurs saisies (l'objet suit la colonne concerns.subject).
+    'concerns' => [
+        'subject_max_length' => 200,
+        'message_max_length' => (int) env('CONCERNS_MESSAGE_MAX_LENGTH', 10000),
+        'reason_max_length' => (int) env('CONCERNS_REASON_MAX_LENGTH', 1000),
     ],
 
     /*

@@ -109,6 +109,8 @@ return [
         'communications.bulk.approve' => ['locked' => false, 'roles' => [$manager]],
         'concerns.reply' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants, $secretary]],
         'concerns.network.write' => ['locked' => false, 'roles' => [$manager, $expert]],
+        // Tableau des délais des demandes des adhérents du centre (F-PRE-04).
+        'concerns.indicators.view' => ['locked' => false, 'roles' => [$manager]],
         'trainings.cga.manage' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants, $secretary, $trainer]],
         'banking.manage' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
 

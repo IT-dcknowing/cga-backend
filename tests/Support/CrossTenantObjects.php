@@ -4,6 +4,7 @@ namespace Tests\Support;
 
 use App\Domain\Closing\Models\ClosingCampaign;
 use App\Domain\Closing\Models\ClosingCampaignItem;
+use App\Domain\Concerns\Models\Concern;
 use App\Domain\Documents\Models\DocumentTemplate;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
@@ -77,6 +78,8 @@ final class CrossTenantObjects
             // Une campagne par CGA et par exercice : le dossier suivi reprend la campagne du CGA B si elle existe.
             ClosingCampaign::class => static fn (Organization $other): ClosingCampaign => self::closingCampaignOf($other),
             ClosingCampaignItem::class => static fn (Organization $other): ClosingCampaignItem => ClosingCampaignItem::factory()->create(['campaign_id' => self::closingCampaignOf($other)->id]),
+            // Demande d'un adhérent du CGA B à son centre (PRD M10).
+            Concern::class => static fn (Organization $other): Concern => Concern::factory()->create(['organization_id' => $other->id]),
             CgaPerson::class => static fn (Organization $other): CgaPerson => CgaPerson::factory()->create(['organization_id' => $other->id]),
             MessageCampaign::class => static fn (Organization $other): MessageCampaign => Tenancy::bypass(static function () use ($other): MessageCampaign {
                 $campaign = new MessageCampaign;
@@ -195,6 +198,9 @@ final class CrossTenantObjects
             'network.dues.remind:dueId' => 'Cotisation d\'un centre, relancée par le CNCGA seul ; un CGA reçoit 403 (Policy).',
             'network.dues.payments.confirm:paymentId' => 'Paiement de cotisation confirmé par le CNCGA seul ; un CGA reçoit 403 (Policy).',
             'network.dues.payments.reject:paymentId' => 'Paiement de cotisation rejeté par le CNCGA seul ; un CGA reçoit 403 (Policy).',
+            'network.concerns.show:concernId' => 'Demande d\'un CGA lue par le CNCGA, qui voit celles de tous les centres (05-BACKEND-SCHEMA §12) ; un CGA reçoit 403.',
+            'network.concerns.messages.store:concernId' => 'Demande d\'un CGA à laquelle répond le CNCGA seul ; un CGA reçoit 403.',
+            'network.concerns.status:concernId' => 'Demande d\'un CGA dont le CNCGA seul change le statut ; un CGA reçoit 403.',
             'me.notifications.read:notificationId' => 'Notification de la cloche (PRD M13) : cherchée parmi celles de l\'utilisateur connecté dans son espace actif ; toute autre répond 404.',
             'cga.permanent-profile.resources.save:category' => 'Catégorie de moyens matériels de la fiche permanente (F-RPT-01) : la ligne est cherchée dans le CGA de l\'espace actif ; une valeur inconnue répond 404.',
         ];
