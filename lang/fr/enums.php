@@ -472,6 +472,13 @@ return [
         'financial_statements' => 'États financiers',
     ],
 
+    'announcement_audience' => [
+        'all_cgas' => 'Tous les CGA',
+        'selected_cgas' => 'Certains CGA',
+        'all_network_members' => 'Tous les adhérents du réseau',
+        'own_members' => 'Les adhérents du centre',
+    ],
+
     'training_format' => [
         'in_person' => 'Présentiel',
         'online' => 'En ligne',

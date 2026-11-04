@@ -1,5 +1,7 @@
 <?php
 
+use App\Domain\Announcements\Http\Controllers\AuthorAnnouncementController;
+use App\Domain\Announcements\Http\Controllers\MyAnnouncementController;
 use App\Domain\Auth\Http\Controllers\InvitationController;
 use App\Domain\Auth\Http\Controllers\MeController;
 use App\Domain\Auth\Http\Controllers\PasswordResetController;
@@ -508,6 +510,20 @@ Route::prefix('v1')->group(function (): void {
         Route::get('training-registrations', [MyTrainingController::class, 'registrations'])->name('training-registrations.index');
         Route::post('training-registrations/{registration}/cancel', [MyTrainingController::class, 'cancel'])->name('training-registrations.cancel');
         Route::post('training-registrations/{registration}/evaluation', [MyTrainingController::class, 'evaluate'])->name('training-registrations.evaluation');
+    });
+
+    // Annonces (PRD M12, F-COM-01, 02) : celles de l'auteur (CNCGA : /network/announcements ; CGA :
+    // /cga/announcements), publiées aussitôt ; celles reçues dans l'espace actif, et leur lecture.
+    foreach (['network', 'cga'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/announcements")->name("{$space}.announcements.")->group(function (): void {
+            Route::get('/', [AuthorAnnouncementController::class, 'index'])->name('index');
+            Route::post('/', [AuthorAnnouncementController::class, 'store'])->name('store');
+            Route::get('{announcement}', [AuthorAnnouncementController::class, 'show'])->name('show');
+        });
+    }
+    Route::middleware(['auth', 'tenant'])->prefix('me/announcements')->name('me.announcements.')->group(function (): void {
+        Route::get('/', [MyAnnouncementController::class, 'index'])->name('index');
+        Route::post('{announcementId}/read', [MyAnnouncementController::class, 'read'])->name('read');
     });
 
     // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).

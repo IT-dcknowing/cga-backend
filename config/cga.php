@@ -542,6 +542,11 @@ return [
         'max_capacity' => (int) env('TRAININGS_MAX_CAPACITY', 10000),
     ],
 
+    // Annonces (M12) : longueur du texte.
+    'announcements' => [
+        'body_max_length' => (int) env('ANNOUNCEMENTS_BODY_MAX_LENGTH', 10000),
+    ],
+
     // Préoccupations (M10) : longueurs saisies (l'objet suit la colonne concerns.subject).
     'concerns' => [
         'subject_max_length' => 200,

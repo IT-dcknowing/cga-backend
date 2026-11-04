@@ -29,7 +29,10 @@ return [
         'remind' => 'Relancer une cotisation',
         'own' => ['view' => 'Consulter la cotisation du centre', 'declare' => 'Déclarer un paiement de cotisation'],
     ],
-    'announcements' => ['network' => ['publish' => 'Publier une annonce réseau']],
+    'announcements' => [
+        'network' => ['publish' => 'Publier une annonce réseau'],
+        'cga' => ['publish' => 'Publier une annonce à ses adhérents'],
+    ],
     'trainings' => [
         'network' => ['manage' => 'Créer une formation réseau'],
         'cga' => ['manage' => 'Créer une formation pour ses adhérents et agents'],
