@@ -27,6 +27,9 @@ return [
     // Nouveaux essais de certification FNE (RG-FNE-04) : expression cron, toutes les 15 minutes.
     'fne_retry' => env('SCHEDULE_FNE_RETRY', '*/15 * * * *'),
 
+    // Recalcul des agrégats statistiques de l'année (02-TRD §9).
+    'stats_refresh' => env('SCHEDULE_STATS_REFRESH', '02:00'),
+
     // Fin de la consultation seule des adhérents radiés (RG-ADH-12).
     'radiation_expiry' => env('SCHEDULE_RADIATION_EXPIRY', '03:30'),
 

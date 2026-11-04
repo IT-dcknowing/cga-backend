@@ -28,4 +28,14 @@ return [
         'timeout' => (int) env('CERTIFY_INVOICE_TIMEOUT', 120),
     ],
 
+    // Recalcul ciblé des agrégats d'un CGA (02-TRD §9, file « default ») : dédoublonné par CGA pendant
+    // unique_seconds (5 minutes) ; verrou dans le magasin de cache lock_store (vide : celui de CACHE_STORE).
+    'refresh_stats' => [
+        'queue' => env('STATS_QUEUE', 'default'),
+        'tries' => (int) env('REFRESH_STATS_TRIES', 2),
+        'timeout' => (int) env('REFRESH_STATS_TIMEOUT', 600),
+        'unique_seconds' => (int) env('REFRESH_STATS_UNIQUE_SECONDS', 300),
+        'lock_store' => env('REFRESH_STATS_LOCK_STORE'),
+    ],
+
 ];
