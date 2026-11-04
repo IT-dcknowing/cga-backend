@@ -107,6 +107,8 @@ return [
         'reports.transmit' => ['locked' => false, 'roles' => [$manager, $expert]],
         'communications.bulk.send' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
         'communications.bulk.approve' => ['locked' => false, 'roles' => [$manager]],
+        // Annonces à ses adhérents, « Message de mon CGA » (F-COM-02).
+        'announcements.cga.publish' => ['locked' => false, 'roles' => [$manager, $expert]],
         'concerns.reply' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants, $secretary]],
         'concerns.network.write' => ['locked' => false, 'roles' => [$manager, $expert]],
         // Tableau des délais des demandes des adhérents du centre (F-PRE-04).

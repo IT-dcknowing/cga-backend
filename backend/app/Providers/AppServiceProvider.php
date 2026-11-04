@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Domain\Announcements\Models\Announcement;
+use App\Domain\Announcements\Policies\AnnouncementPolicy;
 use App\Domain\Audit\AuditLogger;
 use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
@@ -204,6 +206,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Préoccupations (PRD M10).
         Gate::policy(Concern::class, ConcernPolicy::class);
+
+        // Annonces (PRD M12).
+        Gate::policy(Announcement::class, AnnouncementPolicy::class);
 
         // Formations (PRD M11).
         Gate::policy(Training::class, TrainingPolicy::class);

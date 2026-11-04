@@ -79,7 +79,11 @@ return [
             'body' => 'Formation « :title » : :event.',
             'sms' => 'CGA Connect, formation « :title » : :event.',
         ],
-        'announcement_published' => ['title' => 'Nouvelle annonce', 'body' => 'Une nouvelle annonce vous est adressée.', 'sms' => 'CGA Connect : nouvelle annonce.'],
+        'announcement_published' => [
+            'title' => 'Nouvelle annonce',
+            'body' => ':author : « :title ».',
+            'sms' => 'CGA Connect : nouvelle annonce de :author.',
+        ],
         'dues_reminder' => [
             'title' => 'Cotisation :year à régler',
             'body' => 'La cotisation :year du CGA au CNCGA reste due (:amount), :days jours après l\'échéance du :date.',

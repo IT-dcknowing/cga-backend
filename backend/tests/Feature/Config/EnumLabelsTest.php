@@ -1,5 +1,6 @@
 <?php
 
+use App\Domain\Announcements\Enums\AnnouncementAudience;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Enums\OtpPurpose;
 use App\Domain\Concerns\Enums\ConcernCategory;
@@ -73,6 +74,7 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
     ChargeKind::class, ChargeStatus::class, PaymentMethod::class, PaymentSource::class, PaymentStatus::class, DocumentType::class, DocumentStatus::class,
     ConcernLevel::class, ConcernCategory::class, ConcernStatus::class, ConcernSide::class, DocumentRequestType::class,
     TrainingFormat::class, TrainingStatus::class, AudienceType::class, RegistrationStatus::class, TrainingPaymentStatus::class, Attendance::class,
+    AnnouncementAudience::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {

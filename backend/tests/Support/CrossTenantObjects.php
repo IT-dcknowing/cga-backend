@@ -2,6 +2,7 @@
 
 namespace Tests\Support;
 
+use App\Domain\Announcements\Models\Announcement;
 use App\Domain\Closing\Models\ClosingCampaign;
 use App\Domain\Closing\Models\ClosingCampaignItem;
 use App\Domain\Concerns\Models\Concern;
@@ -81,6 +82,8 @@ final class CrossTenantObjects
             // Une campagne par CGA et par exercice : le dossier suivi reprend la campagne du CGA B si elle existe.
             ClosingCampaign::class => static fn (Organization $other): ClosingCampaign => self::closingCampaignOf($other),
             ClosingCampaignItem::class => static fn (Organization $other): ClosingCampaignItem => ClosingCampaignItem::factory()->create(['campaign_id' => self::closingCampaignOf($other)->id]),
+            // Annonce du CGA B à ses adhérents (PRD M12).
+            Announcement::class => static fn (Organization $other): Announcement => Announcement::factory()->create(['organization_id' => $other->id]),
             // Formation organisée par le CGA B et inscription d'un de ses agents (PRD M11).
             Training::class => static fn (Organization $other): Training => Training::factory()->create(['organization_id' => $other->id]),
             TrainingRegistration::class => static fn (Organization $other): TrainingRegistration => Tenancy::bypass(static function () use ($other): TrainingRegistration {
@@ -228,6 +231,7 @@ final class CrossTenantObjects
             'cga.network-trainings.registrations.index:trainingId' => $networkTraining,
             'cga.network-trainings.registrations.store:trainingId' => $networkTraining,
             'cga.network-trainings.candidates:trainingId' => $networkTraining,
+            'me.announcements.read:announcementId' => 'Annonce reçue dans l\'espace actif : cherchée parmi celles qu\'il reçoit ; toute autre répond 404.',
             'me.trainings.register:trainingId' => 'Formation ouverte à la personne de l\'espace actif : cherchée parmi celles de son CGA et du CNCGA qui la ciblent ; toute autre répond 404.',
             'me.notifications.read:notificationId' => 'Notification de la cloche (PRD M13) : cherchée parmi celles de l\'utilisateur connecté dans son espace actif ; toute autre répond 404.',
             'cga.permanent-profile.resources.save:category' => 'Catégorie de moyens matériels de la fiche permanente (F-RPT-01) : la ligne est cherchée dans le CGA de l\'espace actif ; une valeur inconnue répond 404.',
