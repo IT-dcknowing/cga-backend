@@ -104,6 +104,7 @@ return [
         'rate_limit.login' => 'Tentatives de connexion',
         'rate_limit.otp' => 'Demandes de code',
         'rate_limit.verification' => 'Vérifications publiques d\'un document',
+        'rate_limit.stats_refresh' => 'Bouton « Actualiser » des tableaux de bord (demandes, fenêtre en minutes)',
         'report.deadline_rule' => 'Date limite du rapport (mois après le trimestre, jour)',
         'report.increase_rule' => 'Règle « cotisation augmentée »',
         'report.legacy_workbook_enabled' => 'Export du classeur de compatibilité (14 feuilles)',
@@ -121,6 +122,7 @@ return [
         'trainings.cancellation_days' => 'Désinscription possible jusqu\'à J-n (jours)',
         'trainings.new_member_months' => '« Nouveaux adhérents » : adhésion depuis moins de (mois)',
         'trainings.reminder_days' => 'Rappel aux inscrits avant la session (jours)',
+        'trainings.almost_full_percent' => '« Formation presque complète » : places prises (%)',
     ],
 
     'help' => [

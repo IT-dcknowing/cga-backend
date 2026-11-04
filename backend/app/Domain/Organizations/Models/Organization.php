@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $rccm
  * @property string|null $agreement_number
  * @property CarbonInterface|null $agreement_date
+ * @property CarbonInterface|null $agreement_expires_at
  * @property CarbonInterface|null $agreement_withdrawn_at
  * @property string|null $regional_directorate_id
  * @property string|null $tax_office_id

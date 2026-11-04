@@ -90,6 +90,12 @@ return [
                 'default' => ['max_attempts' => 30, 'decay_minutes' => 1],
                 'rules' => ['' => ['array:max_attempts,decay_minutes'], 'max_attempts' => ['required', 'integer', 'min:1'], 'decay_minutes' => ['required', 'integer', 'min:1']],
             ],
+            // Bouton « Actualiser » des tableaux de bord (02-TRD §9) : une demande par organisation toutes les 10 minutes.
+            'stats_refresh' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => ['max_attempts' => 1, 'decay_minutes' => 10],
+                'rules' => ['' => ['array:max_attempts,decay_minutes'], 'max_attempts' => ['required', 'integer', 'min:1'], 'decay_minutes' => ['required', 'integer', 'min:1']],
+            ],
         ],
 
         'session' => [
@@ -287,6 +293,11 @@ return [
             'reminder_days' => [
                 'type' => 'integer', 'level' => 'network', 'default' => 1, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:1', 'max:14']],
+            ],
+            // Alerte « formation presque complète » du tableau de bord du CNCGA (F-DSH-01) : places prises, en %.
+            'almost_full_percent' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 90, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:1', 'max:100']],
             ],
         ],
 
@@ -555,6 +566,10 @@ return [
     // pour regrouper les événements rapprochés (secondes).
     'statistics' => [
         'refresh_delay_seconds' => (int) env('STATS_REFRESH_DELAY_SECONDS', 300),
+        // Période personnalisée la plus longue d'un tableau de bord (jours) ; lignes des listes du tableau de bord de
+        // l'adhérent (échéances du mois, documents récents).
+        'max_period_days' => (int) env('STATS_MAX_PERIOD_DAYS', 3660),
+        'member_dashboard_items' => (int) env('STATS_MEMBER_DASHBOARD_ITEMS', 5),
     ],
 
     // Annonces (M12) : longueur du texte.
