@@ -76,6 +76,8 @@ use App\Domain\Reports\Models\CgaResource;
 use App\Domain\Reports\Models\QuarterlyReport;
 use App\Domain\Reports\Policies\PermanentProfilePolicy;
 use App\Domain\Reports\Policies\QuarterlyReportPolicy;
+use App\Domain\Statistics\Models\StatOrgDaily;
+use App\Domain\Statistics\Policies\StatisticsPolicy;
 use App\Domain\Statistics\Support\StatsRefresh;
 use App\Domain\Trainings\Models\Training;
 use App\Domain\Trainings\Models\TrainingRegistration;
@@ -212,6 +214,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Préoccupations (PRD M10).
         Gate::policy(Concern::class, ConcernPolicy::class);
+
+        // Tableaux de bord et statistiques (PRD M15).
+        Gate::policy(StatOrgDaily::class, StatisticsPolicy::class);
 
         // Annonces (PRD M12).
         Gate::policy(Announcement::class, AnnouncementPolicy::class);

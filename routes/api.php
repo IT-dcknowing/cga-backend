@@ -69,6 +69,9 @@ use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
 use App\Domain\Reports\Http\Controllers\NetworkReportController;
 use App\Domain\Reports\Http\Controllers\PermanentProfileController;
 use App\Domain\Reports\Http\Controllers\QuarterlyReportController;
+use App\Domain\Statistics\Http\Controllers\CgaStatisticsController;
+use App\Domain\Statistics\Http\Controllers\MemberDashboardController;
+use App\Domain\Statistics\Http\Controllers\NetworkStatisticsController;
 use App\Domain\Trainings\Http\Controllers\MyTrainingController;
 use App\Domain\Trainings\Http\Controllers\NetworkTrainingCatalogController;
 use App\Domain\Trainings\Http\Controllers\OrganizerTrainingController;
@@ -524,6 +527,21 @@ Route::prefix('v1')->group(function (): void {
     Route::middleware(['auth', 'tenant'])->prefix('me/announcements')->name('me.announcements.')->group(function (): void {
         Route::get('/', [MyAnnouncementController::class, 'index'])->name('index');
         Route::post('{announcementId}/read', [MyAnnouncementController::class, 'read'])->name('read');
+    });
+
+    // Tableaux de bord et statistiques (PRD M15) : tableau de bord de l'espace actif pour une période (F-DSH-01 à 04),
+    // statistiques nationales, carte par Direction régionale et détail par commune (F-STA-01), position du CGA dans
+    // le réseau (F-STA-02), bouton « Actualiser » (202, limité par rate_limit.stats_refresh).
+    Route::middleware(['auth', 'tenant'])->group(function (): void {
+        Route::get('network/dashboard', [NetworkStatisticsController::class, 'dashboard'])->name('network.dashboard');
+        Route::get('network/statistics', [NetworkStatisticsController::class, 'statistics'])->name('network.statistics.show');
+        Route::get('network/statistics/map', [NetworkStatisticsController::class, 'map'])->name('network.statistics.map');
+        Route::get('network/statistics/map/{regionalDirectorate}', [NetworkStatisticsController::class, 'communes'])->name('network.statistics.communes');
+        Route::post('network/statistics/refresh', [NetworkStatisticsController::class, 'refresh'])->name('network.statistics.refresh');
+        Route::get('cga/dashboard', [CgaStatisticsController::class, 'dashboard'])->name('cga.dashboard');
+        Route::get('cga/statistics', [CgaStatisticsController::class, 'position'])->name('cga.statistics.show');
+        Route::post('cga/statistics/refresh', [CgaStatisticsController::class, 'refresh'])->name('cga.statistics.refresh');
+        Route::get('member/dashboard', [MemberDashboardController::class, 'show'])->name('member.dashboard');
     });
 
     // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).
