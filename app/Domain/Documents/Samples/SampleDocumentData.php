@@ -103,6 +103,10 @@ class SampleDocumentData
                 'payment_date' => '20 octobre 2026', 'payment_method' => 'Espèces', 'payment_reference' => '—'],
             'report_transmission_slip' => [...$cga, 'report_label' => 'T3 2026', 'report_period' => 'du 1er juillet 2026 au 30 septembre 2026',
                 'report_version' => 'V1', 'transmission_date' => '20 octobre 2026', 'transmission_mode' => 'Dépôt physique', 'transmission_reference' => 'DEP-EXEMPLE-0001'],
+            'statistics_brochure' => ['cga_name' => 'COLLECTIF EXEMPLE DES CGA', 'brochure_year' => '2026', 'coverage_label' => 'Sur la base de 20 CGA abonnés sur 111',
+                'computed_date' => '31 décembre 2026', 'tax_revenue_total' => '1 250 000 000 FCFA', 'member_revenue_total' => '85 000 000 000 FCFA',
+                'budget_contribution' => '0,04 %', 'gdp_contribution' => 'Non disponible — saisir les références 2026', 'members_total' => '4 200',
+                'members_tee' => '2 900', 'members_rme' => '1 200', 'members_rsi' => '100', 'document_date' => '15 janvier 2027'],
             default => throw new RuntimeException("Pas de données d'exemple pour {$type}."),
         };
     }
@@ -120,6 +124,14 @@ class SampleDocumentData
                 ['line_label' => 'Droit d\'adhésion', 'line_amount' => '25 000 FCFA'],
                 ['line_label' => 'Honoraires du 01/10/2026 au 31/10/2026', 'line_amount' => '15 000 FCFA'],
             ]];
+        }
+        if ($type === 'statistics_brochure') {
+            return [
+                'nature_label' => [['nature_label' => 'PATENTE', 'nature_amount' => '400 000 000 FCFA'], ['nature_label' => 'TVA', 'nature_amount' => '850 000 000 FCFA']],
+                'by_cga_name' => [['by_cga_name' => 'CGA EXEMPLE NORD', 'by_cga_members' => '320', 'by_cga_tax' => '90 000 000 FCFA', 'by_cga_revenue' => '6 000 000 000 FCFA']],
+                'sector_name' => [['sector_name' => 'Commerce', 'sector_members' => '2 100'], ['sector_name' => 'Services', 'sector_members' => '1 300']],
+                'directorate_name' => [['directorate_name' => 'DR EXEMPLE', 'directorate_cgas' => '5', 'directorate_members' => '1 400', 'directorate_revenue' => '25 000 000 000 FCFA']],
+            ];
         }
         if (in_array($type, ['invoice', 'credit_note'], true)) {
             return ['line_label' => [

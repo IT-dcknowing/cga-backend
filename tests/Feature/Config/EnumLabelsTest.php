@@ -10,6 +10,8 @@ use App\Domain\Concerns\Enums\ConcernStatus;
 use App\Domain\Concerns\Enums\DocumentRequestType;
 use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Enums\DocumentType;
+use App\Domain\Exports\Enums\ExportStatus;
+use App\Domain\Exports\Enums\ExportType;
 use App\Domain\Imports\Enums\ImportRowStatus;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
@@ -74,7 +76,7 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
     ChargeKind::class, ChargeStatus::class, PaymentMethod::class, PaymentSource::class, PaymentStatus::class, DocumentType::class, DocumentStatus::class,
     ConcernLevel::class, ConcernCategory::class, ConcernStatus::class, ConcernSide::class, DocumentRequestType::class,
     TrainingFormat::class, TrainingStatus::class, AudienceType::class, RegistrationStatus::class, TrainingPaymentStatus::class, Attendance::class,
-    AnnouncementAudience::class,
+    AnnouncementAudience::class, ExportType::class, ExportStatus::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {

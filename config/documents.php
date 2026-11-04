@@ -29,6 +29,7 @@ use App\Domain\Reports\Composers\QuarterlyReportModernComposer;
 use App\Domain\Reports\Composers\QuarterlyReportWorkbookComposer;
 use App\Domain\Reports\Composers\ReportTransmissionSlipComposer;
 use App\Domain\Reports\Workbook\WorkbookStructure;
+use App\Domain\Statistics\Composers\StatisticsBrochureComposer;
 use App\Domain\Trainings\Composers\TrainingCertificateComposer;
 use App\Domain\Trainings\Composers\TrainingReceiptComposer;
 
@@ -248,6 +249,26 @@ return [
                 ...$cga, 'cga_address', 'cga_signatory_name', 'cga_signatory_title',
                 'receipt_number', 'payer_name', 'training_title', 'training_dates', 'payment_amount', 'payment_amount_words',
                 'payment_date', 'payment_method', 'payment_reference', 'document_place', 'document_date',
+            ],
+        ],
+
+        // Modèle provisoire (la maquette n'en a pas) : plaquette statistique annuelle du CNCGA (F-STA-03), tableaux
+        // des statistiques nationales de l'année ; pas de version publique en ligne.
+        'statistics_brochure' => [
+            'label' => 'Plaquette statistique',
+            'format' => 'docx',
+            'path' => resource_path('templates/statistics_brochure.docx'),
+            'composer' => StatisticsBrochureComposer::class,
+            'images' => [],
+            'rows' => [
+                'nature_label' => ['nature_label', 'nature_amount'],
+                'by_cga_name' => ['by_cga_name', 'by_cga_members', 'by_cga_tax', 'by_cga_revenue'],
+                'sector_name' => ['sector_name', 'sector_members'],
+                'directorate_name' => ['directorate_name', 'directorate_cgas', 'directorate_members', 'directorate_revenue'],
+            ],
+            'variables' => [
+                'cga_name', 'brochure_year', 'coverage_label', 'computed_date', 'tax_revenue_total', 'member_revenue_total',
+                'budget_contribution', 'gdp_contribution', 'members_total', 'members_tee', 'members_rme', 'members_rsi', 'document_date',
             ],
         ],
 

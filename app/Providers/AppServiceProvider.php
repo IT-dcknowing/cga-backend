@@ -22,6 +22,8 @@ use App\Domain\Documents\Policies\DocumentPolicy;
 use App\Domain\Documents\Policies\DocumentTemplatePolicy;
 use App\Domain\Dues\Models\NetworkDue;
 use App\Domain\Dues\Policies\NetworkDuePolicy;
+use App\Domain\Exports\Models\Export;
+use App\Domain\Exports\Policies\ExportPolicy;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Imports\Policies\ImportBatchPolicy;
 use App\Domain\Members\Events\RadiationCancelled;
@@ -220,6 +222,7 @@ class AppServiceProvider extends ServiceProvider
 
         // Annonces (PRD M12).
         Gate::policy(Announcement::class, AnnouncementPolicy::class);
+        Gate::policy(Export::class, ExportPolicy::class);
 
         // Formations (PRD M11).
         Gate::policy(Training::class, TrainingPolicy::class);
