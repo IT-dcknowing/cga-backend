@@ -41,7 +41,7 @@ CSP, HSTS, TLS, règles Nginx/WAF et en-têtes de sécurité doivent être contr
 
 Les paramètres existants sont 24 mois pour les journaux d'activité, 60 mois pour les journaux d'audit et 6 mois pour l'éligibilité générale après résiliation. Ces délais ne doivent pas effacer les documents ou preuves soumis à une conservation plus longue.
 
-La commande `php artisan logs:prune` est une simulation. `php artisan logs:prune --execute` supprime les partitions mensuelles arrivées à échéance. Elle n'est volontairement pas planifiée automatiquement : le responsable conformité doit valider les durées et les éventuelles obligations de gel avant activation.
+La commande `php artisan logs:prune` est une simulation. La suppression exige `php artisan logs:prune --execute --confirm-no-legal-hold`, après vérification humaine et documentée des gels juridiques. Une exécution avec `--execute` sans cette confirmation est refusée. La commande n'est volontairement pas planifiée automatiquement : le responsable conformité doit valider les durées et les éventuelles obligations de gel avant activation.
 
 La purge générale d'une organisation résiliée, l'anonymisation des comptes et le nettoyage des fichiers ne sont pas autorisés par cette commande et restent à implémenter après cartographie des relations et règles métier.
 
