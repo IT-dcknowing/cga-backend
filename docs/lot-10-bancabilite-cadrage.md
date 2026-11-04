@@ -100,3 +100,31 @@ Limites importantes :
 Le développement peut avancer sur les fondations techniques non ambiguës et les tests d'isolation. Les listes de pièces, règles d'expiration, formules de score, seuils, textes de consentement, banques et workflows ne doivent pas être inventés. Ils seront activés après validation CNCGA.
 
 Aucune donnée financière ou pièce justificative ne doit être transmise à une banque par défaut. Un score ne doit pas être présenté comme une décision de crédit ni comme une garantie d'obtention de financement.
+
+
+## 7. Avancement du sous-lot 10.1 — fondations techniques
+
+Implémenté sur la branche `feat/lot-10-bancabilite` :
+
+- table `banking_profiles` : état courant du consentement, version, empreinte SHA-256, date, auteur et retrait ;
+- table `banking_consent_events` : historique des octrois et retraits, rattaché à l'organisation, au dossier, à l'utilisateur et au rattachement actif ;
+- modèles `BankingProfile` et `BankingConsentEvent`, avec cloisonnement par organisation et journalisation ;
+- relation `Member::bankingProfile()` ;
+- action `RecordBankingConsent` : octroi et retrait transactionnels, réservés au rôle propriétaire de l'espace adhérent correspondant ;
+- événements historiques protégés contre la modification et la suppression via le modèle.
+
+Garanties de cette première tranche :
+
+- `organizations.banking_enabled` reste distinct du consentement individuel ;
+- un consentement actif exige une version, une empreinte SHA-256, un horodatage et un utilisateur ;
+- le retrait désactive le consentement courant sans effacer la preuve historique ;
+- un autre adhérent, un agent CGA ou un espace d'une autre organisation ne peut pas enregistrer le consentement à la place du propriétaire.
+
+Non livré / bloquant avant mise en service :
+
+- texte de consentement et version approuvés par la CNCGA ;
+- écran et API du parcours de consentement ;
+- tests automatisés et exécution des migrations sur PostgreSQL ;
+- définition juridique des finalités, destinataires et conséquences du retrait.
+
+**Statut 10.1 : fondations de persistance et action métier commencées ; sous-lot non clos.** L'action ne doit pas être exposée à une API tant que le serveur ne fournit pas lui-même la version et l'empreinte du texte officiellement approuvé. Aucun partage de données bancaires n'est activé par ce sous-lot.
