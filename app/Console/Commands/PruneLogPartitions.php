@@ -143,9 +143,11 @@ class PruneLogPartitions extends Command
             $expectedEnd = $expectedStart->addMonth();
             if (! $partitionStart->equalTo($expectedStart)
                 || ! $partitionEnd->equalTo($expectedEnd)
-                || $partitionEnd->lessThanOrEqualTo($cutoff)) {
-                $eligible[] = $name;
+                || $partitionEnd->greaterThan($cutoff)) {
+                continue;
             }
+
+            $eligible[] = $name;
         }
 
         return $eligible;
