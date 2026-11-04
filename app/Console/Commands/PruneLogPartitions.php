@@ -19,12 +19,18 @@ use Throwable;
 class PruneLogPartitions extends Command
 {
     protected $signature = 'logs:prune
-        {--execute : Supprime réellement les partitions arrivées au terme de leur rétention}';
+        {--execute : Supprime réellement les partitions arrivées au terme de leur rétention}
+        {--confirm-no-legal-hold : Confirme que les obligations de gel juridique ont été vérifiées}';
 
     protected $description = 'Prévisualise ou purge les partitions mensuelles de journaux arrivées à échéance';
 
     public function handle(SettingsService $settings): int
     {
+        if ($this->option('execute') && ! $this->option('confirm-no-legal-hold')) {
+            $this->error('Purge bloquée : vérifiez les gels juridiques et ajoutez --confirm-no-legal-hold après validation.');
+            return self::FAILURE;
+        }
+
         try {
             $policies = [
                 'activity_logs' => (int) $settings->get('logs.activity_retention_months'),
