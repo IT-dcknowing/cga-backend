@@ -471,6 +471,43 @@ return [
         'financial_statements' => 'États financiers',
     ],
 
+    'concern_level' => [
+        'member_to_cga' => 'Adhérent vers CGA',
+        'cga_to_cncga' => 'CGA vers CNCGA',
+    ],
+
+    'concern_category' => [
+        'tax' => 'Fiscalité',
+        'accounting' => 'Comptabilité',
+        'legal' => 'Juridique',
+        'social' => 'Social (CNPS / CMU)',
+        'training' => 'Formation',
+        'administrative' => 'Administratif',
+        'public_platforms' => 'Plateformes publiques',
+        'document_request' => 'Demande de document',
+        'info_update' => 'Mise à jour de mes informations',
+        'closing_pieces' => 'Pièces de clôture',
+        'other' => 'Autre',
+    ],
+
+    'concern_status' => [
+        'open' => 'Ouverte',
+        'in_review' => 'En examen',
+        'resolved' => 'Traitée',
+        'rejected' => 'Rejetée',
+    ],
+
+    'concern_side' => [
+        'requester' => 'Demandeur',
+        'handler' => 'Traitement de la demande',
+    ],
+
+    'document_request_type' => [
+        'attestation' => 'Attestation',
+        'financial_statements' => 'États financiers',
+        'other' => 'Autre document',
+    ],
+
     'closing_step' => [
         'pieces' => 'Collecte des pièces',
         'regularisation' => 'Régularisation',

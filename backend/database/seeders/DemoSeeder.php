@@ -6,6 +6,10 @@ use App\Domain\Auth\Actions\IssueInvitation;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Models\Invitation;
 use App\Domain\Closing\Actions\OpenClosingCampaign;
+use App\Domain\Concerns\Actions\SubmitConcern;
+use App\Domain\Concerns\Enums\ConcernCategory;
+use App\Domain\Concerns\Enums\ConcernLevel;
+use App\Domain\Concerns\Models\Concern;
 use App\Domain\Documents\Samples\SampleDocumentData;
 use App\Domain\Dues\Actions\OpenDuesYear;
 use App\Domain\Members\Enums\EntityType;
@@ -33,6 +37,7 @@ use App\Support\Config\SettingsService;
 use App\Support\Files\StorageService;
 use App\Support\Numbering\SequenceService;
 use App\Support\Tenancy\Tenancy;
+use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +58,8 @@ use Illuminate\Support\Str;
  * radié du CGA de Bouaké (NCC 9000001T) permet de rejouer le réimport d'identité (RG-ADH-15) ;
  * 0700000011 est l'accès principal en ligne d'un adhérent actif de DC-KNOWING (espace adhérent).
  * La fiche de DC-KNOWING est complète (images de remplacement) : ses documents se produisent ; sa
- * campagne de clôture de l'exercice précédent est ouverte.
+ * campagne de clôture de l'exercice précédent est ouverte ; une préoccupation de l'adhérent en ligne attend
+ * une réponse, une demande du gérant attend celle du CNCGA.
  */
 class DemoSeeder extends Seeder
 {
@@ -67,6 +73,8 @@ class DemoSeeder extends Seeder
         private readonly SampleDocumentData $samples,
         private readonly OpenClosingCampaign $openClosing,
         private readonly OpenDuesYear $openDues,
+        private readonly SubmitConcern $submitConcern,
+        private readonly TenantContext $context,
     ) {}
 
     public function run(): void
@@ -107,6 +115,7 @@ class DemoSeeder extends Seeder
         $this->formerMember($bouake);
         $this->onlineMember($dck);
         $this->closingCampaign($dck);
+        $this->concerns($dck);
         // Appel de cotisation de l'année, comme dues:open-year le 1er janvier (F-COT-01) : /cncga/cotisations,
         // /cga/cotisation et la collection Postman s'y appuient. Rejouable (une cotisation par centre et par an).
         $this->openDues->execute(now()->year);
@@ -229,6 +238,29 @@ class DemoSeeder extends Seeder
             fn () => $this->openClosing->execute($organization->id, now()->year - 1, CarbonImmutable::now()),
             'Jeu de démonstration : campagne de clôture de DC-KNOWING.',
         );
+    }
+
+    /**
+     * Préoccupations de DC-KNOWING (PRD M10) : une demande de l'adhérent en ligne à son CGA, une demande du
+     * gérant au CNCGA, déposées comme dans leur espace. /cga/preoccupations, /cncga/preoccupations et
+     * /adherent/messages s'y appuient. Rejouable.
+     */
+    private function concerns(Organization $organization): void
+    {
+        $exists = Tenancy::bypass(static fn (): bool => Concern::query()->where('organization_id', $organization->id)->exists(), 'Jeu de démonstration : préoccupations de DC-KNOWING.');
+        if ($exists) {
+            return;
+        }
+
+        $member = Membership::query()->whereHas('user', static fn ($user) => $user->where('phone', '+2250700000011'))->whereNotNull('member_id')->sole();
+        $this->context->runAs($member, fn (): Concern => $this->submitConcern->execute(
+            ConcernLevel::MemberToCga, ConcernCategory::Tax, 'Montant de la patente', 'Bonjour, quel montant de patente dois-je prévoir cette année ?', [], $member,
+        ));
+
+        $manager = Membership::query()->where('organization_id', $organization->id)->where('role', Role::CgaManager)->firstOrFail();
+        $this->context->runAs($manager, fn (): Concern => $this->submitConcern->execute(
+            ConcernLevel::CgaToCncga, ConcernCategory::Legal, 'Renouvellement de l\'agrément', 'Quelles pièces fournir pour le renouvellement de notre agrément ?', [], $manager,
+        ));
     }
 
     /**

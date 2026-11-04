@@ -63,6 +63,11 @@ Schedule::command('reminders:closing')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('reminders:concerns')
+    ->dailyAt(config('schedule.reminders_concerns'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('members:radiation-expiry')
     ->dailyAt(config('schedule.radiation_expiry'))
     ->withoutOverlapping()

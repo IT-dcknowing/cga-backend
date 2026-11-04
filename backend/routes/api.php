@@ -7,6 +7,9 @@ use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
 use App\Domain\Closing\Http\Controllers\ClosingCampaignController;
 use App\Domain\Closing\Http\Controllers\MemberClosingController;
+use App\Domain\Concerns\Http\Controllers\CgaConcernController;
+use App\Domain\Concerns\Http\Controllers\MemberConcernController;
+use App\Domain\Concerns\Http\Controllers\NetworkConcernController;
 use App\Domain\Documents\Http\Controllers\AttestationBlockController;
 use App\Domain\Documents\Http\Controllers\CertificateCampaignController;
 use App\Domain\Documents\Http\Controllers\DocumentController;
@@ -434,6 +437,36 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{campaign}/send', [MessageCampaignController::class, 'send'])->name('send');
         Route::post('{campaign}/approve', [MessageCampaignController::class, 'approve'])->name('approve');
         Route::post('{campaign}/reject', [MessageCampaignController::class, 'reject'])->name('reject');
+    });
+
+    // Préoccupations (PRD M10, F-PRE-01 à 04) : dans l'espace du CGA, demandes reçues des adhérents et envoyées
+    // au CNCGA, fil, statut, réouverture, transfert au CNCGA, tableau des délais ; vues du CNCGA, demandes des
+    // CGA et chiffres agrégés des demandes des adhérents (RG-PRE-03) ; dans l'espace de l'adhérent, ses demandes
+    // et « Demander un document » (F-DOC-06).
+    Route::middleware(['auth', 'tenant'])->prefix('cga/concerns')->name('cga.concerns.')->group(function (): void {
+        Route::get('/', [CgaConcernController::class, 'index'])->name('index');
+        Route::post('/', [CgaConcernController::class, 'store'])->name('store');
+        Route::get('indicators', [CgaConcernController::class, 'indicators'])->name('indicators');
+        Route::get('{concern}', [CgaConcernController::class, 'show'])->name('show');
+        Route::post('{concern}/messages', [CgaConcernController::class, 'reply'])->name('messages.store');
+        Route::post('{concern}/status', [CgaConcernController::class, 'status'])->name('status');
+        Route::post('{concern}/reopen', [CgaConcernController::class, 'reopen'])->name('reopen');
+        Route::post('{concern}/transfer', [CgaConcernController::class, 'transfer'])->name('transfer');
+    });
+    Route::middleware(['auth', 'tenant'])->prefix('network/concerns')->name('network.concerns.')->group(function (): void {
+        Route::get('/', [NetworkConcernController::class, 'index'])->name('index');
+        Route::get('indicators', [NetworkConcernController::class, 'indicators'])->name('indicators');
+        Route::get('{concernId}', [NetworkConcernController::class, 'show'])->name('show');
+        Route::post('{concernId}/messages', [NetworkConcernController::class, 'reply'])->name('messages.store');
+        Route::post('{concernId}/status', [NetworkConcernController::class, 'status'])->name('status');
+    });
+    Route::middleware(['auth', 'tenant'])->prefix('member')->name('member.')->group(function (): void {
+        Route::get('concerns', [MemberConcernController::class, 'index'])->name('concerns.index');
+        Route::post('concerns', [MemberConcernController::class, 'store'])->name('concerns.store');
+        Route::get('concerns/{concern}', [MemberConcernController::class, 'show'])->name('concerns.show');
+        Route::post('concerns/{concern}/messages', [MemberConcernController::class, 'reply'])->name('concerns.messages.store');
+        Route::post('concerns/{concern}/reopen', [MemberConcernController::class, 'reopen'])->name('concerns.reopen');
+        Route::post('document-requests', [MemberConcernController::class, 'requestDocument'])->name('document-requests.store');
     });
 
     // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).
