@@ -7,6 +7,7 @@ use App\Domain\Obligations\Models\ObligationInstance;
 use App\Domain\Obligations\Models\ObligationPayment;
 use App\Domain\Obligations\Support\InstanceAmounts;
 use App\Domain\Payments\Enums\PaymentStatus;
+use App\Domain\Statistics\Support\StatsRefresh;
 use App\Domain\Users\Models\User;
 use App\Support\Files\StorageService;
 use App\Support\Http\Exceptions\BusinessRuleException;
@@ -24,6 +25,7 @@ class RecordObligationPayment
     public function __construct(
         private readonly InstanceAmounts $amounts,
         private readonly StorageService $storage,
+        private readonly StatsRefresh $stats,
     ) {}
 
     /**
@@ -52,6 +54,7 @@ class RecordObligationPayment
             $payment->save();
 
             $this->amounts->refresh($instance);
+            $this->stats->queue($instance->organization_id);
 
             return $payment;
         });

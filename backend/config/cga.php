@@ -154,6 +154,15 @@ return [
             ],
         ],
 
+        // Statistiques (PRD M15) : une moyenne du réseau n'est affichée que si au moins n CGA y contribuent
+        // (RG-STA-04), pour qu'aucun autre CGA ne soit identifiable.
+        'stats' => [
+            'min_cgas_for_average' => [
+                'type' => 'integer', 'level' => 'network', 'default' => 5, 'permission' => 'network_settings.manage',
+                'rules' => ['' => ['integer', 'min:2', 'max:1000']],
+            ],
+        ],
+
         // Quota de SMS inclus par centre et par mois (02-TRD §10) ; les packs achetés s'y ajoutent.
         'sms' => [
             'monthly_quota' => [
@@ -540,6 +549,12 @@ return [
         ],
         'text_max_length' => (int) env('TRAININGS_TEXT_MAX_LENGTH', 10000),
         'max_capacity' => (int) env('TRAININGS_MAX_CAPACITY', 10000),
+    ],
+
+    // Statistiques (M15) : délai avant le recalcul ciblé des agrégats d'un CGA après un événement (02-TRD §9),
+    // pour regrouper les événements rapprochés (secondes).
+    'statistics' => [
+        'refresh_delay_seconds' => (int) env('STATS_REFRESH_DELAY_SECONDS', 300),
     ],
 
     // Annonces (M12) : longueur du texte.

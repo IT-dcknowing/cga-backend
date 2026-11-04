@@ -24,6 +24,7 @@ use App\Domain\Dues\Models\NetworkDue;
 use App\Domain\Dues\Policies\NetworkDuePolicy;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Imports\Policies\ImportBatchPolicy;
+use App\Domain\Members\Events\RadiationCancelled;
 use App\Domain\Members\Events\RadiationValidated;
 use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
@@ -75,6 +76,7 @@ use App\Domain\Reports\Models\CgaResource;
 use App\Domain\Reports\Models\QuarterlyReport;
 use App\Domain\Reports\Policies\PermanentProfilePolicy;
 use App\Domain\Reports\Policies\QuarterlyReportPolicy;
+use App\Domain\Statistics\Support\StatsRefresh;
 use App\Domain\Trainings\Models\Training;
 use App\Domain\Trainings\Models\TrainingRegistration;
 use App\Domain\Trainings\Policies\TrainingPolicy;
@@ -156,6 +158,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(PaymentConfirmed::class, ProduceReceiptOnConfirmation::class);
         Event::listen(RadiationValidated::class, CancelCertificatesOnRadiation::class);
         Event::listen(RadiationValidated::class, ProduceRadiationNoticeOnValidation::class);
+        // Recalcul ciblé des statistiques du CGA (02-TRD §9).
+        foreach ([PaymentConfirmed::class, RadiationValidated::class, RadiationCancelled::class] as $statsEvent) {
+            Event::listen($statsEvent, [StatsRefresh::class, 'handle']);
+        }
 
         // Canal « sms » des notifications (02-TRD §10).
         Notification::extend('sms', static fn (Application $app): SmsChannel => $app->make(SmsChannel::class));

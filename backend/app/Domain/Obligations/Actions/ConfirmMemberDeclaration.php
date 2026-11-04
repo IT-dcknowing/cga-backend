@@ -9,6 +9,7 @@ use App\Domain\Obligations\Models\ObligationInstance;
 use App\Domain\Obligations\Models\ObligationPayment;
 use App\Domain\Obligations\Support\InstanceAmounts;
 use App\Domain\Payments\Enums\PaymentStatus;
+use App\Domain\Statistics\Support\StatsRefresh;
 use App\Domain\Users\Models\User;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use Carbon\CarbonImmutable;
@@ -26,6 +27,7 @@ class ConfirmMemberDeclaration
     public function __construct(
         private readonly MarkDeclarationDone $done,
         private readonly InstanceAmounts $amounts,
+        private readonly StatsRefresh $stats,
     ) {}
 
     /**
@@ -68,6 +70,7 @@ class ConfirmMemberDeclaration
             $instance->member_declared_status = null;
             $instance->member_declared_at = null;
             $this->amounts->refresh($instance);
+            $this->stats->queue($instance->organization_id);
 
             return $instance;
         });
