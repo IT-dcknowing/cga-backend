@@ -7,7 +7,7 @@
  * Codes de sortie :
  *   0  base vide, ou déjà celle de CGA Connect (toutes ses migrations sont connues du code) ;
  *   10 base occupée par autre chose : on n'y touche pas ;
- *   11 extensions PostgreSQL manquantes et droit de les créer absent ;
+ *   11 extensions PostgreSQL absentes du serveur, ou droit de les créer absent ;
  *   12 connexion impossible.
  */
 
@@ -63,6 +63,17 @@ $installed = array_map(
     $db->select('select extname from pg_extension'),
 );
 $missing = array_values(array_diff(['pg_trgm', 'unaccent', 'citext'], $installed));
+$available = array_map(
+    static fn (object $row): string => (string) $row->name,
+    $db->select('select name from pg_available_extensions'),
+);
+$absent = array_values(array_diff($missing, $available));
+
+if ($absent !== []) {
+    echo 'Extensions absentes du serveur PostgreSQL ('.implode(', ', $absent).") : paquet « contrib » à faire installer par l'hébergeur.\n";
+    exit(11);
+}
+
 $canCreate = (bool) $db->selectOne("select has_database_privilege(current_user, current_database(), 'CREATE') as allowed")->allowed;
 
 if ($missing !== [] && ! $canCreate) {

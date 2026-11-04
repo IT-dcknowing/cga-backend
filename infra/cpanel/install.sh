@@ -193,7 +193,7 @@ set -e
 case $db_state in
     0) ;;
     10) fail "la base $DB_DATABASE sert déjà à une autre application : créer une base dédiée dans cPanel et l'indiquer dans cpanel.env" ;;
-    11) fail "demander à l'hébergeur d'activer les extensions pg_trgm, unaccent et citext sur la base $DB_DATABASE" ;;
+    11) fail "demander à l’hébergeur d’installer et d’activer les extensions PostgreSQL pg_trgm, unaccent et citext (paquet contrib) pour la base $DB_DATABASE" ;;
     12) fail "connexion à la base impossible : relancer « bash install.sh --mot-de-passe » et ressaisir le mot de passe" ;;
     *) fail "contrôle de la base en erreur (code $db_state)" ;;
 esac
