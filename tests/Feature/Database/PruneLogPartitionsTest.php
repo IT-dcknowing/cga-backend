@@ -9,10 +9,27 @@ it('prévisualise les partitions échues puis ne les supprime qu’avec --execut
     $activityExpiredStart = $now->subMonths(30);
     $auditExpiredStart = $now->subMonths(70);
 
-    $activityExpiredPartitions = app(MonthlyPartitions::class)->ensure('activity_logs', $activityExpiredStart);
-    $auditExpiredPartitions = app(MonthlyPartitions::class)->ensure('audit_logs', $auditExpiredStart);
-    $activityCurrentPartitions = app(MonthlyPartitions::class)->ensure('activity_logs', $now);
-    $auditCurrentPartitions = app(MonthlyPartitions::class)->ensure('audit_logs', $now);
+    $monthlyPartitions = static fn (array $partitions, string $table): array => array_values(array_filter(
+        $partitions,
+        static fn (string $partition): bool => preg_match('/^'.preg_quote($table, '/').'_[0-9]{4}_[0-9]{2}$/D', $partition) === 1,
+    ));
+
+    $activityExpiredPartitions = $monthlyPartitions(
+        app(MonthlyPartitions::class)->ensure('activity_logs', $activityExpiredStart),
+        'activity_logs',
+    );
+    $auditExpiredPartitions = $monthlyPartitions(
+        app(MonthlyPartitions::class)->ensure('audit_logs', $auditExpiredStart),
+        'audit_logs',
+    );
+    $activityCurrentPartitions = $monthlyPartitions(
+        app(MonthlyPartitions::class)->ensure('activity_logs', $now),
+        'activity_logs',
+    );
+    $auditCurrentPartitions = $monthlyPartitions(
+        app(MonthlyPartitions::class)->ensure('audit_logs', $now),
+        'audit_logs',
+    );
 
     expect($activityExpiredPartitions)->not->toBeEmpty()
         ->and($auditExpiredPartitions)->not->toBeEmpty()
