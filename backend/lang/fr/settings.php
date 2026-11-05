@@ -42,6 +42,7 @@ return [
         'stats' => 'Statistiques',
         'subscription' => 'Abonnement',
         'trainings' => 'Formations',
+        'users' => 'Comptes utilisateurs',
     ],
 
     'labels' => [
@@ -119,6 +120,9 @@ return [
         'stats.min_cgas_for_average' => 'CGA nécessaires pour afficher une moyenne du réseau',
         'subscription.data_retention_months' => 'Conservation des données après résiliation (mois)',
         'subscription.trial_months' => 'Durée de l\'essai (mois)',
+        'users.inactivity_disable_months' => 'Désactivation après inactivité (mois)',
+        'users.inactivity_delete_months' => 'Effacement des données après inactivité (mois)',
+        'users.inactivity_notice_months_before_delete' => 'Avis avant effacement du compte (mois)',
         'trainings.cancellation_days' => 'Désinscription possible jusqu\'à J-n (jours)',
         'trainings.new_member_months' => '« Nouveaux adhérents » : adhésion depuis moins de (mois)',
         'trainings.reminder_days' => 'Rappel aux inscrits avant la session (jours)',

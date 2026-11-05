@@ -483,6 +483,12 @@ return [
         'statistics' => 'Statistiques',
     ],
 
+    'backup_status' => [
+        'running' => 'En cours',
+        'done' => 'Réussie',
+        'failed' => 'En échec',
+    ],
+
     'export_status' => [
         'queued' => 'En file d\'attente',
         'processing' => 'En cours',

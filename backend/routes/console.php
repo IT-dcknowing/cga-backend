@@ -83,7 +83,17 @@ Schedule::command('members:radiation-expiry')
     ->withoutOverlapping()
     ->onOneServer();
 
+Schedule::command('users:inactivity')
+    ->dailyAt(config('schedule.users_inactivity'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
 Schedule::command('stats:refresh')
     ->dailyAt(config('schedule.stats_refresh'))
+    ->withoutOverlapping()
+    ->onOneServer();
+
+Schedule::command('backup:run')
+    ->dailyAt(config('schedule.backup_run'))
     ->withoutOverlapping()
     ->onOneServer();

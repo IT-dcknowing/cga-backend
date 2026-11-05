@@ -192,8 +192,24 @@ return [
                 'default' => [
                     'password', 'password_confirmation', 'current_password', 'new_password', 'token', 'code', 'otp',
                     'secret', 'api_key', 'api_secret', 'client_secret', 'authorization', 'cookie', 'x-xsrf-token',
+                    'first_name', 'last_name', 'phone', 'email',
                 ],
                 'rules' => ['' => ['array'], '*' => ['string', 'max:60']],
+            ],
+        ],
+
+        'users' => [
+            'inactivity_disable_months' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 12, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:120']],
+            ],
+            'inactivity_delete_months' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 24, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:2', 'max:240']],
+            ],
+            'inactivity_notice_months_before_delete' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 1, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:12']],
             ],
         ],
 

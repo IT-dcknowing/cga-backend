@@ -29,6 +29,11 @@ return [
             'body' => 'Le document « :title » est disponible dans votre espace.',
             'sms' => 'CGA Connect : le document « :title » est disponible dans votre espace.',
         ],
+        'account_inactivity_notice' => [
+            'title' => 'Suppression prochaine de votre compte',
+            'body' => 'Votre compte CGA Connect, inactif, sera supprimé le :delete_date. Contactez votre centre si vous souhaitez conserver votre accès.',
+            'sms' => 'CGA Connect : votre compte inactif sera supprimé le :delete_date. Contactez votre centre si nécessaire.',
+        ],
         'obligation_due' => [
             'title' => 'Échéance le :date',
             'body' => ':label (:period) arrive à échéance le :date.',
@@ -78,6 +83,11 @@ return [
             'title' => 'Formation « :title »',
             'body' => 'Formation « :title » : :event.',
             'sms' => 'CGA Connect, formation « :title » : :event.',
+        ],
+        'backup_failed' => [
+            'title' => 'Sauvegarde en échec',
+            'body' => 'La sauvegarde du :date a échoué : consulter le journal et relancer backup:run.',
+            'sms' => 'CGA Connect : sauvegarde du :date en échec.',
         ],
         'export_ready' => [
             'title' => 'Export prêt',

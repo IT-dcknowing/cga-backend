@@ -27,11 +27,17 @@ return [
     // Nouveaux essais de certification FNE (RG-FNE-04) : expression cron, toutes les 15 minutes.
     'fne_retry' => env('SCHEDULE_FNE_RETRY', '*/15 * * * *'),
 
+    // Sauvegarde chiffrée de la base et des fichiers (02-TRD §12.3), sans effet si BACKUP_ENABLED est faux.
+    'backup_run' => env('SCHEDULE_BACKUP_RUN', '04:00'),
+
     // Recalcul des agrégats statistiques de l'année (02-TRD §9).
     'stats_refresh' => env('SCHEDULE_STATS_REFRESH', '02:00'),
 
     // Fin de la consultation seule des adhérents radiés (RG-ADH-12).
     'radiation_expiry' => env('SCHEDULE_RADIATION_EXPIRY', '03:30'),
+
+    // Désactivation et effacement anonymisé des comptes inactifs (RG-ACC-06).
+    'users_inactivity' => env('SCHEDULE_USERS_INACTIVITY', '03:45'),
 
     // Ouverture de la campagne de clôture de l'exercice précédent (F-OBL-08) : expression cron, le 2 janvier.
     'closing_open' => env('SCHEDULE_CLOSING_OPEN', '45 0 2 1 *'),
