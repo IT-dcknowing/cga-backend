@@ -55401,6 +55401,186 @@
             ]
         },
         {
+            "name": "50. Étape 9.5 — Accès support journalisé (RG-SEC-04)",
+            "description": "RG-SEC-04 : accès support platform_admin consigné, consultable et exportable par le CGA.",
+            "item": [
+                {
+                    "name": "Plateforme — journal des accès support",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/platform/access-logs",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "platform",
+                                "access-logs"
+                            ]
+                        },
+                        "description": "RG-SEC-04 : consultation globale des accès support."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Plateforme — consigner un accès support",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/platform/access-logs",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "platform",
+                                "access-logs"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"organization_id\": \"{{cga_id}}\",\n    \"reason\": \"Assistance technique sur la facture FNE\",\n    \"route\": \"/cga/invoices/123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "description": "RG-SEC-04 : consignation obligatoire d un accès support platform_admin."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — journal des accès support",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/support-access-logs",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "support-access-logs"
+                            ]
+                        },
+                        "description": "RG-SEC-04 : consultation des accès support subis par le centre."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "CGA — export CSV du journal des accès support",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "text/csv"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "gerant"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/cga/support-access-logs/export",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "cga",
+                                "support-access-logs",
+                                "export"
+                            ]
+                        },
+                        "description": "RG-SEC-04 : export CSV du journal des accès support."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [

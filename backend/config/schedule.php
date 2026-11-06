@@ -66,4 +66,7 @@ return [
     // Rappels de la campagne de clôture (RG-OBL-11).
     'reminders_closing' => env('SCHEDULE_REMINDERS_CLOSING', '07:35'),
 
+    // Purge et anonymisation hebdomadaire des données selon durées légales (PRD §7, RG-ORG-07).
+    'retention_purge' => env('SCHEDULE_RETENTION_PURGE', '04:30'),
+
 ];

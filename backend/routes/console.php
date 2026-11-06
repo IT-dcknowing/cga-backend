@@ -97,3 +97,8 @@ Schedule::command('backup:run')
     ->dailyAt(config('schedule.backup_run'))
     ->withoutOverlapping()
     ->onOneServer();
+
+Schedule::command('retention:purge')
+    ->weeklyOn(0, config('schedule.retention_purge'))
+    ->withoutOverlapping()
+    ->onOneServer();

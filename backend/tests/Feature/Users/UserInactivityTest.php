@@ -6,8 +6,10 @@ use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Actions\ProcessUserInactivity;
 use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\User;
+use App\Support\Config\SettingsService;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 
 beforeEach(function () {
@@ -57,4 +59,13 @@ it('users:inactivity est exécutable par la commande', function () {
     Artisan::call('users:inactivity');
 
     expect(Artisan::output())->toContain('0 désactivé(s)');
+});
+
+it('RG-ACC-06 journalise puis relance une erreur du traitement des comptes inactifs', function () {
+    Log::spy();
+    app(SettingsService::class)->set('users.inactivity_disable_months', 24);
+
+    expect(fn () => $this->artisan('users:inactivity')->run())
+        ->toThrow(InvalidArgumentException::class, 'Les durées d’inactivité');
+    Log::shouldHaveReceived('error')->once();
 });

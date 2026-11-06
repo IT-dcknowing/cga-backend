@@ -192,7 +192,6 @@ return [
                 'default' => [
                     'password', 'password_confirmation', 'current_password', 'new_password', 'token', 'code', 'otp',
                     'secret', 'api_key', 'api_secret', 'client_secret', 'authorization', 'cookie', 'x-xsrf-token',
-                    'first_name', 'last_name', 'phone', 'email',
                 ],
                 'rules' => ['' => ['array'], '*' => ['string', 'max:60']],
             ],
@@ -454,6 +453,34 @@ return [
             'data_retention_months' => [
                 'type' => 'integer', 'level' => 'network', 'default' => 6, 'permission' => 'network_settings.manage',
                 'rules' => ['' => ['integer', 'min:1', 'max:120']],
+            ],
+        ],
+
+        // Durées de rétention des données et archivage (PRD §7, 02-TRD §11)
+        'retention' => [
+            'activity_logs_years' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 2, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:10']],
+            ],
+            'audit_logs_years' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 5, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:10']],
+            ],
+            'concerns_years' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 5, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:10']],
+            ],
+            'messages_years' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 2, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:10']],
+            ],
+            'legal_documents_years' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 10, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:20']],
+            ],
+            'radiated_member_years' => [
+                'type' => 'integer', 'level' => 'platform', 'default' => 10, 'permission' => $platform,
+                'rules' => ['' => ['integer', 'min:1', 'max:20']],
             ],
         ],
 

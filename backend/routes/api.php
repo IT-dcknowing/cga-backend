@@ -57,6 +57,7 @@ use App\Domain\Payments\Http\Controllers\MemberPaymentController;
 use App\Domain\Payments\Http\Controllers\MemberSpacePaymentController;
 use App\Domain\Payments\Http\Controllers\PaymentController;
 use App\Domain\Platform\Http\Controllers\HealthController;
+use App\Domain\Platform\Http\Controllers\PlatformAccessLogController;
 use App\Domain\Platform\Http\Controllers\SettingsController;
 use App\Domain\Referentials\Http\Controllers\CommuneController;
 use App\Domain\Referentials\Http\Controllers\HolidayController;
@@ -243,6 +244,12 @@ Route::prefix('v1')->group(function (): void {
         Route::post('{agent}/permissions/reset', [UserPermissionController::class, 'reset'])->name('permissions.reset');
     });
 
+    // Journal d'accès support platform_admin (RG-SEC-04).
+    Route::middleware(['auth', 'tenant'])->prefix('platform/access-logs')->name('platform.access-logs.')->group(function (): void {
+        Route::get('/', [PlatformAccessLogController::class, 'indexForPlatform'])->name('index');
+        Route::post('/', [PlatformAccessLogController::class, 'store'])->name('store');
+    });
+
     // Dossiers des adhérents du centre (F-ADH-01 à 10, F-PJ-01) : fiche, régime, radiation en deux temps, pièces,
     // accès en ligne, réimport depuis un autre CGA. La modification remplace la fiche : PUT (multipart avec
     // _method=PUT quand elle porte un justificatif, RG-ADH-06b).
@@ -316,6 +323,9 @@ Route::prefix('v1')->group(function (): void {
         Route::post('invoices/{invoice}/credit-note', [InvoiceController::class, 'creditNote'])->name('invoices.credit-note');
         Route::post('invoices/{invoice}/deliver', [InvoiceController::class, 'deliver'])->name('invoices.deliver');
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        // Journal des accès techniques support subis par le centre (RG-SEC-04).
+        Route::get('support-access-logs', [PlatformAccessLogController::class, 'indexForCga'])->name('support-access-logs.index');
+        Route::get('support-access-logs/export', [PlatformAccessLogController::class, 'exportForCga'])->name('support-access-logs.export');
     });
 
     // Documents du centre (M08) : état de la production (asynchrone, RG-DOC-05), liens signés, relance d'un
