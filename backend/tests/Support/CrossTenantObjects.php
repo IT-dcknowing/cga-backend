@@ -28,6 +28,7 @@ use App\Domain\Payments\Enums\InvoiceStatus;
 use App\Domain\Payments\Enums\InvoiceType;
 use App\Domain\Payments\Models\Invoice;
 use App\Domain\Payments\Models\MemberPayment;
+use App\Domain\Platform\Models\FailedJob;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
 use App\Domain\Referentials\Models\NationalReference;
@@ -172,6 +173,7 @@ final class CrossTenantObjects
             NationalReference::class => $referential,
             DocumentTemplate::class => 'Modèle de document du réseau, commun à tous les centres, géré par l\'administrateur de la plateforme (F-ADM-02).',
             MessagingProvider::class => 'Compte d\'envoi de la plateforme (écran « Envois », RG-NOT-05), géré par l\'administrateur seul ; un centre reçoit 403.',
+            FailedJob::class => 'Travail en échec des files de la plateforme (écran « Technique », 02-TRD §12.3), géré par l\'administrateur seul ; un centre reçoit 403.',
         ];
     }
 

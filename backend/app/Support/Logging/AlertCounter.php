@@ -2,6 +2,7 @@
 
 namespace App\Support\Logging;
 
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Config\Repository;
 use Throwable;
@@ -31,5 +32,13 @@ class AlertCounter
         } catch (Throwable $exception) {
             report($exception);
         }
+    }
+
+    /**
+     * Compte du jour d'une alerte (security:alerts) ; 0 si rien n'a été compté.
+     */
+    public function count(string $alert, CarbonInterface $day): int
+    {
+        return (int) $this->cache->get(self::PREFIX.$alert.':'.$day->toDateString(), 0);
     }
 }

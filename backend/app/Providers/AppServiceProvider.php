@@ -62,7 +62,9 @@ use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Payments\Policies\InvoicePolicy;
 use App\Domain\Payments\Policies\InvoicingProviderPolicy;
 use App\Domain\Payments\Policies\PaymentPolicy;
+use App\Domain\Platform\Models\FailedJob;
 use App\Domain\Platform\Models\Setting;
+use App\Domain\Platform\Policies\FailedJobPolicy;
 use App\Domain\Platform\Policies\SettingPolicy;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
@@ -213,6 +215,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Paramètres du réseau et de la plateforme (02-TRD §7.5).
         Gate::policy(Setting::class, SettingPolicy::class);
+        // Files d'attente et travaux en échec (02-TRD §12.3).
+        Gate::policy(FailedJob::class, FailedJobPolicy::class);
 
         // Préoccupations (PRD M10).
         Gate::policy(Concern::class, ConcernPolicy::class);

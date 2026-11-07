@@ -2,6 +2,13 @@
 
 return [
 
+    // Files surveillées par /api/health et l'écran « Technique » (02-TRD §12.3), en plus de celle de la connexion
+    // par défaut : une par programme de workers (infra/supervisor).
+    'monitored_queues' => array_values(array_filter(array_map('trim', explode(',', (string) env('MONITORED_QUEUES', 'documents,notifications,integrations,imports'))))),
+
+    // Longueur gardée de la première ligne de l'erreur d'un travail en échec, affichée à l'administrateur.
+    'failed_error_length' => (int) env('FAILED_JOB_ERROR_LENGTH', 500),
+
     /*
     |--------------------------------------------------------------------------
     | Tentatives et délais des Jobs (02-TRD §7.6, §8.2)

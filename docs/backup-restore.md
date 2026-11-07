@@ -2,27 +2,69 @@
 
 Cette procédure s'applique aux sauvegardes produites par `backup:run` (02-TRD §12.3). Les sauvegardes sont chiffrées avec la clé publique GPG du destinataire ; la clé privée de restauration doit être gardée hors du serveur applicatif et protégée par l'équipe d'exploitation.
 
-## Prérequis
+## Contenu d'une sauvegarde
 
-- Utiliser un serveur de restauration isolé et une base vide. Ne jamais restaurer directement sur la production.
-- Disposer de la clé privée GPG correspondante, de `gpg`, `pg_restore` et `tar`.
-- Récupérer depuis la copie hors serveur le dump `.dump.gpg`, toutes les archives du jeu de fichiers choisi et le fichier `snapshot.snar` correspondant.
-- Définir les secrets uniquement dans l'environnement protégé de la session de restauration ; ne pas les placer dans les journaux ou dans un dépôt.
+Dans le dossier `BACKUP_PATH` (par défaut `storage/backups`) :
 
-## Restaurer la base
+| Fichier | Contenu |
+|---|---|
+| `db/{base}-{AAAAMMJJ-HHMMSS}.dump.gpg` | Base PostgreSQL (`pg_dump --format=custom`), chiffrée |
+| `db/{base}-{AAAAMMJJ-HHMMSS}.manifest.json` | Manifeste : nombre de lignes de chaque table (lu dans le même instantané que le dump), nombre et taille des fichiers archivés. Aucune donnée nominative. |
+| `files/{jeu}/{AAAAMMJJ-HHMMSS}-full.tar.gz.gpg` | Archive complète du stockage `storage/app/private` (premier fichier d'un jeu) |
+| `files/{jeu}/{AAAAMMJJ-HHMMSS}-incremental.tar.gz.gpg` | Archives incrémentales du même jeu |
 
-1. Déchiffrer le dump vers un fichier temporaire protégé : `gpg --output database.dump --decrypt <fichier>.dump.gpg`.
-2. Créer une base vide de restauration et restaurer avec `pg_restore --no-owner --no-privileges --dbname=<base_de_restauration> database.dump`.
-3. Vérifier le code de sortie, les migrations (`php artisan migrate:status`) et les enregistrements de contrôle attendus.
-4. Supprimer le dump temporaire après validation.
+## Test de restauration trimestriel (commande `backup:restore-test`)
 
-## Restaurer les fichiers
+Le test se fait sur un **serveur isolé** (jamais la production), où l'application est installée avec un `.env` dont `APP_ENV` figure dans `BACKUP_RESTORE_ENVIRONMENTS` (par défaut `local,testing,restore,recette`).
+
+1. Sur le serveur isolé, importer la **clé privée** GPG dans le trousseau de l'utilisateur qui lance la commande, et la déverrouiller (agent GPG) pour que `gpg --batch --decrypt` fonctionne sans saisie.
+2. Copier depuis la copie hors serveur le dossier des sauvegardes vers `BACKUP_PATH` (au minimum : le dump, son manifeste et tout le jeu de fichiers correspondant).
+3. Créer une **base vide** de restauration, différente de celle de l'application : `createdb cga_restore_AAAAMMJJ`.
+4. Lancer :
+
+   ```bash
+   php artisan backup:restore-test cga_restore_AAAAMMJJ            # sauvegarde la plus récente
+   php artisan backup:restore-test cga_restore_AAAAMMJJ --dump=cga_connect-20261108-040000.dump.gpg
+   ```
+
+   La commande :
+   - refuse un environnement non autorisé, un nom de base invalide, la base de l'application et une base non vide ;
+   - déchiffre le dump au fil de l'eau vers `pg_restore` (aucune copie en clair sur le disque) ;
+   - compare, table par table, le nombre de lignes restaurées avec le manifeste ;
+   - déchiffre et extrait l'archive complète puis les incrémentales du jeu, **jusqu'à celle de la sauvegarde testée**, dans `BACKUP_RESTORE_WORK_PATH`, contrôle le nombre et la taille des fichiers, puis efface ce dossier ;
+   - écrit un rapport JSON dans `BACKUP_RESTORE_REPORT_PATH` et affiche le résultat.
+
+   Code de sortie `0` : restauration conforme. Code `1` : au moins un écart (détaillé à l'écran et dans le rapport). Une erreur (outil absent, clé indisponible, sauvegarde introuvable) arrête la commande avec son message.
+5. Supprimer la base de restauration après validation : `dropdb cga_restore_AAAAMMJJ`.
+
+## Restauration manuelle (sinistre)
+
+### Restaurer la base
+
+1. Créer une base vide.
+2. Restaurer sans fichier en clair : `gpg --batch --decrypt <fichier>.dump.gpg | pg_restore --no-owner --no-privileges --dbname=<base>`.
+3. Vérifier le code de sortie, `php artisan migrate:status`, et comparer quelques comptes avec le manifeste.
+
+### Restaurer les fichiers
 
 1. Créer un répertoire vide de restauration.
-2. Déchiffrer l'archive complète du jeu choisi vers un flux puis l'extraire dans ce répertoire : `gpg --decrypt <jeu>-full.tar.gz.gpg | tar --extract --gzip --directory=<répertoire_de_restauration>`.
-3. Appliquer, dans l'ordre chronologique, chaque archive incrémentale de ce même jeu avec `gpg --decrypt <jeu>-incremental.tar.gz.gpg | tar --extract --gzip --listed-incremental=/dev/null --directory=<répertoire_de_restauration>`.
-4. Vérifier les fichiers et sommes de contrôle métier avant de reconnecter l'application au stockage restauré.
+2. Extraire l'archive complète du jeu choisi : `gpg --batch --decrypt <jeu>-full.tar.gz.gpg | tar --extract --gzip --listed-incremental=/dev/null --directory=<répertoire>`.
+3. Appliquer, dans l'ordre chronologique, chaque archive incrémentale de ce même jeu avec la même commande.
+4. Contrôler le nombre et la taille des fichiers avec le manifeste avant de reconnecter l'application au stockage restauré.
 
-## Test trimestriel et preuve
+## Registre d'exploitation (preuve du test)
 
-L'équipe d'exploitation consigne la date, les identifiants des sauvegardes utilisées, la durée, le résultat des contrôles de base et de fichiers, et l'approbateur dans le registre d'exploitation. Une restauration n'est déclarée réussie qu'après vérification de la base et des fichiers sur l'environnement isolé. Ce dépôt décrit la procédure ; il ne constitue pas une preuve qu'une restauration en recette a déjà été exécutée.
+À chaque test trimestriel, l'équipe d'exploitation consigne :
+
+| Champ | Source |
+|---|---|
+| Date du test | `tested_at` du rapport |
+| Serveur isolé et environnement | `environment` |
+| Sauvegarde testée | `database_file`, `files_set`, `archives` |
+| Durée | `duration_seconds` |
+| Résultat base | `tables.checked`, `tables.mismatches` |
+| Résultat fichiers | `files.restored_count`, `files.ok` |
+| Résultat global | `status` (`passed` / `failed`) |
+| Approbateur | nom et signature |
+
+Une restauration n'est déclarée réussie qu'avec un rapport `status = passed`. Ce dépôt fournit la procédure et l'outil ; il ne constitue pas, à lui seul, la preuve qu'une restauration a été exécutée en recette.

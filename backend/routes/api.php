@@ -58,6 +58,7 @@ use App\Domain\Payments\Http\Controllers\MemberSpacePaymentController;
 use App\Domain\Payments\Http\Controllers\PaymentController;
 use App\Domain\Platform\Http\Controllers\HealthController;
 use App\Domain\Platform\Http\Controllers\PlatformAccessLogController;
+use App\Domain\Platform\Http\Controllers\QueueController;
 use App\Domain\Platform\Http\Controllers\SettingsController;
 use App\Domain\Referentials\Http\Controllers\CommuneController;
 use App\Domain\Referentials\Http\Controllers\HolidayController;
@@ -242,6 +243,13 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{agent}/permissions', [UserPermissionController::class, 'show'])->name('permissions.show');
         Route::put('{agent}/permissions', [UserPermissionController::class, 'update'])->name('permissions.update');
         Route::post('{agent}/permissions/reset', [UserPermissionController::class, 'reset'])->name('permissions.reset');
+    });
+
+    // Écran « Technique » de /plateforme (02-TRD §12.3) : files d'attente, travaux en échec et relance.
+    Route::middleware(['auth', 'tenant'])->prefix('platform')->name('platform.')->group(function (): void {
+        Route::get('queues', [QueueController::class, 'index'])->name('queues.index');
+        Route::get('failed-jobs', [QueueController::class, 'failed'])->name('failed-jobs.index');
+        Route::post('failed-jobs/{failedJob}/retry', [QueueController::class, 'retry'])->name('failed-jobs.retry');
     });
 
     // Journal d'accès support platform_admin (RG-SEC-04).

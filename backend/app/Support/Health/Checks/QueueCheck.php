@@ -2,21 +2,21 @@
 
 namespace App\Support\Health\Checks;
 
-use App\Support\Config\SettingsService;
 use App\Support\Health\HealthCheck;
 use App\Support\Health\HealthCheckError;
 use App\Support\Health\HealthCheckResult;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\Queue;
+use App\Support\Queue\QueueMonitor;
 
 /**
- * Les files d'attente (base de données ou Redis, selon QUEUE_CONNECTION) répondent et ne dépassent pas
- * le délai réglable queue.alert_delay_minutes. Un retard met /api/health en 503 ; le moniteur de santé
- * déclenche alors l'alerte et inscrit les minutes de retard au journal structuré, sans données de job.
+ * Les files d'attente (base de données ou Redis, selon QUEUE_CONNECTION) répondent et aucune file surveillée
+ * (QueueMonitor : défaut, documents, notifications, intégrations, imports) ne dépasse le délai réglable
+ * queue.alert_delay_minutes. Un retard met /api/health en 503 ; le moniteur de santé déclenche alors l'alerte et
+ * inscrit les minutes de retard au journal structuré (la file la plus en retard, puis les autres files en
+ * retard s'il y en a), sans données de job.
  */
 class QueueCheck implements HealthCheck
 {
-    public function __construct(private readonly SettingsService $settings) {}
+    public function __construct(private readonly QueueMonitor $monitor) {}
 
     public function name(): string
     {
@@ -25,31 +25,26 @@ class QueueCheck implements HealthCheck
 
     public function run(): HealthCheckResult
     {
-        $connectionName = (string) config('queue.default');
-        $queue = (string) config("queue.connections.{$connectionName}.queue", 'default');
-        $connection = Queue::connection($connectionName);
-        $size = $connection->size($queue);
+        $delayed = [];
+        foreach ($this->monitor->snapshot() as $state) {
+            if ($state['delayed']) {
+                $delayed[$state['queue']] = (int) $state['delay_minutes'];
+            }
+        }
 
-        if ($size === 0) {
+        if ($delayed === []) {
             return HealthCheckResult::ok();
         }
 
-        $oldest = $connection->creationTimeOfOldestPendingJob($queue);
-        if (! is_numeric($oldest)) {
-            return HealthCheckResult::ok();
-        }
-
-        $delayMinutes = max(0, (int) floor((CarbonImmutable::now()->getTimestamp() - (int) $oldest) / 60));
-        $thresholdMinutes = (int) $this->settings->get('queue.alert_delay_minutes');
-
-        if ($delayMinutes < $thresholdMinutes) {
-            return HealthCheckResult::ok();
-        }
+        arsort($delayed);
+        $worst = (string) array_key_first($delayed);
+        $others = array_diff_key($delayed, [$worst => true]);
 
         return HealthCheckResult::failed(HealthCheckError::Delayed, [
-            'queue' => $queue,
-            'delay_minutes' => $delayMinutes,
-            'threshold_minutes' => $thresholdMinutes,
+            'queue' => $worst,
+            'delay_minutes' => $delayed[$worst],
+            'threshold_minutes' => $this->monitor->thresholdMinutes(),
+            ...($others === [] ? [] : ['other_delayed_queues' => $others]),
         ]);
     }
 }

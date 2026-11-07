@@ -18,7 +18,8 @@ return [
 
     'enabled' => (bool) env('BACKUP_ENABLED', false),
 
-    'directory' => env('BACKUP_PATH', storage_path('backups')),
+    // Une valeur vide dans .env (BACKUP_PATH=) garde le dossier par défaut.
+    'directory' => env('BACKUP_PATH') ?: storage_path('backups'),
 
     'gpg_recipient' => env('BACKUP_GPG_RECIPIENT'),
 
@@ -39,9 +40,21 @@ return [
 
     'commands' => [
         'pg_dump' => [env('BACKUP_PG_DUMP_BINARY', 'pg_dump')],
+        'pg_restore' => [env('BACKUP_PG_RESTORE_BINARY', 'pg_restore')],
         'gpg' => [env('BACKUP_GPG_BINARY', 'gpg')],
         'tar' => [env('BACKUP_TAR_BINARY', 'tar')],
         'rsync' => [env('BACKUP_RSYNC_BINARY', 'rsync')],
+    ],
+
+    /*
+    | Test de restauration (backup:restore-test, docs/backup-restore.md) : seulement dans ces environnements (serveur
+    | isolé, jamais la production), fichiers restaurés dans work_directory (effacé après contrôle), rapport JSON
+    | dans report_directory pour le registre d'exploitation.
+    */
+    'restore' => [
+        'environments' => array_values(array_filter(array_map('trim', explode(',', (string) env('BACKUP_RESTORE_ENVIRONMENTS', 'local,testing,restore,recette'))))),
+        'work_directory' => env('BACKUP_RESTORE_WORK_PATH') ?: storage_path('restore-tests/work'),
+        'report_directory' => env('BACKUP_RESTORE_REPORT_PATH') ?: storage_path('restore-tests/reports'),
     ],
 
     // Options SSH de la copie hors du serveur (clé de l'utilisateur de l'application, sans mot de passe).

@@ -89,6 +89,11 @@ return [
             'body' => 'La sauvegarde du :date a échoué : consulter le journal et relancer backup:run.',
             'sms' => 'CGA Connect : sauvegarde du :date en échec.',
         ],
+        'security_alert' => [
+            'title' => 'Alerte de sécurité',
+            'body' => ':alert : :count le :date (seuil du jour : :threshold). Consulter les journaux.',
+            'sms' => 'CGA Connect : alerte de sécurité, :alert (:count).',
+        ],
         'export_ready' => [
             'title' => 'Export prêt',
             'body' => 'Votre export « :list » est prêt à télécharger.',

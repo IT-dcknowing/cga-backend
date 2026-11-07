@@ -55581,6 +55581,138 @@
             ]
         },
         {
+            "name": "51. Étape 9.2 — Supervision : files d'attente et travaux en échec",
+            "description": "02-TRD §12.3 : écran « Technique » de /plateforme (administrateur de la plateforme, droit verrouillé platform.queues.manage).",
+            "item": [
+                {
+                    "name": "Plateforme — état des files",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/platform/queues",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "platform",
+                                "queues"
+                            ]
+                        },
+                        "description": "Travaux en attente, retard du plus ancien (seuil queue.alert_delay_minutes) et travaux en échec de chaque file surveillée."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Plateforme — travaux en échec",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/platform/failed-jobs?filter[queue]=documents",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "platform",
+                                "failed-jobs"
+                            ]
+                        },
+                        "description": "Travaux en échec, les plus récents d'abord : file, nom du travail, date, première ligne de l'erreur (jamais le contenu du travail)."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Plateforme — relancer un travail en échec",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            },
+                            {
+                                "key": "Origin",
+                                "value": "{{spa_origin}}"
+                            },
+                            {
+                                "key": "Referer",
+                                "value": "{{spa_origin}}/"
+                            },
+                            {
+                                "key": "X-XSRF-TOKEN",
+                                "value": "{{xsrf_token}}"
+                            },
+                            {
+                                "key": "X-Demo-Account",
+                                "value": "admin"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/platform/failed-jobs/{{failed_job_uuid}}/retry",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "platform",
+                                "failed-jobs",
+                                "{{failed_job_uuid}}",
+                                "retry"
+                            ]
+                        },
+                        "description": "Remet le travail dans sa file (queue:retry) et trace la relance au journal des modifications ; 204."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Manuel — requêtes non rejouables",
             "description": "Requêtes qui consomment une donnée de démo : à lancer à la main, puis `php artisan migrate:fresh --seed`. Exclues de l'exécution complète (`newman run … --folder` sur chaque dossier d'étape).",
             "item": [

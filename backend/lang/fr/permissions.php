@@ -127,6 +127,7 @@ return [
         'messaging' => ['manage' => 'Gérer les comptes d\'envoi SMS, WhatsApp et e-mail'],
         'templates' => ['manage' => 'Gérer les modèles de documents'],
         'logs' => ['view' => 'Consulter les journaux de la plateforme'],
+        'queues' => ['manage' => 'Suivre les files d\'attente et relancer les travaux en échec'],
     ],
 
 ];

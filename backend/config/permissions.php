@@ -132,6 +132,8 @@ return [
         'platform.messaging.manage' => ['locked' => false, 'roles' => [$admin]],
         'platform.templates.manage' => ['locked' => false, 'roles' => [$admin]],
         'platform.logs.view' => ['locked' => false, 'roles' => [$admin]],
+        // Files d'attente et travaux en échec (écran « Technique », 02-TRD §12.3) : équipe technique.
+        'platform.queues.manage' => ['locked' => false, 'roles' => [$admin]],
 
     ],
 

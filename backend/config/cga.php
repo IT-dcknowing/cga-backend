@@ -491,6 +491,16 @@ return [
             ],
         ],
 
+        // Alertes de sécurité (02-TRD §6.7, A09) : seuil quotidien de chaque compteur (échecs de connexion, refus 403,
+        // erreurs 500, contournements du cloisonnement pendant une activité d'utilisateur), signalé par security:alerts.
+        'alerts' => [
+            'daily_thresholds' => [
+                'type' => 'array', 'level' => 'platform', 'permission' => $platform,
+                'default' => ['login_failed' => 100, 'denied' => 200, 'server_error' => 20, 'tenancy_bypass' => 5000],
+                'rules' => ['' => ['array:login_failed,denied,server_error,tenancy_bypass'], '*' => ['integer', 'min:1']],
+            ],
+        ],
+
         // Formats de numérotation (02-TRD §7.1, RG-ADH-03) : {YYYY} année, {ABR} abréviation du CGA,
         // {N:4} numéro sur 4 chiffres au moins.
         'numbering' => [

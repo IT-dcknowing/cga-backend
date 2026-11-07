@@ -69,4 +69,7 @@ return [
     // Purge et anonymisation hebdomadaire des données selon durées légales (PRD §7, RG-ORG-07).
     'retention_purge' => env('SCHEDULE_RETENTION_PURGE', '04:30'),
 
+    // Alertes de sécurité sur les pics du jour (02-TRD §6.7, A09) : expression cron, toutes les 15 minutes.
+    'security_alerts' => env('SCHEDULE_SECURITY_ALERTS', '*/15 * * * *'),
+
 ];

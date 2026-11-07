@@ -17,7 +17,10 @@ class BackupTools
     private const TAR_ACCEPTED = [0, 1];
 
     /**
-     * @param  array{host: string, port: string, username: string, password: string, database: string}  $database
+     * Base exportée par pg_dump ; avec un instantané (DatabaseSnapshot), pg_dump lit exactement l'état compté dans le
+     * manifeste.
+     *
+     * @param  array{host: string, port: string, username: string, password: string, database: string, snapshot?: string}  $database
      *
      * @throws RuntimeException outil en échec
      */
@@ -26,9 +29,42 @@ class BackupTools
         $this->encrypted([
             ...$this->command('pg_dump'),
             '--format=custom', '--no-owner', '--no-privileges',
+            ...(isset($database['snapshot']) ? ['--snapshot='.$database['snapshot']] : []),
             '--host='.$database['host'], '--port='.$database['port'], '--username='.$database['username'],
             $database['database'],
         ], ['PGPASSWORD' => $database['password']], $target, [0]);
+    }
+
+    /**
+     * Test de restauration : la sauvegarde chiffrée de la base est déchiffrée au fil de l'eau (jamais en clair sur le
+     * disque) et lue par pg_restore dans la base de restauration.
+     *
+     * @param  array{host: string, port: string, username: string, password: string, database: string}  $database
+     *
+     * @throws RuntimeException outil en échec
+     */
+    public function restoreDatabase(array $database, string $encryptedDump): void
+    {
+        $this->decrypted($encryptedDump, [
+            ...$this->command('pg_restore'),
+            '--no-owner', '--no-privileges',
+            '--host='.$database['host'], '--port='.$database['port'], '--username='.$database['username'],
+            '--dbname='.$database['database'],
+        ], ['PGPASSWORD' => $database['password']]);
+    }
+
+    /**
+     * Test de restauration : une archive de fichiers (complète ou incrémentale) est déchiffrée au fil de l'eau et
+     * extraite dans le dossier ; les archives d'un jeu s'appliquent dans l'ordre (les suppressions sont rejouées).
+     *
+     * @throws RuntimeException outil en échec
+     */
+    public function extractFiles(string $encryptedArchive, string $directory): void
+    {
+        $this->decrypted($encryptedArchive, [
+            ...$this->command('tar'),
+            '--extract', '--gzip', '--listed-incremental=/dev/null', '--directory='.$directory,
+        ], []);
     }
 
     /**
@@ -83,6 +119,32 @@ class BackupTools
         }
         if (! $encrypt->isSuccessful()) {
             throw new RuntimeException('Chiffrement en échec : '.trim($encrypt->getErrorOutput()));
+        }
+    }
+
+    /**
+     * Fichier déchiffré par gpg et passé directement à l'entrée de la commande.
+     *
+     * @param  list<string>  $consumerCommand
+     * @param  array<string, string>  $environment
+     */
+    private function decrypted(string $source, array $consumerCommand, array $environment): void
+    {
+        $decrypt = new Process([
+            ...$this->command('gpg'),
+            '--batch', '--decrypt', $source,
+        ], null, null, null, $this->timeout());
+        $decrypt->start();
+
+        $consumer = new Process($consumerCommand, null, $environment === [] ? null : $environment, $decrypt->getIterator(Process::ITER_SKIP_ERR), $this->timeout());
+        $consumer->run();
+        $decrypt->wait();
+
+        if (! $decrypt->isSuccessful()) {
+            throw new RuntimeException('Déchiffrement en échec : '.trim($decrypt->getErrorOutput()));
+        }
+        if (! $consumer->isSuccessful()) {
+            throw new RuntimeException(basename($consumerCommand[0]).' en échec ('.$consumer->getExitCode().') : '.trim($consumer->getErrorOutput()));
         }
     }
 
