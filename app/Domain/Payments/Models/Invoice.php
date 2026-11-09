@@ -6,6 +6,7 @@ use App\Domain\Audit\Concerns\Auditable;
 use App\Domain\Documents\Models\File;
 use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Members\Models\Member;
+use App\Domain\Organizations\Models\Organization;
 use App\Domain\Payments\Enums\CertificationAttemptStatus;
 use App\Domain\Payments\Enums\CertificationMode;
 use App\Domain\Payments\Enums\InvoiceStatus;
@@ -118,6 +119,16 @@ class Invoice extends Model
     public function member(): BelongsTo
     {
         return $this->belongsTo(Member::class);
+    }
+
+    /**
+     * Centre client d'une facture de cotisation émise par le CNCGA (étape 6.9).
+     *
+     * @return BelongsTo<Organization, $this>
+     */
+    public function billedOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'billed_organization_id');
     }
 
     /**

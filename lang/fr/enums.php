@@ -345,6 +345,8 @@ return [
         'dues_receipt' => 'Reçu de cotisation',
         'dues_invoice' => 'Facture de cotisation',
         'training_certificate' => 'Attestation de formation',
+        'training_receipt' => 'Reçu de formation',
+        'statistics_brochure' => 'Plaquette statistique',
         'banking_file' => 'Dossier de bancabilité',
         'uploaded' => 'Document déposé',
     ],
@@ -366,6 +368,275 @@ return [
         'financial_statements' => 'États financiers visés',
         'certificate' => 'Attestation',
         'other' => 'Autre document',
+    ],
+
+    'obligation_category' => [
+        'tax' => 'Impôts et taxes',
+        'cnps' => 'CNPS',
+        'cmu' => 'CMU',
+        'other' => 'Autres administrations',
+    ],
+
+    'obligation_kind' => [
+        'declaration' => 'Déclaration',
+        'payment' => 'Paiement',
+        'declaration_payment' => 'Déclaration et paiement',
+        'diligence' => 'Diligence',
+    ],
+
+    'obligation_periodicity' => [
+        'monthly' => 'Mensuelle',
+        'quarterly' => 'Trimestrielle',
+        'half_yearly' => 'Semestrielle',
+        'yearly' => 'Annuelle',
+        'one_off' => 'Ponctuelle',
+        'on_event' => 'Sur événement',
+    ],
+
+    'tax_nature' => [
+        'patente' => 'Patente',
+        'bic' => 'BIC',
+        'tva' => 'TVA',
+        'tse' => 'TSE',
+        'its' => 'ITS',
+        'airsi' => 'AIRSI',
+        'igr' => 'IGR',
+        'irvm' => 'IRVM',
+        'irc' => 'IRC',
+        'fdfp' => 'FDFP',
+        'tee' => 'TEE',
+        'rme' => 'Impôt microentreprise',
+        'cnps' => 'CNPS',
+        'cmu' => 'CMU',
+        'other' => 'Autres',
+    ],
+
+    'member_obligation_source' => [
+        'suggested' => 'Proposée',
+        'manual' => 'Ajoutée par le CGA',
+    ],
+
+    'member_obligation_status' => [
+        'suggested' => 'À confirmer',
+        'active' => 'Active',
+        'removed' => 'Retirée',
+    ],
+
+    'instance_kind' => [
+        'declaration' => 'Déclaration',
+        'payment' => 'Paiement',
+        'diligence' => 'Diligence',
+    ],
+
+    'instance_status' => [
+        'todo' => 'À faire',
+        'done' => 'Faite',
+        'to_pay' => 'À payer',
+        'partially_paid' => 'Partiellement payé',
+        'paid' => 'Payé',
+        'not_established' => 'Non établie',
+        'in_progress' => 'En cours',
+        'established' => 'Établie',
+        'cancelled' => 'Annulée',
+    ],
+
+    'obligation_payment_source' => [
+        'cga_entry' => 'Saisi par le CGA',
+        'member_declaration' => 'Déclaré par l\'adhérent',
+        'import' => 'Importé',
+        'compta_flow' => 'Compta Flow',
+    ],
+
+    'center_obligation_kind' => [
+        'tax' => 'Impôts et taxes',
+        'cnps' => 'CNPS',
+        'cmu' => 'CMU',
+        'agreement_renewal' => 'Renouvellement de l\'agrément',
+        'smt' => 'SMT',
+        'other' => 'Autre',
+    ],
+
+    'center_obligation_status' => [
+        'todo' => 'À faire',
+        'done' => 'Faite',
+        'to_pay' => 'À payer',
+        'paid' => 'Payée',
+    ],
+
+    'closing_campaign_status' => [
+        'open' => 'Ouverte',
+        'closed' => 'Close',
+    ],
+
+    'closing_deliverable' => [
+        'smt' => 'SMT',
+        'financial_statements' => 'États financiers',
+    ],
+
+    'export_type' => [
+        'members' => 'Adhérents',
+        'concerns' => 'Préoccupations',
+        'network_concerns' => 'Préoccupations des CGA',
+        'training_registrations' => 'Inscrits aux formations',
+        'obligations' => 'Échéances',
+        'dues' => 'Cotisations',
+        'statistics' => 'Statistiques',
+    ],
+
+    'backup_status' => [
+        'running' => 'En cours',
+        'done' => 'Réussie',
+        'failed' => 'En échec',
+    ],
+
+    'export_status' => [
+        'queued' => 'En file d\'attente',
+        'processing' => 'En cours',
+        'done' => 'Prêt',
+        'failed' => 'En échec',
+    ],
+
+    'announcement_audience' => [
+        'all_cgas' => 'Tous les CGA',
+        'selected_cgas' => 'Certains CGA',
+        'all_network_members' => 'Tous les adhérents du réseau',
+        'own_members' => 'Les adhérents du centre',
+    ],
+
+    'training_format' => [
+        'in_person' => 'Présentiel',
+        'online' => 'En ligne',
+        'workshop' => 'Atelier',
+    ],
+
+    'training_status' => [
+        'draft' => 'Brouillon',
+        'published' => 'Publiée',
+        'cancelled' => 'Annulée',
+        'completed' => 'Terminée',
+    ],
+
+    'audience_type' => [
+        'cga_managers' => 'Responsables CGA',
+        'cga_staff' => 'Tous les agents CGA',
+        'cga_accountants' => 'Comptables CGA',
+        'all_members' => 'Tous les adhérents',
+        'members_by_regime' => 'Adhérents d\'un régime',
+        'new_members' => 'Nouveaux adhérents',
+    ],
+
+    'registration_status' => [
+        'pending_approval' => 'En attente de validation',
+        'registered' => 'Inscrit',
+        'waitlisted' => 'En liste d\'attente',
+        'cancelled' => 'Désinscrit',
+        'rejected' => 'Refusée',
+    ],
+
+    'training_payment_status' => [
+        'not_applicable' => 'Gratuite',
+        'to_pay' => 'À payer',
+        'paid' => 'Payée',
+    ],
+
+    'attendance' => [
+        'present' => 'Présent',
+        'absent' => 'Absent',
+    ],
+
+    'concern_level' => [
+        'member_to_cga' => 'Adhérent vers CGA',
+        'cga_to_cncga' => 'CGA vers CNCGA',
+    ],
+
+    'concern_category' => [
+        'tax' => 'Fiscalité',
+        'accounting' => 'Comptabilité',
+        'legal' => 'Juridique',
+        'social' => 'Social (CNPS / CMU)',
+        'training' => 'Formation',
+        'administrative' => 'Administratif',
+        'public_platforms' => 'Plateformes publiques',
+        'document_request' => 'Demande de document',
+        'info_update' => 'Mise à jour de mes informations',
+        'closing_pieces' => 'Pièces de clôture',
+        'other' => 'Autre',
+    ],
+
+    'concern_status' => [
+        'open' => 'Ouverte',
+        'in_review' => 'En examen',
+        'resolved' => 'Traitée',
+        'rejected' => 'Rejetée',
+    ],
+
+    'concern_side' => [
+        'requester' => 'Demandeur',
+        'handler' => 'Traitement de la demande',
+    ],
+
+    'document_request_type' => [
+        'attestation' => 'Attestation',
+        'financial_statements' => 'États financiers',
+        'other' => 'Autre document',
+    ],
+
+    'closing_step' => [
+        'pieces' => 'Collecte des pièces',
+        'regularisation' => 'Régularisation',
+        'finalisation' => 'Finalisation',
+        'filing' => 'Dépôt légal',
+    ],
+
+    'dues_status' => [
+        'due' => 'À régler',
+        'partial' => 'Partielle',
+        'paid' => 'À jour',
+        'unpaid' => 'Impayée',
+    ],
+
+    'dues_payment_source' => [
+        'cga_declaration' => 'Déclaré par le CGA',
+        'cncga_entry' => 'Saisi par le CNCGA',
+    ],
+
+    'campaign_status' => [
+        'draft' => 'Brouillon',
+        'pending_approval' => 'En attente de validation',
+        'approved' => 'Validé',
+        'sending' => 'Envoi en cours',
+        'sent' => 'Envoyé',
+        'rejected' => 'Refusé',
+    ],
+
+    'cga_person_kind' => [
+        'director' => 'Dirigeant',
+        'employee' => 'Salarié permanent',
+        'occasional' => 'Personnel occasionnel',
+    ],
+
+    'cga_resource_category' => [
+        'premises' => 'Locaux',
+        'training_rooms' => 'Salles de formation',
+        'furniture' => 'Mobilier',
+        'computers' => 'Matériel informatique',
+        'software' => 'Logiciels',
+        'projectors' => 'Vidéoprojecteurs',
+        'vehicles' => 'Véhicules',
+        'other' => 'Autres moyens',
+    ],
+
+    'report_status' => [
+        'draft' => 'Brouillon',
+        'generated' => 'Généré',
+        'transmitted' => 'Transmis',
+        'acknowledged' => 'Accusé reçu',
+    ],
+
+    'transmission_mode' => [
+        'physical' => 'Dépôt physique',
+        'email' => 'E-mail',
+        'other' => 'Autre',
     ],
 
 ];

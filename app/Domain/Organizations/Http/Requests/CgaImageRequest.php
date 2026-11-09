@@ -2,6 +2,7 @@
 
 namespace App\Domain\Organizations\Http\Requests;
 
+use App\Domain\Organizations\Policies\OrganizationPolicy;
 use App\Support\Config\SettingsService;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Foundation\Http\FormRequest;
@@ -17,7 +18,7 @@ class CgaImageRequest extends FormRequest
 {
     public function authorize(TenantContext $context): bool
     {
-        return $context->has() && Gate::allows('updateProfile', $context->organization());
+        return $context->has() && Gate::allows(OrganizationPolicy::profileAbility($this, 'update'), $context->organization());
     }
 
     /**

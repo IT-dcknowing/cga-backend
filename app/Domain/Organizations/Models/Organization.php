@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $rccm
  * @property string|null $agreement_number
  * @property CarbonInterface|null $agreement_date
+ * @property CarbonInterface|null $agreement_expires_at
  * @property CarbonInterface|null $agreement_withdrawn_at
  * @property string|null $regional_directorate_id
  * @property string|null $tax_office_id
@@ -133,6 +134,12 @@ class Organization extends Model
      * agrément, rattachement à la DR et au CDI, coordonnées, gérant, expert-comptable référent,
      * abréviation de numérotation, logo, signature et cachet.
      */
+    /**
+     * Champs propres à un CGA agréé, sans objet pour le CNCGA (étape 6.9) : agrément et expert-comptable
+     * référent.
+     */
+    public const NETWORK_PROFILE_EXEMPT_FIELDS = ['agreement_number', 'agreement_date', 'expert_name'];
+
     public const PROFILE_REQUIRED_FIELDS = [
         'ncc', 'rccm', 'legal_form', 'share_capital', 'agreement_number', 'agreement_date', 'regional_directorate_id',
         'tax_office_id', 'address', 'city', 'phone_1', 'email', 'manager_name', 'expert_name', 'numbering_abbreviation',
@@ -146,8 +153,12 @@ class Organization extends Model
      */
     public function missingProfileFields(): array
     {
+        $required = $this->type === OrganizationType::Cncga
+            ? array_diff(self::PROFILE_REQUIRED_FIELDS, self::NETWORK_PROFILE_EXEMPT_FIELDS)
+            : self::PROFILE_REQUIRED_FIELDS;
+
         return array_values(array_filter(
-            self::PROFILE_REQUIRED_FIELDS,
+            $required,
             fn (string $field): bool => blank($this->getAttribute($field)),
         ));
     }

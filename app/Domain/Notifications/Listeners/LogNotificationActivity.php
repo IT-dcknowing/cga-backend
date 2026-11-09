@@ -3,6 +3,7 @@
 namespace App\Domain\Notifications\Listeners;
 
 use App\Domain\Audit\Enums\ActivityResult;
+use App\Domain\Notifications\Support\MessageLogger;
 use App\Support\Logging\ActivityLogger;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Events\Dispatcher;
@@ -20,6 +21,17 @@ class LogNotificationActivity
     public function sent(NotificationSent $event): void
     {
         $this->record(ActivityResult::Success, $event->notifiable, $event->notification, $event->channel);
+
+        // Un e-mail parti va aussi au journal des envois (02-TRD §10) ; SMS et WhatsApp y sont écrits
+        // par leur canal, avec l'identifiant du fournisseur.
+        if ($event->channel === 'mail') {
+            $to = $event->notifiable instanceof AnonymousNotifiable
+                ? ($event->notifiable->routes['mail'] ?? null)
+                : ($event->notifiable instanceof Model ? $event->notifiable->getAttribute('email') : null);
+            if (is_string($to)) {
+                app(MessageLogger::class)->record($event->notifiable, $event->notification, 'mail', $to, 'sent');
+            }
+        }
     }
 
     public function failed(NotificationFailed $event): void

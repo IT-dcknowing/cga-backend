@@ -26,6 +26,7 @@ class InvoicingProviderPolicy
 
     private function inCga(): bool
     {
-        return $this->context->has() && $this->context->organizationType() === OrganizationType::Cga && $this->context->memberId() === null;
+        // Un centre, ou le CNCGA pour ses factures de cotisation (étape 6.9, F-ADM-07).
+        return $this->context->has() && in_array($this->context->organizationType(), [OrganizationType::Cga, OrganizationType::Cncga], true) && $this->context->memberId() === null;
     }
 }

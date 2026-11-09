@@ -66,7 +66,8 @@ class PreviewTemplate
             } else {
                 $images = $this->samples->images($work.'/images', $this->codes->url('apercu'));
                 $wanted = [...(array) ($definition['images'] ?? []), ...(array) ($definition['framed_images'] ?? [])];
-                $this->renderer->render($source, $filled, $this->samples->values($type), array_intersect_key($images, array_flip($wanted)), $this->samples->rows($type));
+                $charts = array_intersect_key($this->samples->reportCharts(), array_flip((array) ($definition['charts'] ?? [])));
+                $this->renderer->render($source, $filled, $this->samples->values($type), array_intersect_key($images, array_flip($wanted)), $this->samples->rows($type), $charts);
             }
 
             $pdf = $this->converter->convert($filled);

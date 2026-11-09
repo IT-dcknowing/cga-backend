@@ -50,7 +50,8 @@ class InvoicePolicy
     private function issues(): bool
     {
         return $this->context->has()
-            && $this->context->organizationType() === OrganizationType::Cga
+            // Le CNCGA facture les cotisations des centres (étape 6.9) ; un centre facture ses adhérents.
+            && in_array($this->context->organizationType(), [OrganizationType::Cga, OrganizationType::Cncga], true)
             && $this->context->memberId() === null
             && $this->context->allows('invoices.issue');
     }

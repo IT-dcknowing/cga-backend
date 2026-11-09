@@ -28,10 +28,12 @@ function realDataOfMockup(): array
     ];
 }
 
-dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
+// Bordereau de transmission du rapport (étape 5.5, décision 0007), reçu de cotisation (étape 6.4), rapport modernisé (étape 5.11),
+// attestation de participation et reçu de formation (étape 7.2), plaquette statistique (étape 8.3) ajoutés.
+dataset('modèles', ['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_modern', 'report_transmission_slip', 'dues_receipt', 'training_certificate', 'training_receipt', 'statistics_brochure', 'quarterly_report_xlsx']);
 
 it('déclare chaque modèle de la liste', function () {
-    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_xlsx']);
+    expect(array_keys(config('documents.templates')))->toBe(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_modern', 'report_transmission_slip', 'dues_receipt', 'training_certificate', 'training_receipt', 'statistics_brochure', 'quarterly_report_xlsx']);
 });
 
 it('ne contient aucune donnée réelle de la maquette, même dans un attribut ou les propriétés', function (string $type) {
@@ -54,12 +56,12 @@ it('n\'a ni commentaire de relecture ni auteur', function (string $type) {
 
 it('porte exactement les variables déclarées (modèles Word)', function (string $type) {
     $template = config("documents.templates.{$type}");
-    $expected = [...$template['variables'], ...$template['images'], ...array_merge([], ...array_values($template['rows']))];
+    $expected = [...$template['variables'], ...$template['images'], ...array_merge([], ...array_values($template['rows'])), ...($template['charts'] ?? [])];
     sort($expected);
 
     expect(app(DocxTemplateRenderer::class)->variables($template['path']))->toBe(array_values(array_unique($expected)))
         ->and(array_keys(app(DocxTemplateRenderer::class)->framedImages($template['path'])))->toBe($template['framed_images'] ?? []);
-})->with(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx']);
+})->with(['membership_contract', 'membership_certificate', 'receipt', 'invoice', 'credit_note', 'radiation_notice', 'quarterly_report_docx', 'quarterly_report_modern']);
 
 it('RG-DOC-02 ne porte jamais la mention « signature électronique »', function (string $type) {
     foreach (templateParts(config("documents.templates.{$type}.path")) as $xml) {

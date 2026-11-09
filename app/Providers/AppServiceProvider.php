@@ -2,9 +2,15 @@
 
 namespace App\Providers;
 
+use App\Domain\Announcements\Models\Announcement;
+use App\Domain\Announcements\Policies\AnnouncementPolicy;
 use App\Domain\Audit\AuditLogger;
 use App\Domain\Auth\Support\AuthSession;
 use App\Domain\Auth\Support\InvitationToken;
+use App\Domain\Closing\Models\ClosingCampaign;
+use App\Domain\Closing\Policies\ClosingCampaignPolicy;
+use App\Domain\Concerns\Models\Concern;
+use App\Domain\Concerns\Policies\ConcernPolicy;
 use App\Domain\Documents\Listeners\CancelCertificatesOnRadiation;
 use App\Domain\Documents\Listeners\ProduceRadiationNoticeOnValidation;
 use App\Domain\Documents\Listeners\ProduceReceiptOnConfirmation;
@@ -14,17 +20,39 @@ use App\Domain\Documents\Models\GeneratedDocument;
 use App\Domain\Documents\Policies\AttestationBlockPolicy;
 use App\Domain\Documents\Policies\DocumentPolicy;
 use App\Domain\Documents\Policies\DocumentTemplatePolicy;
+use App\Domain\Dues\Models\NetworkDue;
+use App\Domain\Dues\Policies\NetworkDuePolicy;
+use App\Domain\Exports\Models\Export;
+use App\Domain\Exports\Policies\ExportPolicy;
 use App\Domain\Imports\Models\ImportBatch;
 use App\Domain\Imports\Policies\ImportBatchPolicy;
+use App\Domain\Members\Events\RadiationCancelled;
 use App\Domain\Members\Events\RadiationValidated;
 use App\Domain\Members\Models\BusinessReferrer;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Policies\MemberPolicy;
 use App\Domain\Members\Policies\ReferrerPolicy;
 use App\Domain\Notifications\Channels\SmsChannel;
+use App\Domain\Notifications\Channels\WhatsappChannel;
 use App\Domain\Notifications\Contracts\SmsProvider;
+use App\Domain\Notifications\Contracts\WhatsappProvider;
 use App\Domain\Notifications\Listeners\LogNotificationActivity;
-use App\Domain\Notifications\Providers\LogSmsProvider;
+use App\Domain\Notifications\Listeners\NotifyDomainEvents;
+use App\Domain\Notifications\Mail\PlatformMailTransport;
+use App\Domain\Notifications\Models\MessageCampaign;
+use App\Domain\Notifications\Models\MessagingProvider;
+use App\Domain\Notifications\Policies\MessageCampaignPolicy;
+use App\Domain\Notifications\Policies\MessagingProviderPolicy;
+use App\Domain\Notifications\Policies\NotificationPolicy;
+use App\Domain\Notifications\Providers\ConfiguredSmsProvider;
+use App\Domain\Notifications\Providers\ConfiguredWhatsappProvider;
+use App\Domain\Notifications\Support\MessagingProviders;
+use App\Domain\Obligations\Models\CenterObligation;
+use App\Domain\Obligations\Models\MemberObligation;
+use App\Domain\Obligations\Models\ObligationType;
+use App\Domain\Obligations\Policies\CenterObligationPolicy;
+use App\Domain\Obligations\Policies\MemberObligationPolicy;
+use App\Domain\Obligations\Policies\ObligationTypePolicy;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Organizations\Policies\OrganizationPolicy;
 use App\Domain\Payments\Events\PaymentConfirmed;
@@ -34,6 +62,10 @@ use App\Domain\Payments\Models\MemberPayment;
 use App\Domain\Payments\Policies\InvoicePolicy;
 use App\Domain\Payments\Policies\InvoicingProviderPolicy;
 use App\Domain\Payments\Policies\PaymentPolicy;
+use App\Domain\Platform\Models\FailedJob;
+use App\Domain\Platform\Models\Setting;
+use App\Domain\Platform\Policies\FailedJobPolicy;
+use App\Domain\Platform\Policies\SettingPolicy;
 use App\Domain\Referentials\Models\Commune;
 use App\Domain\Referentials\Models\Holiday;
 use App\Domain\Referentials\Models\NationalReference;
@@ -43,6 +75,17 @@ use App\Domain\Referentials\Models\TaxOffice;
 use App\Domain\Referentials\Policies\ReferenceDataPolicy;
 use App\Domain\Referentials\Policies\ReferentialPolicy;
 use App\Domain\Referentials\ReferenceData\ReferenceDataset;
+use App\Domain\Reports\Models\CgaPerson;
+use App\Domain\Reports\Models\CgaResource;
+use App\Domain\Reports\Models\QuarterlyReport;
+use App\Domain\Reports\Policies\PermanentProfilePolicy;
+use App\Domain\Reports\Policies\QuarterlyReportPolicy;
+use App\Domain\Statistics\Models\StatOrgDaily;
+use App\Domain\Statistics\Policies\StatisticsPolicy;
+use App\Domain\Statistics\Support\StatsRefresh;
+use App\Domain\Trainings\Models\Training;
+use App\Domain\Trainings\Models\TrainingRegistration;
+use App\Domain\Trainings\Policies\TrainingPolicy;
 use App\Domain\Users\Http\Controllers\UserPermissionController;
 use App\Domain\Users\Models\RolePermission;
 use App\Domain\Users\Models\User;
@@ -63,9 +106,11 @@ use App\Support\Tenancy\TenantContext;
 use App\Support\Validation\Rules\NotCommonPassword;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\DevCommands;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Routing\Route as RouteDefinition;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -94,7 +139,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(AuthSession::class);
 
         // Pilote SMS « log » jusqu'au branchement des fournisseurs de l'écran « Envois » (lot 6).
-        $this->app->bind(SmsProvider::class, LogSmsProvider::class);
+        // Envois par le compte actif de l'écran « Envois » (RG-NOT-05), journal sans compte actif.
+        $this->app->bind(SmsProvider::class, ConfiguredSmsProvider::class);
+        $this->app->bind(WhatsappProvider::class, ConfiguredWhatsappProvider::class);
 
         // Conversion PDF : pilote choisi par PDF_CONVERTER (02-TRD §8.2).
         $this->app->bind(PdfConverter::class, static fn (Application $app): PdfConverter => match (config('pdf.driver')) {
@@ -108,14 +155,26 @@ class AppServiceProvider extends ServiceProvider
         // Jobs, tâches planifiées et commandes au journal d'activité (02-TRD §6.5).
         Event::subscribe(SystemActivityListener::class);
         Event::subscribe(LogNotificationActivity::class);
+        // Notifications des événements des modules (PRD M13) : écouteur résolu à l'événement, pas au démarrage.
+        foreach (NotifyDomainEvents::LISTENS as $event => $method) {
+            Event::listen($event, [NotifyDomainEvents::class, $method]);
+        }
 
         // Documents produits ou annulés par les événements d'autres modules (F-DOC-01, RG-DOC-08).
         Event::listen(PaymentConfirmed::class, ProduceReceiptOnConfirmation::class);
         Event::listen(RadiationValidated::class, CancelCertificatesOnRadiation::class);
         Event::listen(RadiationValidated::class, ProduceRadiationNoticeOnValidation::class);
+        // Recalcul ciblé des statistiques du CGA (02-TRD §9).
+        foreach ([PaymentConfirmed::class, RadiationValidated::class, RadiationCancelled::class] as $statsEvent) {
+            Event::listen($statsEvent, [StatsRefresh::class, 'handle']);
+        }
 
         // Canal « sms » des notifications (02-TRD §10).
         Notification::extend('sms', static fn (Application $app): SmsChannel => $app->make(SmsChannel::class));
+        Notification::extend('whatsapp', static fn (Application $app): WhatsappChannel => $app->make(WhatsappChannel::class));
+        Mail::extend('platform', static fn (array $config): PlatformMailTransport => new PlatformMailTransport(
+            app(MessagingProviders::class), app('mail.manager'), (string) ($config['fallback'] ?? 'log'),
+        ));
 
         // Mot de passe : longueur minimale et refus des mots de passe courants (02-TRD §6.1).
         Password::defaults(static fn (): Password => Password::min((int) config('auth.password_min_length'))->rules([new NotCommonPassword]));
@@ -137,6 +196,44 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(MemberPayment::class, PaymentPolicy::class);
         Gate::policy(Invoice::class, InvoicePolicy::class);
         Gate::policy(InvoicingProvider::class, InvoicingProviderPolicy::class);
+
+        // Obligations fiscales et sociales (M07).
+        Gate::policy(ObligationType::class, ObligationTypePolicy::class);
+        Gate::policy(MemberObligation::class, MemberObligationPolicy::class);
+        Gate::policy(CenterObligation::class, CenterObligationPolicy::class);
+        Gate::policy(ClosingCampaign::class, ClosingCampaignPolicy::class);
+
+        // Rapport trimestriel (M09) : fiche permanente du CGA.
+        Gate::policy(CgaPerson::class, PermanentProfilePolicy::class);
+        Gate::policy(CgaResource::class, PermanentProfilePolicy::class);
+        Gate::policy(QuarterlyReport::class, QuarterlyReportPolicy::class);
+
+        // Notifications dans la plateforme (PRD M13) : celles de l'utilisateur, dans son espace actif.
+        Gate::policy(DatabaseNotification::class, NotificationPolicy::class);
+        Gate::policy(MessagingProvider::class, MessagingProviderPolicy::class);
+        Gate::policy(MessageCampaign::class, MessageCampaignPolicy::class);
+
+        // Paramètres du réseau et de la plateforme (02-TRD §7.5).
+        Gate::policy(Setting::class, SettingPolicy::class);
+        // Files d'attente et travaux en échec (02-TRD §12.3).
+        Gate::policy(FailedJob::class, FailedJobPolicy::class);
+
+        // Préoccupations (PRD M10).
+        Gate::policy(Concern::class, ConcernPolicy::class);
+
+        // Tableaux de bord et statistiques (PRD M15).
+        Gate::policy(StatOrgDaily::class, StatisticsPolicy::class);
+
+        // Annonces (PRD M12).
+        Gate::policy(Announcement::class, AnnouncementPolicy::class);
+        Gate::policy(Export::class, ExportPolicy::class);
+
+        // Formations (PRD M11).
+        Gate::policy(Training::class, TrainingPolicy::class);
+        Gate::policy(TrainingRegistration::class, TrainingPolicy::class);
+
+        // Cotisation CNCGA (PRD M14).
+        Gate::policy(NetworkDue::class, NetworkDuePolicy::class);
 
         // Documents officiels produits ou déposés (M08).
         Gate::policy(GeneratedDocument::class, DocumentPolicy::class);

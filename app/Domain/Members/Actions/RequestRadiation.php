@@ -8,6 +8,7 @@ use App\Domain\Members\Enums\MemberStatus;
 use App\Domain\Members\Enums\Portfolio;
 use App\Domain\Members\Enums\RadiationOutcome;
 use App\Domain\Members\Enums\RadiationStatus;
+use App\Domain\Members\Events\RadiationRequested;
 use App\Domain\Members\Models\Member;
 use App\Domain\Members\Models\Radiation;
 use App\Domain\Members\Support\RadiationRules;
@@ -76,6 +77,7 @@ class RequestRadiation
             $member->updated_by = $actor->id;
             $member->save();
             $this->audit->record('radiation_requested', $member, context: ['radiation_id' => $radiation->id, 'initiator' => $demand->initiator->value, 'reason' => $demand->reason->value]);
+            RadiationRequested::dispatch($radiation);
 
             if ($immediate !== null) {
                 return $this->validate->execute($member, $immediate['outcome'], $immediate['reference'], $actor);

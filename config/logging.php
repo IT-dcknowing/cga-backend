@@ -79,6 +79,7 @@ return [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
+            'formatter' => JsonFormatter::class,
             'replace_placeholders' => true,
         ],
 
@@ -86,7 +87,9 @@ return [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
-            'max_files' => env('LOG_DAILY_DAYS', 14),
+            // Journaux JSON gardés 30 jours (02-TRD §12.3).
+            'max_files' => (int) env('LOG_DAILY_DAYS', 30),
+            'formatter' => JsonFormatter::class,
             'replace_placeholders' => true,
         ],
 

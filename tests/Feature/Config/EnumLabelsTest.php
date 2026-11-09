@@ -1,9 +1,18 @@
 <?php
 
+use App\Domain\Announcements\Enums\AnnouncementAudience;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Enums\OtpPurpose;
+use App\Domain\Concerns\Enums\ConcernCategory;
+use App\Domain\Concerns\Enums\ConcernLevel;
+use App\Domain\Concerns\Enums\ConcernSide;
+use App\Domain\Concerns\Enums\ConcernStatus;
+use App\Domain\Concerns\Enums\DocumentRequestType;
 use App\Domain\Documents\Enums\DocumentStatus;
 use App\Domain\Documents\Enums\DocumentType;
+use App\Domain\Exports\Enums\ExportStatus;
+use App\Domain\Platform\Enums\BackupStatus;
+use App\Domain\Exports\Enums\ExportType;
 use App\Domain\Imports\Enums\ImportRowStatus;
 use App\Domain\Imports\Enums\ImportStatus;
 use App\Domain\Imports\Enums\ImportType;
@@ -41,6 +50,12 @@ use App\Domain\Referentials\Enums\SectorStatus;
 use App\Domain\Referentials\ReferenceData\ImportMode;
 use App\Domain\Referentials\ReferenceData\ReferenceDataset;
 use App\Domain\Referentials\ReferenceData\Removal;
+use App\Domain\Trainings\Enums\Attendance;
+use App\Domain\Trainings\Enums\AudienceType;
+use App\Domain\Trainings\Enums\RegistrationStatus;
+use App\Domain\Trainings\Enums\TrainingFormat;
+use App\Domain\Trainings\Enums\TrainingPaymentStatus;
+use App\Domain\Trainings\Enums\TrainingStatus;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Enums\UserStatus;
@@ -60,6 +75,9 @@ it('donne un libellé français à chaque valeur', function (string $enum) {
     ImportType::class, ImportStatus::class, ImportRowStatus::class, ReferenceDataset::class, ImportMode::class, Removal::class,
     Portfolio::class, MemberStatus::class, EntityType::class, LegalForm::class, TaxRegime::class, FeesPeriodicity::class, PiecesStatus::class, PieceType::class, PieceStatus::class, RadiationInitiator::class, RadiationReason::class, RadiationStatus::class, RadiationOutcome::class, RevenueKind::class, RevenueSource::class, MovementDirection::class, FeeKind::class,
     ChargeKind::class, ChargeStatus::class, PaymentMethod::class, PaymentSource::class, PaymentStatus::class, DocumentType::class, DocumentStatus::class,
+    ConcernLevel::class, ConcernCategory::class, ConcernStatus::class, ConcernSide::class, DocumentRequestType::class,
+    TrainingFormat::class, TrainingStatus::class, AudienceType::class, RegistrationStatus::class, TrainingPaymentStatus::class, Attendance::class,
+    AnnouncementAudience::class, ExportType::class, ExportStatus::class, BackupStatus::class,
 ]);
 
 it('nomme les rôles comme le PRD', function () {

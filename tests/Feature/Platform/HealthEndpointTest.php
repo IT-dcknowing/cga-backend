@@ -3,6 +3,7 @@
 use App\Support\Health\HealthCheckResult;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\FakesHealthChecks;
 
@@ -29,6 +30,7 @@ it('répond 200 sans authentification quand tous les contrôles sont bons', func
                 'queue' => ['status' => 'ok'],
                 'storage' => ['status' => 'ok'],
                 'libreoffice' => ['status' => 'ok'],
+                'backup' => ['status' => 'ok'],
             ],
         ]]);
 });
@@ -52,6 +54,23 @@ it('signale un disque presque plein', function () {
     $this->getJson('/api/health')
         ->assertServiceUnavailable()
         ->assertJsonPath('data.checks.storage', ['status' => 'failed', 'error' => 'low_space']);
+});
+
+it('déclenche une alerte de supervision quand une tâche dépasse le délai paramétré', function () {
+    Process::fake(['*' => Process::result('LibreOffice 26.2.6.3')]);
+    $this->travelTo(now()->subMinutes(16));
+    Queue::push(static fn () => null);
+    $this->travelTo(now()->addMinutes(16));
+    Log::spy();
+
+    $this->getJson('/api/health')
+        ->assertServiceUnavailable()
+        ->assertJsonPath('data.checks.queue', ['status' => 'failed', 'error' => 'delayed']);
+
+    Log::shouldHaveReceived('warning')->once()->withArgs(
+        fn (string $message, array $context): bool => str_contains($message, 'queue')
+            && $context === ['check' => 'queue', 'error' => 'delayed', 'queue' => 'default', 'delay_minutes' => 16, 'threshold_minutes' => 15],
+    );
 });
 
 it('ne révèle jamais le détail technique d\'une panne', function () {

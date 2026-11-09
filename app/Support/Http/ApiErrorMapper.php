@@ -34,6 +34,8 @@ class ApiErrorMapper
 
     public const DENIED_ALERTS_KEY = AlertCounter::PREFIX.self::DENIED_ALERT.':';
 
+    public const SERVER_ERROR_ALERT = 'server_error';
+
     public function __construct(
         private readonly AlertCounter $alerts,
         private readonly RequestContext $requestContext,
@@ -48,6 +50,9 @@ class ApiErrorMapper
 
         if ($result === ActivityResult::Denied && $status === 403) {
             $this->alerts->increment(self::DENIED_ALERT);
+        }
+        if ($status >= 500) {
+            $this->alerts->increment(self::SERVER_ERROR_ALERT);
         }
 
         return new JsonResponse($body, $status, $headers);

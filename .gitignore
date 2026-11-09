@@ -20,6 +20,8 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/backups
+/storage/restore-tests
 /vendor
 _ide_helper.php
 Homestead.json
