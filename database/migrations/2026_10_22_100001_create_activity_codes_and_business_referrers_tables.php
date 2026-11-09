@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('label', 40);
             $table->string('name', 150);
             $table->string('phone', 20)->nullable();
-            $table->rawColumn('email', 'citext')->nullable();
+            $table->string('email', 255)->nullable();
             $table->text('terms')->nullable();
             $table->boolean('active')->default(true);
             $table->foreignUlid('created_by')->nullable()->constrained('users')->nullOnDelete();

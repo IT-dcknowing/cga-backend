@@ -69,7 +69,7 @@ return new class extends Migration
             $table->date('registration_date')->nullable();
             $table->string('phone', 20);
             $table->string('whatsapp', 20)->nullable();
-            $table->rawColumn('email', 'citext')->nullable();
+            $table->string('email', 255)->nullable();
             $table->string('signatory_name', 150)->nullable();
             $table->string('signatory_title', 100)->nullable();
             $table->integer('employees_count')->nullable();

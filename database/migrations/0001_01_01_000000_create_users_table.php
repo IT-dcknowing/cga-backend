@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('last_name', 100);
             $table->string('phone', 20)->unique();
             $table->timestampTz('phone_verified_at')->nullable();
-            $table->rawColumn('email', 'citext')->nullable();
+            $table->string('email', 255)->nullable();
             $table->timestampTz('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->string('status', 20)->default(UserStatus::Invited->value);

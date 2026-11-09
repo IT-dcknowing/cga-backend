@@ -44,7 +44,7 @@ return new class extends Migration
             $table->ulid('commune_id')->nullable()->index();
             $table->string('phone_1', 20);
             $table->string('phone_2', 20)->nullable();
-            $table->rawColumn('email', 'citext')->nullable();
+            $table->string('email', 255)->nullable();
             $table->string('manager_name', 150)->nullable();
             $table->string('expert_name', 150)->nullable();
             $table->string('signatory_name', 150)->nullable();

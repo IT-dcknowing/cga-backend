@@ -27,6 +27,8 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+/tests/*
+
 
 # Rapports de couverture et de tests (CI)
 /build
