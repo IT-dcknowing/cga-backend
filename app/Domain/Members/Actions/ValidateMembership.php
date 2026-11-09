@@ -9,6 +9,7 @@ use App\Domain\Members\Models\Member;
 use App\Domain\Members\Support\MemberNumbering;
 use App\Domain\Members\Support\MembershipReadiness;
 use App\Domain\Organizations\Models\Organization;
+use App\Domain\Statistics\Support\StatsRefresh;
 use App\Domain\Users\Models\User;
 use App\Support\Http\Exceptions\BusinessRuleException;
 use App\Support\Numbering\SequenceService;
@@ -32,6 +33,7 @@ class ValidateMembership
         private readonly MemberNumbering $numbering,
         private readonly CreateExpectedPieces $pieces,
         private readonly AuditLogger $audit,
+        private readonly StatsRefresh $stats,
     ) {}
 
     /**
@@ -88,6 +90,7 @@ class ValidateMembership
                 'number' => $member->membership_number ?? $member->client_number,
                 'exclusivity_confirmed' => $cga ? $exclusivityConfirmed : null,
             ]);
+            $this->stats->queue($member->organization_id);
 
             return $member->refresh();
         });

@@ -17,6 +17,7 @@ use App\Domain\Organizations\Models\Organization;
 use App\Domain\Payments\Actions\RecordPayment;
 use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Payments\Data\PaymentEntry;
+use App\Domain\Statistics\Support\StatsRefresh;
 use App\Domain\Users\Models\User;
 use App\Support\Files\StorageService;
 use App\Support\Http\Exceptions\BusinessRuleException;
@@ -46,6 +47,7 @@ class MoveToCgaPortfolio
         private readonly SyncEntryFee $entryFee,
         private readonly RecordPayment $payments,
         private readonly AuditLogger $audit,
+        private readonly StatsRefresh $stats,
     ) {}
 
     /**
@@ -92,6 +94,7 @@ class MoveToCgaPortfolio
             $this->contractPiece($member);
             $this->movement($member, $contractSignedOn, $file?->id, $reason, $actor);
             $this->audit->record('portfolio_moved', $member, context: ['direction' => MovementDirection::CabinetToCga->value, 'number' => $member->membership_number]);
+            $this->stats->queue($member->organization_id);
 
             return $member->refresh();
         });

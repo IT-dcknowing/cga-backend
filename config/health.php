@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\Health\Checks\BackupCheck;
 use App\Support\Health\Checks\DatabaseCheck;
 use App\Support\Health\Checks\LibreOfficeCheck;
 use App\Support\Health\Checks\QueueCheck;
@@ -22,6 +23,7 @@ return [
         QueueCheck::class,
         StorageCheck::class,
         LibreOfficeCheck::class,
+        BackupCheck::class,
     ],
 
     // Délai maximal de « soffice --version » ; le premier lancement de LibreOffice est lent. Il doit

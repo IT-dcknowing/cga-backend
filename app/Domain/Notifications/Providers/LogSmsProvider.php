@@ -4,6 +4,7 @@ namespace App\Domain\Notifications\Providers;
 
 use App\Domain\Notifications\Contracts\SmsProvider;
 use Illuminate\Log\LogManager;
+use Illuminate\Support\Str;
 
 /**
  * Pilote de développement et de recette (02-TRD §10, §14) : aucun SMS ne part, chaque message est
@@ -13,8 +14,10 @@ class LogSmsProvider implements SmsProvider
 {
     public function __construct(private readonly LogManager $logs) {}
 
-    public function send(string $to, string $text): void
+    public function send(string $to, string $text): ?string
     {
         $this->logs->channel('sms')->info("SMS à {$to} : {$text}");
+
+        return 'log-'.Str::lower((string) Str::ulid());
     }
 }

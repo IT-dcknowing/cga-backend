@@ -3,6 +3,7 @@
 namespace App\Domain\Organizations\Http\Resources;
 
 use App\Domain\Documents\Models\File;
+use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Models\Organization;
 use App\Support\Files\StorageService;
 use Illuminate\Http\Request;
@@ -77,7 +78,7 @@ class CgaProfileResource extends JsonResource
             'missing_fields' => $organization->missingProfileFields(),
             'profile_completed_at' => $organization->profile_completed_at?->toIso8601ZuluString(),
             'can' => [
-                'update' => Gate::allows('updateProfile', $organization),
+                'update' => Gate::allows($organization->type === OrganizationType::Cncga ? 'updateNetworkProfile' : 'updateProfile', $organization),
             ],
         ];
     }

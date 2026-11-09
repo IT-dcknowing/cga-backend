@@ -101,6 +101,12 @@ class StorageService
         ]);
     }
 
+    public function delete(File $file): void
+    {
+        $this->disk($file->disk)->delete($file->path);
+        $file->delete();
+    }
+
     private function disk(string $name): FilesystemAdapter
     {
         /** @var FilesystemAdapter */

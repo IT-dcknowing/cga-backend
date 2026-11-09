@@ -33,10 +33,15 @@ class UploadTemplateVersion
     {
         try {
             $variables = $this->inspector->variables($type, (string) $upload->getRealPath());
+            $problems = $this->inspector->structure($type, (string) $upload->getRealPath());
         } catch (Throwable $exception) {
             Log::warning('Modèle de document illisible.', ['type' => $type->value, 'version' => $version, 'exception' => $exception->getMessage()]);
 
             throw ValidationException::withMessages(['file' => __('documents.template_unreadable')]);
+        }
+        // Structure attendue par le remplissage (étape 5.10) : un fichier inutilisable n'est pas déposé.
+        if ($problems !== []) {
+            throw ValidationException::withMessages(['file' => $problems]);
         }
 
         return DB::transaction(function () use ($type, $version, $upload, $notes, $actor, $variables): DocumentTemplate {

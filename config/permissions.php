@@ -46,10 +46,16 @@ return [
         'network_user_permissions.manage' => ['locked' => true, 'roles' => [$admin]],
         'network_permissions.manage' => ['locked' => true, 'roles' => [$admin]],
         'network_settings.manage' => ['locked' => false, 'roles' => [$president, $networkManager]],
+        // Fiche d'identité du CNCGA, émetteur des reçus et factures de cotisation (étape 6.9).
+        'network_profile.view' => ['locked' => false, 'roles' => [$president, $networkManager]],
+        'network_profile.manage' => ['locked' => false, 'roles' => [$president, $networkManager]],
         'referentials.manage' => ['locked' => false, 'roles' => [$president, $networkManager, $admin]],
         'dues.view' => ['locked' => false, 'roles' => [$president, $networkManager, $dues, $board]],
         'dues.payments.manage' => ['locked' => false, 'roles' => [$president, $networkManager, $dues]],
         'dues.remind' => ['locked' => false, 'roles' => [$president, $networkManager, $dues]],
+        // Côté CGA (F-COT-06) : sa cotisation lue par le gérant et l'expert-comptable, déclarée par le gérant.
+        'dues.own.view' => ['locked' => false, 'roles' => [$manager, $expert]],
+        'dues.own.declare' => ['locked' => false, 'roles' => [$manager]],
         'announcements.network.publish' => ['locked' => false, 'roles' => [$president, $networkManager, $training]],
         'trainings.network.manage' => ['locked' => false, 'roles' => [$president, $networkManager, $training]],
         'network_concerns.view' => ['locked' => false, 'roles' => [$president, $networkManager, $board]],
@@ -77,6 +83,8 @@ return [
         'members.update' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
         'members.access.manage' => ['locked' => false, 'roles' => [$manager]],
         'members.import' => ['locked' => false, 'roles' => [$manager]],
+        // Reprise d'historique : CA et paiements d'impôts (F-IMP-03), par les agents qui suivent les obligations.
+        'members.history.import' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
         'members.radiation.request' => ['locked' => false, 'roles' => [$manager, $expert]],
         'members.radiation.validate' => ['locked' => false, 'roles' => [$manager, $expert]],
         'members.radiation.cancel' => ['locked' => true, 'roles' => [$manager]],
@@ -99,8 +107,12 @@ return [
         'reports.transmit' => ['locked' => false, 'roles' => [$manager, $expert]],
         'communications.bulk.send' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
         'communications.bulk.approve' => ['locked' => false, 'roles' => [$manager]],
+        // Annonces à ses adhérents, « Message de mon CGA » (F-COM-02).
+        'announcements.cga.publish' => ['locked' => false, 'roles' => [$manager, $expert]],
         'concerns.reply' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants, $secretary]],
         'concerns.network.write' => ['locked' => false, 'roles' => [$manager, $expert]],
+        // Tableau des délais des demandes des adhérents du centre (F-PRE-04).
+        'concerns.indicators.view' => ['locked' => false, 'roles' => [$manager]],
         'trainings.cga.manage' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants, $secretary, $trainer]],
         'banking.manage' => ['locked' => false, 'roles' => [$manager, $expert, ...$accountants]],
 
@@ -120,6 +132,8 @@ return [
         'platform.messaging.manage' => ['locked' => false, 'roles' => [$admin]],
         'platform.templates.manage' => ['locked' => false, 'roles' => [$admin]],
         'platform.logs.view' => ['locked' => false, 'roles' => [$admin]],
+        // Files d'attente et travaux en échec (écran « Technique », 02-TRD §12.3) : équipe technique.
+        'platform.queues.manage' => ['locked' => false, 'roles' => [$admin]],
 
     ],
 
@@ -128,7 +142,7 @@ return [
      * code. Libellés : lang/fr/permission_modules.php.
      */
     'modules' => [
-        'network' => ['organizations', 'network_users', 'network_user_permissions', 'network_permissions', 'network_settings', 'referentials'],
+        'network' => ['organizations', 'network_users', 'network_user_permissions', 'network_permissions', 'network_settings', 'network_profile', 'referentials'],
         'centre' => ['cga', 'cga_users', 'cga_permissions', 'cga_user_permissions', 'integrations', 'internal'],
         'members' => ['members'],
         'documents' => ['documents', 'attestations'],

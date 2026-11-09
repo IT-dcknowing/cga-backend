@@ -1,10 +1,17 @@
 <?php
 
+use App\Domain\Announcements\Http\Controllers\AuthorAnnouncementController;
+use App\Domain\Announcements\Http\Controllers\MyAnnouncementController;
 use App\Domain\Auth\Http\Controllers\InvitationController;
 use App\Domain\Auth\Http\Controllers\MeController;
 use App\Domain\Auth\Http\Controllers\PasswordResetController;
 use App\Domain\Auth\Http\Controllers\ProfileSecurityController;
 use App\Domain\Auth\Http\Controllers\SessionController;
+use App\Domain\Closing\Http\Controllers\ClosingCampaignController;
+use App\Domain\Closing\Http\Controllers\MemberClosingController;
+use App\Domain\Concerns\Http\Controllers\CgaConcernController;
+use App\Domain\Concerns\Http\Controllers\MemberConcernController;
+use App\Domain\Concerns\Http\Controllers\NetworkConcernController;
 use App\Domain\Documents\Http\Controllers\AttestationBlockController;
 use App\Domain\Documents\Http\Controllers\CertificateCampaignController;
 use App\Domain\Documents\Http\Controllers\DocumentController;
@@ -13,8 +20,13 @@ use App\Domain\Documents\Http\Controllers\FileDownloadController;
 use App\Domain\Documents\Http\Controllers\MemberDocumentController;
 use App\Domain\Documents\Http\Controllers\MemberSpaceDocumentController;
 use App\Domain\Documents\Http\Controllers\VerificationController;
+use App\Domain\Dues\Http\Controllers\CgaDuesController;
+use App\Domain\Dues\Http\Controllers\NetworkDuesController;
+use App\Domain\Exports\Http\Controllers\ExportController;
+use App\Domain\Imports\Http\Controllers\HistoryImportController;
 use App\Domain\Imports\Http\Controllers\ImportController;
 use App\Domain\Imports\Http\Controllers\MemberImportController;
+use App\Domain\Members\Http\Controllers\AgreementLossController;
 use App\Domain\Members\Http\Controllers\MemberAccessController;
 use App\Domain\Members\Http\Controllers\MemberController;
 use App\Domain\Members\Http\Controllers\MemberHistoryController;
@@ -25,6 +37,16 @@ use App\Domain\Members\Http\Controllers\PortfolioController;
 use App\Domain\Members\Http\Controllers\RadiationController;
 use App\Domain\Members\Http\Controllers\ReferrerController;
 use App\Domain\Members\Http\Controllers\RegimeController;
+use App\Domain\Notifications\Http\Controllers\MessageCampaignController;
+use App\Domain\Notifications\Http\Controllers\MessagingProviderController;
+use App\Domain\Notifications\Http\Controllers\NotificationController;
+use App\Domain\Obligations\Http\Controllers\CenterObligationController;
+use App\Domain\Obligations\Http\Controllers\MemberObligationController;
+use App\Domain\Obligations\Http\Controllers\MemberSpaceObligationController;
+use App\Domain\Obligations\Http\Controllers\ObligationCatalogController;
+use App\Domain\Obligations\Http\Controllers\ObligationInstanceController;
+use App\Domain\Obligations\Http\Controllers\ObligationPlanningController;
+use App\Domain\Obligations\Http\Controllers\ObligationTypeController;
 use App\Domain\Organizations\Http\Controllers\CgaProfileController;
 use App\Domain\Organizations\Http\Controllers\OrganizationController;
 use App\Domain\Organizations\Http\Controllers\OrganizationStatusController;
@@ -35,6 +57,9 @@ use App\Domain\Payments\Http\Controllers\MemberPaymentController;
 use App\Domain\Payments\Http\Controllers\MemberSpacePaymentController;
 use App\Domain\Payments\Http\Controllers\PaymentController;
 use App\Domain\Platform\Http\Controllers\HealthController;
+use App\Domain\Platform\Http\Controllers\PlatformAccessLogController;
+use App\Domain\Platform\Http\Controllers\QueueController;
+use App\Domain\Platform\Http\Controllers\SettingsController;
 use App\Domain\Referentials\Http\Controllers\CommuneController;
 use App\Domain\Referentials\Http\Controllers\HolidayController;
 use App\Domain\Referentials\Http\Controllers\MergeController;
@@ -44,6 +69,15 @@ use App\Domain\Referentials\Http\Controllers\RegionalDirectorateController;
 use App\Domain\Referentials\Http\Controllers\SectorController;
 use App\Domain\Referentials\Http\Controllers\SectorProposalController;
 use App\Domain\Referentials\Http\Controllers\TaxOfficeController;
+use App\Domain\Reports\Http\Controllers\NetworkReportController;
+use App\Domain\Reports\Http\Controllers\PermanentProfileController;
+use App\Domain\Reports\Http\Controllers\QuarterlyReportController;
+use App\Domain\Statistics\Http\Controllers\CgaStatisticsController;
+use App\Domain\Statistics\Http\Controllers\MemberDashboardController;
+use App\Domain\Statistics\Http\Controllers\NetworkStatisticsController;
+use App\Domain\Trainings\Http\Controllers\MyTrainingController;
+use App\Domain\Trainings\Http\Controllers\NetworkTrainingCatalogController;
+use App\Domain\Trainings\Http\Controllers\OrganizerTrainingController;
 use App\Domain\Users\Http\Controllers\AgentController;
 use App\Domain\Users\Http\Controllers\RolePermissionController;
 use App\Domain\Users\Http\Controllers\UserPermissionController;
@@ -81,6 +115,13 @@ Route::prefix('v1')->group(function (): void {
         Route::post('phone/code', [ProfileSecurityController::class, 'phoneCode'])->name('phone.code');
         Route::post('phone', [ProfileSecurityController::class, 'phone'])->name('phone');
         Route::patch('preferences', [ProfileSecurityController::class, 'preferences'])->name('preferences');
+    });
+
+    // Cloche de notifications (PRD M13) : notifications de l'utilisateur dans son espace actif.
+    Route::prefix('me/notifications')->name('me.notifications.')->middleware(['auth', 'tenant'])->group(function (): void {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('read-all', [NotificationController::class, 'readAll'])->name('read-all');
+        Route::post('{notificationId}/read', [NotificationController::class, 'read'])->name('read');
     });
 
     // Référentiels nationaux (F-REF-01 à 04, 05-BACKEND-SCHEMA §4) : lus dans tout espace, gérés par le CNCGA.
@@ -144,6 +185,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('members/template', [MemberImportController::class, 'template'])->name('members.template');
         Route::post('members/preview', [MemberImportController::class, 'preview'])->name('members.preview');
         Route::post('members', [MemberImportController::class, 'store'])->name('members.store');
+        // Reprise d'historique (F-IMP-03) : chiffres d'affaires, paiements d'impôts.
+        Route::get('revenues/template', [HistoryImportController::class, 'revenuesTemplate'])->name('revenues.template');
+        Route::post('revenues', [HistoryImportController::class, 'store'])->name('revenues.store');
+        Route::get('tax-payments/template', [HistoryImportController::class, 'taxPaymentsTemplate'])->name('tax-payments.template');
+        Route::post('tax-payments', [HistoryImportController::class, 'store'])->name('tax-payments.store');
         Route::get('{importBatch}', [ImportController::class, 'show'])->name('show');
         Route::get('{importBatch}/rows', [ImportController::class, 'rows'])->name('rows');
     });
@@ -182,11 +228,34 @@ Route::prefix('v1')->group(function (): void {
         Route::put('/', [UserPermissionController::class, 'update'])->name('update');
         Route::post('reset', [UserPermissionController::class, 'reset'])->name('reset');
     });
+    // Écran « Envois » de l'administrateur (F-ADM-06, RG-NOT-05) : comptes SMS, WhatsApp et e-mail.
+    Route::middleware(['auth', 'tenant'])->prefix('platform/messaging')->name('platform.messaging.')->group(function (): void {
+        Route::get('/', [MessagingProviderController::class, 'index'])->name('index');
+        Route::post('/', [MessagingProviderController::class, 'store'])->name('store');
+        Route::put('{messagingProvider}', [MessagingProviderController::class, 'update'])->name('update');
+        Route::post('{messagingProvider}/activate', [MessagingProviderController::class, 'activate'])->name('activate');
+        Route::post('{messagingProvider}/deactivate', [MessagingProviderController::class, 'deactivate'])->name('deactivate');
+        Route::post('{messagingProvider}/test', [MessagingProviderController::class, 'test'])->name('test');
+    });
+
     Route::middleware(['auth', 'tenant'])->prefix('platform/network-users')->name('platform.network-users.')->group(function (): void {
         Route::get('/', [UserPermissionController::class, 'networkUsers'])->name('index');
         Route::get('{agent}/permissions', [UserPermissionController::class, 'show'])->name('permissions.show');
         Route::put('{agent}/permissions', [UserPermissionController::class, 'update'])->name('permissions.update');
         Route::post('{agent}/permissions/reset', [UserPermissionController::class, 'reset'])->name('permissions.reset');
+    });
+
+    // Écran « Technique » de /plateforme (02-TRD §12.3) : files d'attente, travaux en échec et relance.
+    Route::middleware(['auth', 'tenant'])->prefix('platform')->name('platform.')->group(function (): void {
+        Route::get('queues', [QueueController::class, 'index'])->name('queues.index');
+        Route::get('failed-jobs', [QueueController::class, 'failed'])->name('failed-jobs.index');
+        Route::post('failed-jobs/{failedJob}/retry', [QueueController::class, 'retry'])->name('failed-jobs.retry');
+    });
+
+    // Journal d'accès support platform_admin (RG-SEC-04).
+    Route::middleware(['auth', 'tenant'])->prefix('platform/access-logs')->name('platform.access-logs.')->group(function (): void {
+        Route::get('/', [PlatformAccessLogController::class, 'indexForPlatform'])->name('index');
+        Route::post('/', [PlatformAccessLogController::class, 'store'])->name('store');
     });
 
     // Dossiers des adhérents du centre (F-ADH-01 à 10, F-PJ-01) : fiche, régime, radiation en deux temps, pièces,
@@ -218,6 +287,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('{member}/attestation-blocks', [AttestationBlockController::class, 'index'])->name('attestation-blocks.index');
         Route::post('{member}/attestation-blocks', [AttestationBlockController::class, 'store'])->name('attestation-blocks.store');
         Route::post('{member}/attestation-blocks/release', [AttestationBlockController::class, 'release'])->name('attestation-blocks.release');
+        Route::get('{member}/obligations', [MemberObligationController::class, 'index'])->name('obligations.index');
+        Route::post('{member}/obligations', [MemberObligationController::class, 'store'])->name('obligations.store');
+        Route::post('{member}/obligations/review', [MemberObligationController::class, 'review'])->name('obligations.review');
+        Route::get('{member}/obligation-instances', [ObligationInstanceController::class, 'index'])->name('obligation-instances.index');
+        Route::post('{member}/obligation-instances', [ObligationInstanceController::class, 'store'])->name('obligation-instances.store');
         Route::get('{member}/pieces', [PieceController::class, 'index'])->name('pieces.index');
         Route::post('{member}/pieces/{pieceType}', [PieceController::class, 'store'])->name('pieces.store');
         Route::get('{member}/accesses', [MemberAccessController::class, 'index'])->name('accesses.index');
@@ -228,6 +302,12 @@ Route::prefix('v1')->group(function (): void {
             Route::post('{member}/accesses/{access}/enable', [MemberAccessController::class, 'enable'])->name('accesses.enable');
             Route::post('{member}/payments/{payment}/confirm', [MemberPaymentController::class, 'confirm'])->name('payments.confirm');
             Route::post('{member}/payments/{payment}/reject', [MemberPaymentController::class, 'reject'])->name('payments.reject');
+            Route::post('{member}/obligation-instances/{obligationInstance}/done', [ObligationInstanceController::class, 'done'])->name('obligation-instances.done');
+            Route::put('{member}/obligation-instances/{obligationInstance}/amount', [ObligationInstanceController::class, 'amount'])->name('obligation-instances.amount');
+            Route::post('{member}/obligation-instances/{obligationInstance}/payments', [ObligationInstanceController::class, 'payment'])->name('obligation-instances.payments');
+            Route::put('{member}/obligation-instances/{obligationInstance}/diligence', [ObligationInstanceController::class, 'diligence'])->name('obligation-instances.diligence');
+            Route::post('{member}/obligation-instances/{obligationInstance}/member-declaration/confirm', [ObligationInstanceController::class, 'confirmDeclaration'])->name('obligation-instances.declaration.confirm');
+            Route::post('{member}/obligation-instances/{obligationInstance}/member-declaration/reject', [ObligationInstanceController::class, 'rejectDeclaration'])->name('obligation-instances.declaration.reject');
         });
     });
 
@@ -251,6 +331,9 @@ Route::prefix('v1')->group(function (): void {
         Route::post('invoices/{invoice}/credit-note', [InvoiceController::class, 'creditNote'])->name('invoices.credit-note');
         Route::post('invoices/{invoice}/deliver', [InvoiceController::class, 'deliver'])->name('invoices.deliver');
         Route::get('payments', [PaymentController::class, 'index'])->name('payments.index');
+        // Journal des accès techniques support subis par le centre (RG-SEC-04).
+        Route::get('support-access-logs', [PlatformAccessLogController::class, 'indexForCga'])->name('support-access-logs.index');
+        Route::get('support-access-logs/export', [PlatformAccessLogController::class, 'exportForCga'])->name('support-access-logs.export');
     });
 
     // Documents du centre (M08) : état de la production (asynchrone, RG-DOC-05), liens signés, relance d'un
@@ -284,6 +367,221 @@ Route::prefix('v1')->group(function (): void {
         Route::get('charges', [MemberSpacePaymentController::class, 'charges'])->name('charges.index');
         Route::get('payments', [MemberSpacePaymentController::class, 'index'])->name('payments.index');
         Route::post('payments', [MemberSpacePaymentController::class, 'store'])->name('payments.store');
+        // Mes obligations (F-OBL-05) et « Signaler comme fait / payé » (RG-OBL-09).
+        Route::get('obligations', [MemberSpaceObligationController::class, 'index'])->name('obligations.index');
+        Route::post('obligations/{obligationInstance}/declare', [MemberSpaceObligationController::class, 'declare'])->name('obligations.declare');
+    });
+
+    // Catalogue des obligations vu du centre (F-OBL-01) : national en vigueur et obligations locales
+    // (RG-OBL-01), obligations applicables à un futur dossier (RG-OBL-02, 03). Modification : PUT.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/obligation-types')->name('cga.obligation-types.')->group(function (): void {
+        Route::get('/', [ObligationTypeController::class, 'index'])->name('index');
+        Route::get('suggestions', [ObligationTypeController::class, 'suggestions'])->name('suggestions');
+        Route::post('/', [ObligationTypeController::class, 'store'])->name('store');
+        Route::put('{obligationType}', [ObligationTypeController::class, 'update'])->name('update');
+    });
+
+    // Catalogue national des obligations (F-OBL-01, RG-DATA-04) : versions, aperçu des effets d'une
+    // nouvelle version sur les dossiers, application, validation par le CNCGA.
+    Route::middleware(['auth', 'tenant'])->prefix('network/obligation-catalog')->name('network.obligation-catalog.')->group(function (): void {
+        Route::get('/', [ObligationCatalogController::class, 'index'])->name('index');
+        Route::post('preview', [ObligationCatalogController::class, 'preview'])->name('preview');
+        Route::post('apply', [ObligationCatalogController::class, 'apply'])->name('apply');
+        Route::post('{version}/validate', [ObligationCatalogController::class, 'validateVersion'])->name('validate');
+    });
+
+    // Campagnes de clôture du centre (F-OBL-08, RG-OBL-10 à 12) : calendrier et tableau de suivi, dossiers,
+    // étapes marquées dans l'ordre, livrable et agent d'un dossier.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/closing-campaigns')->name('cga.closing-campaigns.')->group(function (): void {
+        Route::get('/', [ClosingCampaignController::class, 'index'])->name('index');
+        Route::get('agents', [ClosingCampaignController::class, 'agents'])->name('agents');
+        Route::get('{closingCampaign}', [ClosingCampaignController::class, 'show'])->name('show');
+        Route::get('{closingCampaign}/items', [ClosingCampaignController::class, 'items'])->name('items');
+        Route::post('{closingCampaign}/bulk/steps/{step}', [ClosingCampaignController::class, 'bulkStep'])->name('bulk.step');
+        Route::post('{closingCampaign}/bulk/assign', [ClosingCampaignController::class, 'bulkAssign'])->name('bulk.assign');
+        Route::scopeBindings()->group(function (): void {
+            Route::put('{closingCampaign}/items/{item}', [ClosingCampaignController::class, 'updateItem'])->name('items.update');
+            Route::post('{closingCampaign}/items/{item}/steps/{step}', [ClosingCampaignController::class, 'markStep'])->name('items.step');
+        });
+    });
+    Route::middleware(['auth', 'tenant'])->get('cga/members/{member}/closing', [MemberClosingController::class, 'forMember'])->name('cga.members.closing');
+    Route::middleware(['auth', 'tenant'])->get('member/closing', [MemberClosingController::class, 'own'])->name('member.closing');
+
+    // Planning des échéances du portefeuille (F-OBL-06) et obligations propres du centre (F-OBL-07).
+    Route::middleware(['auth', 'tenant'])->prefix('cga')->name('cga.')->group(function (): void {
+        Route::get('obligation-planning', [ObligationPlanningController::class, 'index'])->name('obligation-planning.index');
+        Route::get('obligation-planning/members', [ObligationPlanningController::class, 'members'])->name('obligation-planning.members');
+        Route::get('obligation-planning/revenue', [ObligationPlanningController::class, 'revenue'])->name('obligation-planning.revenue');
+        Route::get('center-obligations', [CenterObligationController::class, 'index'])->name('center-obligations.index');
+        Route::post('center-obligations', [CenterObligationController::class, 'store'])->name('center-obligations.store');
+        Route::put('center-obligations/{centerObligation}', [CenterObligationController::class, 'update'])->name('center-obligations.update');
+    });
+
+    // Fiche permanente du CGA (F-RPT-01) : présentation, dirigeants et personnel, moyens matériels.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/permanent-profile')->name('cga.permanent-profile.')->group(function (): void {
+        Route::get('/', [PermanentProfileController::class, 'show'])->name('show');
+        Route::put('presentation', [PermanentProfileController::class, 'updatePresentation'])->name('presentation');
+        Route::post('people', [PermanentProfileController::class, 'storePerson'])->name('people.store');
+        Route::put('people/{cgaPerson}', [PermanentProfileController::class, 'updatePerson'])->name('people.update');
+        Route::put('resources/{category}', [PermanentProfileController::class, 'saveResource'])->name('resources.save');
+    });
+
+    // Rapports trimestriels du centre (F-RPT-02 à 07) : préparation, complétude, états du portefeuille.
+    Route::middleware(['auth', 'tenant'])->prefix('cga/quarterly-reports')->name('cga.quarterly-reports.')->group(function (): void {
+        Route::get('/', [QuarterlyReportController::class, 'index'])->name('index');
+        Route::post('/', [QuarterlyReportController::class, 'store'])->name('store');
+        Route::get('{quarterlyReport}', [QuarterlyReportController::class, 'show'])->name('show');
+        Route::patch('{quarterlyReport}', [QuarterlyReportController::class, 'update'])->name('update');
+        Route::get('{quarterlyReport}/states', [QuarterlyReportController::class, 'states'])->name('states');
+        Route::get('{quarterlyReport}/preview', [QuarterlyReportController::class, 'preview'])->name('preview');
+        Route::post('{quarterlyReport}/generate', [QuarterlyReportController::class, 'generate'])->name('generate');
+        Route::get('{quarterlyReport}/versions', [QuarterlyReportController::class, 'versions'])->name('versions');
+        Route::post('{quarterlyReport}/transmit', [QuarterlyReportController::class, 'transmit'])->name('transmit');
+        Route::post('{quarterlyReport}/acknowledge', [QuarterlyReportController::class, 'acknowledge'])->name('acknowledge');
+        Route::post('{quarterlyReport}/correct', [QuarterlyReportController::class, 'correct'])->name('correct');
+    });
+
+    // Cotisation CNCGA (PRD M14) : tableau, paiements, confirmation, rejet, relance (CNCGA) ; cotisation du centre.
+    Route::middleware(['auth', 'tenant'])->prefix('network/dues')->name('network.dues.')->group(function (): void {
+        Route::get('/', [NetworkDuesController::class, 'index'])->name('index');
+        Route::post('payments/{paymentId}/confirm', [NetworkDuesController::class, 'confirm'])->name('payments.confirm');
+        Route::post('payments/{paymentId}/reject', [NetworkDuesController::class, 'reject'])->name('payments.reject');
+        Route::get('{dueId}', [NetworkDuesController::class, 'show'])->name('show');
+        Route::post('{dueId}/payments', [NetworkDuesController::class, 'record'])->name('payments.record');
+        Route::post('{dueId}/remind', [NetworkDuesController::class, 'remind'])->name('remind');
+        Route::post('{dueId}/invoice', [NetworkDuesController::class, 'invoice'])->name('invoice');
+    });
+    Route::middleware(['auth', 'tenant'])->prefix('cga/dues')->name('cga.dues.')->group(function (): void {
+        Route::get('/', [CgaDuesController::class, 'index'])->name('index');
+        Route::post('{networkDue}/payments', [CgaDuesController::class, 'declare'])->name('declare');
+    });
+
+    // Envois groupés du centre (F-COM-03, RG-COM-01, 02).
+    Route::middleware(['auth', 'tenant'])->prefix('cga/campaigns')->name('cga.campaigns.')->group(function (): void {
+        Route::get('/', [MessageCampaignController::class, 'index'])->name('index');
+        Route::post('/', [MessageCampaignController::class, 'store'])->name('store');
+        Route::post('preview', [MessageCampaignController::class, 'preview'])->name('preview');
+        Route::post('{campaign}/send', [MessageCampaignController::class, 'send'])->name('send');
+        Route::post('{campaign}/approve', [MessageCampaignController::class, 'approve'])->name('approve');
+        Route::post('{campaign}/reject', [MessageCampaignController::class, 'reject'])->name('reject');
+    });
+
+    // Préoccupations (PRD M10, F-PRE-01 à 04) : dans l'espace du CGA, demandes reçues des adhérents et envoyées
+    // au CNCGA, fil, statut, réouverture, transfert au CNCGA, tableau des délais ; vues du CNCGA, demandes des
+    // CGA et chiffres agrégés des demandes des adhérents (RG-PRE-03) ; dans l'espace de l'adhérent, ses demandes
+    // et « Demander un document » (F-DOC-06).
+    Route::middleware(['auth', 'tenant'])->prefix('cga/concerns')->name('cga.concerns.')->group(function (): void {
+        Route::get('/', [CgaConcernController::class, 'index'])->name('index');
+        Route::post('/', [CgaConcernController::class, 'store'])->name('store');
+        Route::get('indicators', [CgaConcernController::class, 'indicators'])->name('indicators');
+        Route::get('{concern}', [CgaConcernController::class, 'show'])->name('show');
+        Route::post('{concern}/messages', [CgaConcernController::class, 'reply'])->name('messages.store');
+        Route::post('{concern}/status', [CgaConcernController::class, 'status'])->name('status');
+        Route::post('{concern}/reopen', [CgaConcernController::class, 'reopen'])->name('reopen');
+        Route::post('{concern}/transfer', [CgaConcernController::class, 'transfer'])->name('transfer');
+    });
+    Route::middleware(['auth', 'tenant'])->prefix('network/concerns')->name('network.concerns.')->group(function (): void {
+        Route::get('/', [NetworkConcernController::class, 'index'])->name('index');
+        Route::get('indicators', [NetworkConcernController::class, 'indicators'])->name('indicators');
+        Route::get('{concernId}', [NetworkConcernController::class, 'show'])->name('show');
+        Route::post('{concernId}/messages', [NetworkConcernController::class, 'reply'])->name('messages.store');
+        Route::post('{concernId}/status', [NetworkConcernController::class, 'status'])->name('status');
+    });
+    Route::middleware(['auth', 'tenant'])->prefix('member')->name('member.')->group(function (): void {
+        Route::get('concerns', [MemberConcernController::class, 'index'])->name('concerns.index');
+        Route::post('concerns', [MemberConcernController::class, 'store'])->name('concerns.store');
+        Route::get('concerns/{concern}', [MemberConcernController::class, 'show'])->name('concerns.show');
+        Route::post('concerns/{concern}/messages', [MemberConcernController::class, 'reply'])->name('concerns.messages.store');
+        Route::post('concerns/{concern}/reopen', [MemberConcernController::class, 'reopen'])->name('concerns.reopen');
+        Route::post('document-requests', [MemberConcernController::class, 'requestDocument'])->name('document-requests.store');
+    });
+
+    // Formations (PRD M11, F-FOR-01 à 04) : formations de l'organisateur (CNCGA : /network/trainings ; CGA :
+    // /cga/trainings) ; formations du réseau vues d'un CGA, qui y inscrit ses agents et adhérents ; formations
+    // ouvertes à la personne de l'espace actif, inscription, désinscription, évaluation.
+    foreach (['network', 'cga'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/trainings")->name("{$space}.trainings.")->group(function (): void {
+            Route::get('/', [OrganizerTrainingController::class, 'index'])->name('index');
+            Route::post('/', [OrganizerTrainingController::class, 'store'])->name('store');
+            Route::get('{training}', [OrganizerTrainingController::class, 'show'])->name('show');
+            Route::put('{training}', [OrganizerTrainingController::class, 'update'])->name('update');
+            Route::post('{training}/publish', [OrganizerTrainingController::class, 'publish'])->name('publish');
+            Route::post('{training}/cancel', [OrganizerTrainingController::class, 'cancel'])->name('cancel');
+            Route::get('{training}/registrations', [OrganizerTrainingController::class, 'registrations'])->name('registrations.index');
+            Route::post('{training}/registrations', [OrganizerTrainingController::class, 'register'])->name('registrations.store');
+            Route::get('{training}/candidates', [OrganizerTrainingController::class, 'candidates'])->name('candidates');
+            Route::post('{training}/registrations/{registrationId}/approve', [OrganizerTrainingController::class, 'approve'])->name('registrations.approve');
+            Route::post('{training}/registrations/{registrationId}/reject', [OrganizerTrainingController::class, 'reject'])->name('registrations.reject');
+            Route::post('{training}/registrations/{registrationId}/payment', [OrganizerTrainingController::class, 'payment'])->name('registrations.payment');
+            Route::put('{training}/attendance', [OrganizerTrainingController::class, 'attendance'])->name('attendance');
+            Route::post('{training}/complete', [OrganizerTrainingController::class, 'complete'])->name('complete');
+            Route::get('{training}/evaluations', [OrganizerTrainingController::class, 'evaluations'])->name('evaluations');
+        });
+    }
+    Route::middleware(['auth', 'tenant'])->prefix('cga/network-trainings')->name('cga.network-trainings.')->group(function (): void {
+        Route::get('/', [NetworkTrainingCatalogController::class, 'index'])->name('index');
+        Route::get('{trainingId}', [NetworkTrainingCatalogController::class, 'show'])->name('show');
+        Route::get('{trainingId}/registrations', [NetworkTrainingCatalogController::class, 'registrations'])->name('registrations.index');
+        Route::post('{trainingId}/registrations', [NetworkTrainingCatalogController::class, 'register'])->name('registrations.store');
+        Route::get('{trainingId}/candidates', [NetworkTrainingCatalogController::class, 'candidates'])->name('candidates');
+    });
+    Route::middleware(['auth', 'tenant'])->post('cga/training-registrations/{registration}/cancel', [NetworkTrainingCatalogController::class, 'cancel'])->name('cga.training-registrations.cancel');
+    Route::middleware(['auth', 'tenant'])->prefix('me')->name('me.')->group(function (): void {
+        Route::get('trainings', [MyTrainingController::class, 'index'])->name('trainings.index');
+        Route::post('trainings/{trainingId}/register', [MyTrainingController::class, 'register'])->name('trainings.register');
+        Route::get('training-registrations', [MyTrainingController::class, 'registrations'])->name('training-registrations.index');
+        Route::post('training-registrations/{registration}/cancel', [MyTrainingController::class, 'cancel'])->name('training-registrations.cancel');
+        Route::post('training-registrations/{registration}/evaluation', [MyTrainingController::class, 'evaluate'])->name('training-registrations.evaluation');
+    });
+
+    // Annonces (PRD M12, F-COM-01, 02) : celles de l'auteur (CNCGA : /network/announcements ; CGA :
+    // /cga/announcements), publiées aussitôt ; celles reçues dans l'espace actif, et leur lecture.
+    foreach (['network', 'cga'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/announcements")->name("{$space}.announcements.")->group(function (): void {
+            Route::get('/', [AuthorAnnouncementController::class, 'index'])->name('index');
+            Route::post('/', [AuthorAnnouncementController::class, 'store'])->name('store');
+            Route::get('{announcement}', [AuthorAnnouncementController::class, 'show'])->name('show');
+        });
+    }
+    Route::middleware(['auth', 'tenant'])->prefix('me/announcements')->name('me.announcements.')->group(function (): void {
+        Route::get('/', [MyAnnouncementController::class, 'index'])->name('index');
+        Route::post('{announcementId}/read', [MyAnnouncementController::class, 'read'])->name('read');
+    });
+
+    // Tableaux de bord et statistiques (PRD M15) : tableau de bord de l'espace actif pour une période (F-DSH-01 à 04),
+    // statistiques nationales, carte par Direction régionale et détail par commune (F-STA-01), position du CGA dans
+    // le réseau (F-STA-02), bouton « Actualiser » (202, limité par rate_limit.stats_refresh).
+    Route::middleware(['auth', 'tenant'])->group(function (): void {
+        Route::get('network/dashboard', [NetworkStatisticsController::class, 'dashboard'])->name('network.dashboard');
+        Route::get('network/statistics', [NetworkStatisticsController::class, 'statistics'])->name('network.statistics.show');
+        Route::get('network/statistics/map', [NetworkStatisticsController::class, 'map'])->name('network.statistics.map');
+        Route::get('network/statistics/map/{regionalDirectorate}', [NetworkStatisticsController::class, 'communes'])->name('network.statistics.communes');
+        Route::post('network/statistics/refresh', [NetworkStatisticsController::class, 'refresh'])->name('network.statistics.refresh');
+        Route::get('network/statistics/brochures', [NetworkStatisticsController::class, 'brochures'])->name('network.statistics.brochures.index');
+        Route::post('network/statistics/brochures', [NetworkStatisticsController::class, 'produceBrochure'])->name('network.statistics.brochures.store');
+        Route::get('cga/dashboard', [CgaStatisticsController::class, 'dashboard'])->name('cga.dashboard');
+        Route::get('cga/statistics', [CgaStatisticsController::class, 'position'])->name('cga.statistics.show');
+        Route::post('cga/statistics/refresh', [CgaStatisticsController::class, 'refresh'])->name('cga.statistics.refresh');
+        Route::get('member/dashboard', [MemberDashboardController::class, 'show'])->name('member.dashboard');
+    });
+
+    // Exports Excel en tâche de fond (F-EXP-01, RG-SEC-06) : demande (202), derniers exports de la personne, suivi et
+    // téléchargement, dans l'espace actif (CNCGA : /network/exports ; CGA : /cga/exports).
+    foreach (['network', 'cga'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/exports")->name("{$space}.exports.")->group(function (): void {
+            Route::get('/', [ExportController::class, 'index'])->name('index');
+            Route::post('/', [ExportController::class, 'store'])->name('store');
+            Route::get('{export}', [ExportController::class, 'show'])->name('show');
+        });
+    }
+
+    // Perte d'agrément du centre (F-ORG-07) : dossiers du portefeuille CGA à radier, un par un (RG-ADH-18).
+    Route::middleware(['auth', 'tenant'])->get('cga/agreement-loss/members', [AgreementLossController::class, 'index'])->name('cga.agreement-loss.members');
+
+    // Rapports trimestriels vus du réseau (RG-RPT-04) : état de transmission et tableau de synthèse agrégé.
+    Route::middleware(['auth', 'tenant'])->prefix('network/quarterly-reports')->name('network.quarterly-reports.')->group(function (): void {
+        Route::get('/', [NetworkReportController::class, 'index'])->name('index');
+        Route::get('{organization}/summary', [NetworkReportController::class, 'summary'])->name('summary');
     });
 
     // Apporteurs d'affaires du centre (sous-portefeuille « Accessoires », RG-PTF-06).
@@ -296,6 +594,24 @@ Route::prefix('v1')->group(function (): void {
 
     // Fiche du CGA de l'espace actif, complétée par son gérant (F-ORG-03).
     Route::middleware(['auth', 'tenant'])->prefix('cga/profile')->name('cga.profile.')->group(function (): void {
+        Route::get('/', [CgaProfileController::class, 'show'])->name('show');
+        Route::put('/', [CgaProfileController::class, 'update'])->name('update');
+        Route::post('images/{kind}', [CgaProfileController::class, 'storeImage'])->name('images.store');
+    });
+
+    // Paramètres du réseau (CNCGA : « Paramètres réseau », « Règles du rapport », étapes 5.6b et 5.13) et de
+    // la plateforme (administrateur, 03-APPFLOW §6) : lecture par groupe, modification, retour au défaut.
+    foreach (['network', 'platform'] as $space) {
+        Route::middleware(['auth', 'tenant'])->prefix("{$space}/settings")->name("{$space}.settings.")->group(function (): void {
+            Route::get('/', [SettingsController::class, 'index'])->name('index');
+            Route::put('{settingKey}', [SettingsController::class, 'update'])->name('update')->where('settingKey', '[a-z0-9_.]+');
+            Route::delete('{settingKey}', [SettingsController::class, 'reset'])->name('reset')->where('settingKey', '[a-z0-9_.]+');
+        });
+    }
+
+    // Fiche d'identité du CNCGA, émetteur des reçus et factures de cotisation (étape 6.9) : mêmes écrans
+    // que la fiche d'un CGA, sans agrément ni expert-comptable.
+    Route::middleware(['auth', 'tenant'])->prefix('network/profile')->name('network.profile.')->group(function (): void {
         Route::get('/', [CgaProfileController::class, 'show'])->name('show');
         Route::put('/', [CgaProfileController::class, 'update'])->name('update');
         Route::post('images/{kind}', [CgaProfileController::class, 'storeImage'])->name('images.store');

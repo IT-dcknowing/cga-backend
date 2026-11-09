@@ -3,6 +3,7 @@
 namespace App\Support\Tenancy;
 
 use App\Domain\Audit\AuditLogger;
+use App\Support\Logging\AlertCounter;
 use InvalidArgumentException;
 
 /**
@@ -12,6 +13,8 @@ use InvalidArgumentException;
  */
 class Tenancy
 {
+    public const BYPASS_ALERT = 'tenancy_bypass';
+
     private int $bypassDepth = 0;
 
     public function __construct(private readonly AuditLogger $audit) {}
@@ -46,6 +49,11 @@ class Tenancy
         }
 
         $this->audit->record('tenancy_bypass', context: ['reason' => $reason]);
+        // Pendant l'activité d'un utilisateur (espace actif), compté pour l'alerte de pics (02-TRD §6.7, A09) ; les
+        // tâches planifiées système, sans espace, ne le sont pas.
+        if (app(TenantContext::class)->has()) {
+            app(AlertCounter::class)->increment(self::BYPASS_ALERT);
+        }
 
         $this->bypassDepth++;
         try {

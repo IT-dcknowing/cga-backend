@@ -18,13 +18,21 @@ return [
     'network_user_permissions' => ['manage' => 'Ajuster les habilitations d\'un utilisateur du CNCGA'],
     'network_permissions' => ['manage' => 'Gérer les droits de tout le réseau'],
     'network_settings' => ['manage' => 'Paramétrer les règles du réseau (rapport, cotisation, bancabilité)'],
+    'network_profile' => [
+        'view' => 'Consulter la fiche d\'identité du CNCGA',
+        'manage' => 'Compléter la fiche d\'identité du CNCGA (logo, signature, cachet)',
+    ],
     'referentials' => ['manage' => 'Gérer les données de référence'],
     'dues' => [
         'view' => 'Consulter les cotisations',
         'payments' => ['manage' => 'Enregistrer ou confirmer un paiement de cotisation'],
         'remind' => 'Relancer une cotisation',
+        'own' => ['view' => 'Consulter la cotisation du centre', 'declare' => 'Déclarer un paiement de cotisation'],
     ],
-    'announcements' => ['network' => ['publish' => 'Publier une annonce réseau']],
+    'announcements' => [
+        'network' => ['publish' => 'Publier une annonce réseau'],
+        'cga' => ['publish' => 'Publier une annonce à ses adhérents'],
+    ],
     'trainings' => [
         'network' => ['manage' => 'Créer une formation réseau'],
         'cga' => ['manage' => 'Créer une formation pour ses adhérents et agents'],
@@ -65,6 +73,7 @@ return [
         'update' => 'Modifier un adhérent',
         'access' => ['manage' => 'Inviter les adhérents en ligne et gérer leurs accès'],
         'import' => 'Importer un portefeuille d\'adhérents',
+        'history' => ['import' => 'Importer l\'historique des chiffres d\'affaires et des paiements d\'impôts'],
         'radiation' => [
             'request' => 'Demander une radiation',
             'validate' => 'Valider une radiation',
@@ -95,6 +104,7 @@ return [
     'concerns' => [
         'reply' => 'Répondre aux préoccupations des adhérents',
         'network' => ['write' => 'Écrire au CNCGA ou lui transférer une demande'],
+        'indicators' => ['view' => 'Consulter le tableau des délais des préoccupations'],
     ],
     'banking' => ['manage' => 'Bancabilité (si activée)'],
     'member' => [
@@ -117,6 +127,7 @@ return [
         'messaging' => ['manage' => 'Gérer les comptes d\'envoi SMS, WhatsApp et e-mail'],
         'templates' => ['manage' => 'Gérer les modèles de documents'],
         'logs' => ['view' => 'Consulter les journaux de la plateforme'],
+        'queues' => ['manage' => 'Suivre les files d\'attente et relancer les travaux en échec'],
     ],
 
 ];

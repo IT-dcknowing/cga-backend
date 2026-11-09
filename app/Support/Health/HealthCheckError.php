@@ -10,4 +10,6 @@ enum HealthCheckError: string
     case Unavailable = 'unavailable';
     case NotWritable = 'not_writable';
     case LowSpace = 'low_space';
+    case Outdated = 'outdated';
+    case Delayed = 'delayed';
 }

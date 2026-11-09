@@ -39,7 +39,7 @@ class GenerateDocumentSamples extends Command
                 $file = "{$output}/{$type}.{$template['format']}";
 
                 if ($template['format'] === 'docx') {
-                    $renderer->render($template['path'], $file, $data->values($type), array_intersect_key($images, array_flip([...$template['images'], ...($template['framed_images'] ?? [])])), $data->rows($type));
+                    $renderer->render($template['path'], $file, $data->values($type), array_intersect_key($images, array_flip([...$template['images'], ...($template['framed_images'] ?? [])])), $data->rows($type), array_intersect_key($data->reportCharts(), array_flip($template['charts'] ?? [])));
                 } else {
                     $sample = $data->workbook();
                     $workbook->fill($template['path'], $file, $sample['values'], $sample['rows']);

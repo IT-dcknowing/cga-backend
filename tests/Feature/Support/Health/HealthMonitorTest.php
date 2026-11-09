@@ -1,6 +1,7 @@
 <?php
 
 use App\Support\Health\Checks\DatabaseCheck;
+use App\Support\Health\Checks\BackupCheck;
 use App\Support\Health\Checks\LibreOfficeCheck;
 use App\Support\Health\Checks\QueueCheck;
 use App\Support\Health\Checks\StorageCheck;
@@ -13,9 +14,9 @@ use Tests\Concerns\FakesHealthChecks;
 
 uses(FakesHealthChecks::class);
 
-it('exécute les contrôles de la base, des files, du disque et de LibreOffice', function () {
+it('exécute les contrôles de la base, des files, du disque, de LibreOffice et des sauvegardes', function () {
     expect(config('health.checks'))
-        ->toBe([DatabaseCheck::class, QueueCheck::class, StorageCheck::class, LibreOfficeCheck::class]);
+        ->toBe([DatabaseCheck::class, QueueCheck::class, StorageCheck::class, LibreOfficeCheck::class, BackupCheck::class]);
 });
 
 it('range chaque contrôle sous son nom, dans l\'ordre de la configuration', function () {
