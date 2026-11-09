@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Schema;
 
 /*
  * Dossiers des adhérents (05-BACKEND-SCHEMA §5, F-ADH-02 à 10), dans l'un des deux portefeuilles du
- * centre (RG-PTF-01, 02). Un seul dossier ouvert par NCC dans un centre ; recherche plein texte par
- * trigrammes ; contrat CGA obligatoire hors brouillon dans le portefeuille CGA (RG-PTF-08) ;
+ * centre (RG-PTF-01, 02). Un seul dossier ouvert par NCC dans un centre ; champ de recherche stocké ;
+ * contrat CGA obligatoire hors brouillon dans le portefeuille CGA (RG-PTF-08) ;
  * apporteur seulement dans le portefeuille CGA (RG-PTF-06). La pièce d'identité du dirigeant est
  * chiffrée par le modèle.
  */
@@ -108,8 +108,6 @@ return new class extends Migration
         DB::statement("CREATE UNIQUE INDEX members_open_ncc_unique ON members (organization_id, ncc) WHERE status IN ('draft', 'active', 'radiation_pending') AND deleted_at IS NULL");
         // Exclusivité entre CGA : NCC inscrits au portefeuille CGA (RG-ADH-05, T-22).
         DB::statement("CREATE INDEX members_cga_ncc_index ON members (ncc) WHERE portfolio = 'cga' AND status IN ('active', 'radiation_pending')");
-        DB::statement('CREATE INDEX members_search_text_trgm ON members USING gin (search_text gin_trgm_ops)');
-
         Schema::table('memberships', function (Blueprint $table) {
             $table->foreign('member_id')->references('id')->on('members');
         });

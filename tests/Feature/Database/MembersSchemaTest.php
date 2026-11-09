@@ -135,11 +135,10 @@ it('chiffre la pièce d\'identité du dirigeant et l\'observation d\'une radiati
     });
 });
 
-it('calcule le texte de recherche et l\'indexe par trigrammes', function () {
+it('calcule le texte de recherche', function () {
     $member = Member::factory()->create(['company_name' => 'ETS KOUADIO & FILS', 'sigle' => 'EKF', 'ncc' => '7654321Z', 'legacy_number' => 'ANC-12', 'phone' => '+2250707070707']);
 
-    expect(DB::table('members')->where('id', $member->id)->value('search_text'))->toBe('ets kouadio & fils ekf 7654321z   anc-12 +2250707070707')
-        ->and(DB::table('pg_indexes')->where('indexname', 'members_search_text_trgm')->exists())->toBeTrue();
+    expect(DB::table('members')->where('id', $member->id)->value('search_text'))->toBe('ets kouadio & fils ekf 7654321z   anc-12 +2250707070707');
 });
 
 it('RG-PTF-02 ne garde que le portefeuille CGA dans le périmètre réglementaire', function () {

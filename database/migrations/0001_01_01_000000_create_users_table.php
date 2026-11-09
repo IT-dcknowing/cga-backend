@@ -15,9 +15,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm');
         DB::statement('CREATE EXTENSION IF NOT EXISTS unaccent');
-        DB::statement('CREATE EXTENSION IF NOT EXISTS citext');
 
         Schema::create('users', function (Blueprint $table) {
             $table->ulid('id')->primary();
