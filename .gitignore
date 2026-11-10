@@ -5,3 +5,6 @@ Thumbs.db
 /.zed
 /.cursor/
 /.codex
+*.sql
+*.zip
+
