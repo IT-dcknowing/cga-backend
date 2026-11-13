@@ -8,3 +8,6 @@ Thumbs.db
 *.sql
 *.zip
 
+# Conserver les dumps de données utilisateur
+!database_dump.sql
+!backend/database/backup_cga_plateforme.sql
