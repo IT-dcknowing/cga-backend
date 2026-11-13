@@ -93,6 +93,10 @@ class DemoSeeder extends Seeder
         $dck = $this->cga('DC-KNOWING CGA', 'DCK', 'Abidjan', '+2252722445501', 'contact@dcknowing.demo');
         $bouake = $this->cga('CGA Démo Bouaké', 'DEMOB', 'Bouaké', '+2252731630102', 'contact@cga-bouake.demo');
         $suspended = $this->suspended($this->cga('CGA Démo Suspendu', 'DEMOS', 'Korhogo', '+2252722445502', 'contact@cga-suspendu.demo'));
+        $willaims = $this->cga('WILLAIMS CORPORATE', 'WC', 'Abidjan', '+2250788631750', 'williamskouassi525@gmail.com');
+        $willaims->agreement_number = '123';
+        $willaims->agreement_date = '2000-11-10';
+        $willaims->save();
         $this->referentials();
         $this->completeProfile($dck, [
             'legal_form' => 'SARL', 'share_capital' => 5_000_000, 'ncc' => '9900001K', 'rccm' => 'CI-ABJ-2020-B-00001',
@@ -120,6 +124,7 @@ class DemoSeeder extends Seeder
         $this->account('0700000008', 'Ibrahim', 'Oubli', [[$dck, Role::CgaLegal]], email: 'motdepasse@cga-connect.demo');
         $this->account('0700000009', 'Awa', 'Administratrice', [[$platform, Role::PlatformAdmin]]);
         $this->account('0700000010', 'Salif', 'Suspendu', [[$suspended, Role::CgaManager]]);
+        $this->account('0788631750', 'Serge', 'Kouassi', [[$willaims, Role::CgaManager]], email: 'williamskouassi525@gmail.com');
         $this->invitee($dck);
         $this->formerMember($bouake);
         $this->onlineMember($dck);
