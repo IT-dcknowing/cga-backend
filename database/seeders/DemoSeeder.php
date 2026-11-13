@@ -5,7 +5,13 @@ namespace Database\Seeders;
 use App\Domain\Auth\Actions\IssueInvitation;
 use App\Domain\Auth\Enums\InvitationChannel;
 use App\Domain\Auth\Models\Invitation;
+use App\Domain\Closing\Actions\OpenClosingCampaign;
+use App\Domain\Concerns\Actions\SubmitConcern;
+use App\Domain\Concerns\Enums\ConcernCategory;
+use App\Domain\Concerns\Enums\ConcernLevel;
+use App\Domain\Concerns\Models\Concern;
 use App\Domain\Documents\Samples\SampleDocumentData;
+use App\Domain\Dues\Actions\OpenDuesYear;
 use App\Domain\Members\Enums\EntityType;
 use App\Domain\Members\Enums\FeesPeriodicity;
 use App\Domain\Members\Enums\LegalForm;
@@ -22,6 +28,12 @@ use App\Domain\Organizations\Models\Organization;
 use App\Domain\Payments\Actions\SyncEntryFee;
 use App\Domain\Referentials\Models\RegionalDirectorate;
 use App\Domain\Referentials\Models\TaxOffice;
+use App\Domain\Trainings\Actions\PublishTraining;
+use App\Domain\Trainings\Actions\SaveTraining;
+use App\Domain\Trainings\Enums\AudienceType;
+use App\Domain\Trainings\Enums\TrainingFormat;
+use App\Domain\Trainings\Models\Training;
+use App\Domain\Trainings\Support\TrainingData;
 use App\Domain\Users\Enums\MembershipStatus;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Enums\UserStatus;
@@ -31,6 +43,7 @@ use App\Support\Config\SettingsService;
 use App\Support\Files\StorageService;
 use App\Support\Numbering\SequenceService;
 use App\Support\Tenancy\Tenancy;
+use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -50,7 +63,10 @@ use Illuminate\Support\Str;
  * plateforme · 0700000010 gérant du CGA suspendu (consultation seule, RG-ORG-08). Un ancien adhérent
  * radié du CGA de Bouaké (NCC 9000001T) permet de rejouer le réimport d'identité (RG-ADH-15) ;
  * 0700000011 est l'accès principal en ligne d'un adhérent actif de DC-KNOWING (espace adhérent).
- * La fiche de DC-KNOWING est complète (images de remplacement) : ses documents se produisent.
+ * La fiche de DC-KNOWING est complète (images de remplacement) : ses documents se produisent ; sa
+ * campagne de clôture de l'exercice précédent est ouverte ; une préoccupation de l'adhérent en ligne attend
+ * une réponse, une demande du gérant attend celle du CNCGA ; une formation du réseau et une de DC-KNOWING sont
+ * publiées.
  */
 class DemoSeeder extends Seeder
 {
@@ -62,6 +78,12 @@ class DemoSeeder extends Seeder
         private readonly SyncEntryFee $entryFee,
         private readonly StorageService $storage,
         private readonly SampleDocumentData $samples,
+        private readonly OpenClosingCampaign $openClosing,
+        private readonly OpenDuesYear $openDues,
+        private readonly SubmitConcern $submitConcern,
+        private readonly SaveTraining $saveTraining,
+        private readonly PublishTraining $publishTraining,
+        private readonly TenantContext $context,
     ) {}
 
     public function run(): void
@@ -71,8 +93,22 @@ class DemoSeeder extends Seeder
         $dck = $this->cga('DC-KNOWING CGA', 'DCK', 'Abidjan', '+2252722445501', 'contact@dcknowing.demo');
         $bouake = $this->cga('CGA Démo Bouaké', 'DEMOB', 'Bouaké', '+2252731630102', 'contact@cga-bouake.demo');
         $suspended = $this->suspended($this->cga('CGA Démo Suspendu', 'DEMOS', 'Korhogo', '+2252722445502', 'contact@cga-suspendu.demo'));
+        $willaims = $this->cga('WILLAIMS CORPORATE', 'WC', 'Abidjan', '+2250788631750', 'williamskouassi525@gmail.com');
+        $willaims->agreement_number = '123';
+        $willaims->agreement_date = '2000-11-10';
+        $willaims->save();
         $this->referentials();
-        $this->completeProfile($dck);
+        $this->completeProfile($dck, [
+            'legal_form' => 'SARL', 'share_capital' => 5_000_000, 'ncc' => '9900001K', 'rccm' => 'CI-ABJ-2020-B-00001',
+            'agreement_number' => 'AGR-DEMO-0001', 'agreement_date' => '2020-01-06', 'address' => 'Plateau, avenue Chardy, immeuble Démo',
+            'manager_name' => 'Koffi Gérant', 'expert_name' => 'Yao Multi-rôles', 'signatory_name' => 'Koffi Gérant', 'signatory_title' => 'Le Gérant',
+        ]);
+        // Fiche du CNCGA, émetteur des reçus et factures de cotisation (étape 6.9) : sans agrément ni expert-comptable.
+        $this->completeProfile($cncga, [
+            'legal_form' => 'Association', 'share_capital' => 0, 'ncc' => '9900000C', 'rccm' => 'CI-ABJ-2010-W-00001',
+            'address' => 'Cocody, Riviera 3, siège du CNCGA', 'city' => 'Abidjan', 'manager_name' => 'Aminata Présidente', 'numbering_abbreviation' => 'CNCGA',
+            'signatory_name' => 'Aminata Présidente', 'signatory_title' => 'La Présidente', 'phone_1' => '+2252722445500', 'email' => 'contact@cncga.demo',
+        ]);
         $this->mockupRegistry();
 
         $this->account('0700000001', 'Aminata', 'Présidente', [[$cncga, Role::CncgaPresident]]);
@@ -88,9 +124,16 @@ class DemoSeeder extends Seeder
         $this->account('0700000008', 'Ibrahim', 'Oubli', [[$dck, Role::CgaLegal]], email: 'motdepasse@cga-connect.demo');
         $this->account('0700000009', 'Awa', 'Administratrice', [[$platform, Role::PlatformAdmin]]);
         $this->account('0700000010', 'Salif', 'Suspendu', [[$suspended, Role::CgaManager]]);
+        $this->account('0788631750', 'Serge', 'Kouassi', [[$willaims, Role::CgaManager]], email: 'williamskouassi525@gmail.com');
         $this->invitee($dck);
         $this->formerMember($bouake);
         $this->onlineMember($dck);
+        $this->closingCampaign($dck);
+        $this->concerns($dck);
+        $this->trainings($cncga, $dck);
+        // Appel de cotisation de l'année, comme dues:open-year le 1er janvier (F-COT-01) : /cncga/cotisations,
+        // /cga/cotisation et la collection Postman s'y appuient. Rejouable (une cotisation par centre et par an).
+        $this->openDues->execute(now()->year);
 
         // Fenêtre des demandes de code ramenée à une minute : la collection Postman se rejoue.
         $this->settings->set('rate_limit.otp', ['max_attempts' => 3, 'decay_minutes' => (int) config('cga.seed.demo.otp_decay_minutes')]);
@@ -201,6 +244,68 @@ class DemoSeeder extends Seeder
     }
 
     /**
+     * Campagne de clôture de l'exercice précédent de DC-KNOWING (F-OBL-08), ouverte comme le ferait
+     * closing:open-campaign : /cga/cloture et la collection Postman s'y appuient. Rejouable.
+     */
+    private function closingCampaign(Organization $organization): void
+    {
+        Tenancy::bypass(
+            fn () => $this->openClosing->execute($organization->id, now()->year - 1, CarbonImmutable::now()),
+            'Jeu de démonstration : campagne de clôture de DC-KNOWING.',
+        );
+    }
+
+    /**
+     * Formations publiées (PRD M11) : une du CNCGA pour tous les adhérents et agents du réseau, une de DC-KNOWING
+     * pour ses adhérents, dans trois semaines. /cncga/formations, /cga/formations, /adherent/formations et la
+     * collection Postman s'y appuient. Rejouable.
+     */
+    private function trainings(Organization $cncga, Organization $dck): void
+    {
+        $exists = Tenancy::bypass(static fn (): bool => Training::query()->whereIn('organization_id', [$cncga->id, $dck->id])->exists(), 'Jeu de démonstration : formations.');
+        if ($exists) {
+            return;
+        }
+
+        $start = CarbonImmutable::now()->addWeeks(3)->setTime(9, 0);
+        $organizers = [
+            [$cncga, Role::CncgaPresident, 'Fiscalité des TEE : nouveautés de l\'année', 30, [AudienceType::AllMembers, AudienceType::CgaStaff]],
+            [$dck, Role::CgaManager, 'Tenue de la comptabilité SMT', 15, [AudienceType::AllMembers]],
+        ];
+        foreach ($organizers as [$organization, $role, $title, $capacity, $audiences]) {
+            $organizer = Membership::query()->where('organization_id', $organization->id)->where('role', $role)->firstOrFail();
+            $this->context->runAs($organizer, fn (): int => $this->publishTraining->execute($this->saveTraining->create(new TrainingData(
+                title: $title, description: 'Session de démonstration.', format: TrainingFormat::InPerson, location: 'Abidjan, Plateau', onlineUrl: null,
+                trainer: 'Formateur de démonstration', startsAt: $start, endsAt: $start->setTime(17, 0), capacity: $capacity, price: 0, requiresApproval: false,
+                audiences: array_map(static fn (AudienceType $type): array => ['type' => $type, 'regime' => null], $audiences),
+            ), $organizer)));
+        }
+    }
+
+    /**
+     * Préoccupations de DC-KNOWING (PRD M10) : une demande de l'adhérent en ligne à son CGA, une demande du
+     * gérant au CNCGA, déposées comme dans leur espace. /cga/preoccupations, /cncga/preoccupations et
+     * /adherent/messages s'y appuient. Rejouable.
+     */
+    private function concerns(Organization $organization): void
+    {
+        $exists = Tenancy::bypass(static fn (): bool => Concern::query()->where('organization_id', $organization->id)->exists(), 'Jeu de démonstration : préoccupations de DC-KNOWING.');
+        if ($exists) {
+            return;
+        }
+
+        $member = Membership::query()->whereHas('user', static fn ($user) => $user->where('phone', '+2250700000011'))->whereNotNull('member_id')->sole();
+        $this->context->runAs($member, fn (): Concern => $this->submitConcern->execute(
+            ConcernLevel::MemberToCga, ConcernCategory::Tax, 'Montant de la patente', 'Bonjour, quel montant de patente dois-je prévoir cette année ?', [], $member,
+        ));
+
+        $manager = Membership::query()->where('organization_id', $organization->id)->where('role', Role::CgaManager)->firstOrFail();
+        $this->context->runAs($manager, fn (): Concern => $this->submitConcern->execute(
+            ConcernLevel::CgaToCncga, ConcernCategory::Legal, 'Renouvellement de l\'agrément', 'Quelles pièces fournir pour le renouvellement de notre agrément ?', [], $manager,
+        ));
+    }
+
+    /**
      * Ancien adhérent radié du CGA de Bouaké : DC-KNOWING peut réimporter son identité (RG-ADH-15).
      */
     private function formerMember(Organization $organization): void
@@ -235,19 +340,17 @@ class DemoSeeder extends Seeder
      * (logo, signature, cachet), pour que ses documents se produisent dès l'installation (F-DOC-01).
      * Seuls les champs encore vides sont remplis.
      */
-    private function completeProfile(Organization $organization): void
+    /**
+     * @param  array<string, mixed>  $identity  champs de la fiche, posés s'ils sont vides
+     */
+    private function completeProfile(Organization $organization, array $identity): void
     {
         if ($organization->missingProfileFields() === []) {
             return;
         }
 
         $office = TaxOffice::query()->where('code', 'DEMO-PLT')->sole();
-        $identity = [
-            'legal_form' => 'SARL', 'share_capital' => 5_000_000, 'ncc' => '9900001K', 'rccm' => 'CI-ABJ-2020-B-00001',
-            'agreement_number' => 'AGR-DEMO-0001', 'agreement_date' => '2020-01-06', 'regional_directorate_id' => $office->regional_directorate_id,
-            'tax_office_id' => $office->id, 'address' => 'Plateau, avenue Chardy, immeuble Démo', 'manager_name' => 'Koffi Gérant',
-            'expert_name' => 'Yao Multi-rôles', 'signatory_name' => 'Koffi Gérant', 'signatory_title' => 'Le Gérant',
-        ];
+        $identity += ['regional_directorate_id' => $office->regional_directorate_id, 'tax_office_id' => $office->id];
         foreach ($identity as $field => $value) {
             if (blank($organization->getAttribute($field))) {
                 $organization->setAttribute($field, $value);
