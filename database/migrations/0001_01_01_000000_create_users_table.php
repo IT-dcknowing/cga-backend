@@ -2,6 +2,7 @@
 
 use App\Domain\Users\Enums\UserStatus;
 use App\Support\Database\Constraints;
+use App\Support\Database\Extensions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +16,8 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('CREATE EXTENSION IF NOT EXISTS unaccent');
+        // Extensions optionnelles : installées seulement si le serveur les propose (hébergement mutualisé).
+        Extensions::sync();
 
         Schema::create('users', function (Blueprint $table) {
             $table->ulid('id')->primary();

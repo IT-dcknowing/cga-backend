@@ -3,13 +3,14 @@
 namespace App\Support\Http\Query;
 
 use App\Support\Database\Constraints;
+use App\Support\Database\Extensions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\QueryBuilder\Filters\Filter;
 
 /**
  * Filtre ?filter[search]= : texte contenu dans l'une des colonnes, sans tenir compte de la casse ni
- * des accents (PostgreSQL unaccent, 02-TRD §4.2). Les jokers % et _ saisis sont pris littéralement.
+ * des accents (unaccent si installée, sinon repli SQL : Extensions::unaccent, 02-TRD §4.2). Les jokers % et _ saisis sont pris littéralement.
  *
  * @implements Filter<Model>
  */
@@ -35,8 +36,9 @@ final class SearchFilter implements Filter
 
         $query->where(function (Builder $search) use ($term): void {
             foreach ($this->columns as $column) {
+                $sql = Extensions::unaccent("{$column}::text").' ILIKE '.Extensions::unaccent('?');
                 // @phpstan-ignore cga.rawSqlWithVariable (colonne écrite dans le code et vérifiée ; le texte cherché est une valeur liée)
-                $search->orWhereRaw("unaccent({$column}::text) ILIKE unaccent(?)", [$term]);
+                $search->orWhereRaw($sql, [$term]);
             }
         });
     }

@@ -11,6 +11,7 @@ use App\Domain\Organizations\Enums\AgreementStatus;
 use App\Domain\Organizations\Enums\OrganizationType;
 use App\Domain\Organizations\Models\Organization;
 use App\Domain\Referentials\Models\RegionalDirectorate;
+use App\Support\Database\Extensions;
 use App\Support\Phones\PhoneNormalizer;
 use Carbon\CarbonImmutable;
 
@@ -137,10 +138,10 @@ class CgaRowImporter implements RowImporter
      */
     private function nameTaken(string $name): bool
     {
-        return Organization::query()
-            ->where('type', OrganizationType::Cga)
-            ->whereRaw('lower(unaccent(name)) = lower(unaccent(?))', [$name])
-            ->exists();
+        $sameName = 'lower('.Extensions::unaccent('name').') = lower('.Extensions::unaccent('?').')';
+
+        // @phpstan-ignore cga.rawSqlWithVariable (expression construite par Extensions ; le nom est une valeur liée)
+        return Organization::query()->where('type', OrganizationType::Cga)->whereRaw($sameName, [$name])->exists();
     }
 
     /**

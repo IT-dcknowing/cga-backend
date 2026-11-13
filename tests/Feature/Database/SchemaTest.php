@@ -5,6 +5,7 @@ use App\Domain\Organizations\Models\Organization;
 use App\Domain\Users\Enums\Role;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
+use App\Support\Database\Extensions;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -35,10 +36,20 @@ it('crée les tables du socle', function (string $table) {
     'audit_logs', 'settings', 'sequences', 'platform_access_logs', 'cache', 'jobs', 'failed_jobs',
 ]);
 
-it('active les extensions pg_trgm, unaccent et citext', function () {
-    $extensions = collect(DB::select('select extname from pg_extension'))->pluck('extname');
+it('n\'exige aucune extension : citext absente, unaccent et pg_trgm installées seulement si le serveur les propose', function () {
+    $installed = collect(DB::select('select extname from pg_extension'))->pluck('extname');
+    $available = collect(DB::select('select name from pg_available_extensions'))->pluck('name');
 
-    expect($extensions)->toContain('pg_trgm', 'unaccent', 'citext');
+    expect($installed)->not->toContain('citext');
+    foreach (array_keys(Extensions::OPTIONAL) as $name) {
+        expect($installed->contains($name))->toBe($available->contains($name));
+    }
+});
+
+it('ignore les accents dans la recherche, avec ou sans l\'extension unaccent', function () {
+    $sql = 'SELECT '.Extensions::unaccent('?');
+
+    expect(DB::scalar($sql, ['Élève Œuvre Côte Ivoire Ça']))->toBe('Eleve OEuvre Cote Ivoire Ca');
 });
 
 it('identifie les tables métier par un ULID, jamais par un numéro séquentiel', function (string $table) {

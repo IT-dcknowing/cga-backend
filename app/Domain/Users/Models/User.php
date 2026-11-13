@@ -8,6 +8,7 @@ use App\Domain\Notifications\Models\NotificationPreference;
 use App\Domain\Users\Enums\UserStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -65,6 +66,17 @@ class User extends Authenticatable
             'disabled_at' => 'immutable_datetime',
             'inactivity_notice_sent_at' => 'immutable_datetime',
         ];
+    }
+
+    /**
+     * E-mail stocké en minuscules : la connexion compare une saisie en minuscules (Identifier) et
+     * l'unicité porte sur lower(email), sans dépendre de l'extension citext.
+     *
+     * @return Attribute<string|null, string|null>
+     */
+    protected function email(): Attribute
+    {
+        return Attribute::make(set: static fn (?string $value): ?string => $value === null ? null : mb_strtolower(trim($value)));
     }
 
     /**

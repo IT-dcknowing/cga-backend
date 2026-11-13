@@ -23,6 +23,6 @@ final readonly class AgentIdentity
     {
         $email = $validated['email'] ?? null;
 
-        return new self((string) $validated['first_name'], (string) $validated['last_name'], (string) $validated['phone'], is_string($email) ? $email : null);
+        return new self((string) $validated['first_name'], (string) $validated['last_name'], (string) $validated['phone'], is_string($email) ? mb_strtolower(trim($email)) : null);
     }
 }
