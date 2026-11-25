@@ -50,6 +50,8 @@ class NetworkDueResource extends JsonResource
             ? $due->payments->contains(static fn (NetworkDuePayment $payment): bool => $payment->status === PaymentStatus::PendingConfirmation)
             : null;
 
+        $status = \App\Domain\Dues\Support\DuesRules::status($due->amount_due, $due->amount_paid, \Carbon\CarbonImmutable::parse($due->deadline), \Carbon\CarbonImmutable::today());
+
         $data = [
             'id' => $due->id,
             'cga' => $due->relationLoaded('organization') ? ['id' => $due->organization->id, 'name' => $due->organization->name, 'sigle' => $due->organization->sigle] : null,
@@ -60,8 +62,8 @@ class NetworkDueResource extends JsonResource
             'amount_paid' => $due->amount_paid,
             'balance' => $due->balance(),
             'deadline' => $due->deadline->toDateString(),
-            'status' => $due->status->value,
-            'status_label' => $due->status->label(),
+            'status' => $status->value,
+            'status_label' => $status->label(),
             'pending_confirmation' => $pending,
             'last_reminder_at' => $due->last_reminder_at?->toIso8601ZuluString(),
             'reminder_count' => $due->reminder_count,

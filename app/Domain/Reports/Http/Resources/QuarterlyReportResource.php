@@ -45,6 +45,11 @@ class QuarterlyReportResource extends JsonResource
         $report = $this->resource;
         $completeness = $report->completeness;
         $editable = $report->isEditable();
+        $notTransmitted = $report->status === \App\Domain\Reports\Enums\ReportStatus::Draft || $report->status === \App\Domain\Reports\Enums\ReportStatus::Generated;
+        $today = \Carbon\CarbonImmutable::today();
+        $isLate = $report->is_late || ($notTransmitted && $today->greaterThan($report->deadline));
+        $isLegallyLate = $report->is_legally_late || ($notTransmitted && $today->greaterThan($report->legal_deadline));
+
         $data = [
             'id' => $report->id,
             'year' => $report->year,
@@ -55,8 +60,8 @@ class QuarterlyReportResource extends JsonResource
             'status_label' => $report->status->label(),
             'deadline' => $report->deadline->toDateString(),
             'legal_deadline' => $report->legal_deadline->toDateString(),
-            'is_late' => $report->is_late,
-            'is_legally_late' => $report->is_legally_late,
+            'is_late' => $isLate,
+            'is_legally_late' => $isLegallyLate,
             'current_version' => $report->current_version,
             'completeness' => $completeness,
             'completeness_overall' => ReportCompleteness::overall($completeness),

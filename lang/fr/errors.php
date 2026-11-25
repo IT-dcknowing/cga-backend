@@ -156,6 +156,8 @@ return [
     'training_capacity_below_registered' => 'Le nombre de places ne peut pas être inférieur au nombre d\'inscrits (:registered).',
     'training_not_draft' => 'Seule une formation en brouillon se publie.',
     'training_already_started' => 'Cette formation a déjà commencé.',
+    'training_location_required' => 'Renseignez le lieu de la formation avant de la publier.',
+    'training_online_url_required' => 'Renseignez le lien de la session en ligne avant de la publier.',
     'training_not_cancellable' => 'Une session clôturée ou une formation déjà annulée ne s\'annule plus.',
     'training_registration_closed' => 'Les inscriptions à cette formation sont closes.',
     'training_not_targeted' => 'Cette formation ne s\'adresse pas à ces personnes.',

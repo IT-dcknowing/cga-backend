@@ -2,6 +2,7 @@
 
 namespace App\Domain\Trainings\Actions;
 
+use App\Domain\Trainings\Enums\TrainingFormat;
 use App\Domain\Trainings\Enums\TrainingStatus;
 use App\Domain\Trainings\Models\Training;
 use App\Domain\Trainings\Support\TrainingNotifier;
@@ -33,6 +34,12 @@ class PublishTraining
             $now = CarbonImmutable::now();
             if ($training->starts_at->lessThanOrEqualTo($now)) {
                 throw new BusinessRuleException('training_already_started');
+            }
+            if ($training->format === TrainingFormat::Online && blank($training->online_url)) {
+                throw new BusinessRuleException('training_online_url_required');
+            }
+            if ($training->format !== TrainingFormat::Online && blank($training->location)) {
+                throw new BusinessRuleException('training_location_required');
             }
 
             $training->status = TrainingStatus::Published;
