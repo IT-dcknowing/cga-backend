@@ -33,6 +33,10 @@ class InviteCgaManager
      */
     public function execute(Organization $cga, AgentIdentity $identity, InvitationChannel $channel, User $inviter): InvitedAgent
     {
+        if ($identity->email === null && $channel !== InvitationChannel::Sms && $cga->email !== null) {
+            $identity = new AgentIdentity($identity->firstName, $identity->lastName, $identity->phone, $cga->email);
+        }
+
         $managers = Membership::query()
             ->with('user')
             ->where('organization_id', $cga->id)
