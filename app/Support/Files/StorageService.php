@@ -8,16 +8,11 @@ use App\Support\Database\Constraints;
 use finfo;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Routing\UrlGenerator;
-<<<<<<< HEAD
 use Illuminate\Database\QueryException;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-=======
-use Illuminate\Filesystem\FilesystemAdapter;
-use Illuminate\Http\UploadedFile;
->>>>>>> cd06776774a9a4fdc9bf415c1ccb8b8ff0026d90
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
