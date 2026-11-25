@@ -30,12 +30,9 @@ class StorageService
 
     private const NETWORK_FOLDER = 'network';
 
-<<<<<<< HEAD
     /** Code SQLSTATE d'une clé étrangère encore utilisée (PostgreSQL). */
     private const FOREIGN_KEY_VIOLATION = '23503';
 
-=======
->>>>>>> cd06776774a9a4fdc9bf415c1ccb8b8ff0026d90
     public function __construct(
         private readonly Repository $config,
         private readonly SettingsService $settings,
@@ -116,9 +113,6 @@ class StorageService
         $file->delete();
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD:app/Support/Files/StorageService.php
-=======
     /**
      * Supprime les fichiers que plus rien ne référence (purges du PRD §7, RG-ORG-07). La ligne part d'abord, dans
      * un point de sauvegarde : si une autre donnée la référence encore (clé étrangère), le fichier est gardé et
@@ -160,9 +154,6 @@ class StorageService
         return $deleted;
     }
 
->>>>>>> 7d183d06f03b9ec1a8df4b3b3bd6b9cce26781b9:backend/app/Support/Files/StorageService.php
-=======
->>>>>>> cd06776774a9a4fdc9bf415c1ccb8b8ff0026d90
     private function disk(string $name): FilesystemAdapter
     {
         /** @var FilesystemAdapter */
