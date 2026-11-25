@@ -59,6 +59,11 @@ class InviteAgent
                 throw new BusinessRuleException('agent_already_member');
             } elseif ($member !== null && $user->memberships()->where('member_id', $member->id)->exists()) {
                 throw new BusinessRuleException('member_access_exists');
+            } elseif ($user->email === null && $identity->email !== null) {
+                if (! User::query()->where('email', $identity->email)->where('id', '!=', $user->id)->exists()) {
+                    $user->email = $identity->email;
+                    $user->save();
+                }
             }
 
             if ($channel !== InvitationChannel::Sms && $user->email === null) {

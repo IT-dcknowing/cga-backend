@@ -21,7 +21,10 @@ use InvalidArgumentException;
  */
 final class ProcessUserInactivity
 {
-    public function __construct(private readonly SettingsService $settings) {}
+    public function __construct(
+        private readonly SettingsService $settings,
+        private readonly AnonymizeUser $anonymizeUser,
+    ) {}
 
     /**
      * @return array{disabled: int, notified: int, anonymized: int}

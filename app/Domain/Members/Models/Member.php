@@ -94,6 +94,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property FeesPeriodicity $fees_periodicity
  * @property PiecesStatus $pieces_status
  * @property CarbonInterface|null $rsi_since
+ * @property CarbonInterface|null $anonymized_at
  * @property string|null $created_by
  * @property string|null $updated_by
  * @property CarbonInterface|null $created_at
@@ -163,6 +164,7 @@ class Member extends Model
             'registration_date' => 'immutable_date',
             'rsi_since' => 'immutable_date',
             'validated_at' => 'immutable_datetime',
+            'anonymized_at' => 'immutable_datetime',
         ];
     }
 
