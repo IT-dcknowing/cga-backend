@@ -28,7 +28,10 @@ class PurgeRetentionCommand extends Command
         $this->table(
             ['Catégorie', 'Éléments traités'],
             [
+<<<<<<< HEAD
 <<<<<<< HEAD:app/Console/Commands/PurgeRetentionCommand.php
+=======
+>>>>>>> cd06776774a9a4fdc9bf415c1ccb8b8ff0026d90
                 ['Adhérents anonymisés (> 10 ans)', $stats['anonymized_members']],
                 ['Documents purgés (> 10 ans)', $stats['purged_documents']],
                 ['Préoccupations supprimées (> 5 ans)', $stats['purged_concerns']],
@@ -36,6 +39,7 @@ class PurgeRetentionCommand extends Command
                 ['Logs d’activité purgés', $stats['purged_activity_logs']],
                 ['Logs d’audit purgés', $stats['purged_audit_logs']],
                 ['Dossiers CGA résiliés purgés (> 6 mois)', $stats['purged_terminated_cga_records']],
+<<<<<<< HEAD
 =======
                 ['Adhérents radiés anonymisés', $stats['anonymized_members']],
                 ['Contrats, attestations, reçus et factures supprimés', $stats['purged_documents']],
@@ -45,6 +49,8 @@ class PurgeRetentionCommand extends Command
                 ['Journaux d’audit purgés', $stats['purged_audit_logs']],
                 ['CGA résiliés purgés (données sans durée légale)', $stats['purged_terminated_organizations']],
 >>>>>>> 7d183d06f03b9ec1a8df4b3b3bd6b9cce26781b9:backend/app/Console/Commands/PurgeRetentionCommand.php
+=======
+>>>>>>> cd06776774a9a4fdc9bf415c1ccb8b8ff0026d90
             ]
         );
 

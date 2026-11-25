@@ -21,14 +21,10 @@ use InvalidArgumentException;
  */
 final class ProcessUserInactivity
 {
-<<<<<<< HEAD:app/Domain/Users/Actions/ProcessUserInactivity.php
-    public function __construct(private readonly SettingsService $settings) {}
-=======
     public function __construct(
         private readonly SettingsService $settings,
         private readonly AnonymizeUser $anonymizeUser,
     ) {}
->>>>>>> 7d183d06f03b9ec1a8df4b3b3bd6b9cce26781b9:backend/app/Domain/Users/Actions/ProcessUserInactivity.php
 
     /**
      * @return array{disabled: int, notified: int, anonymized: int}
@@ -120,7 +116,6 @@ final class ProcessUserInactivity
                             return;
                         }
 
-<<<<<<< HEAD:app/Domain/Users/Actions/ProcessUserInactivity.php
                         DB::table('sessions')->where('user_id', $user->id)->delete();
                         DB::table('notifications')->where('notifiable_type', $user->getMorphClass())->where('notifiable_id', $user->id)->delete();
                         DB::table('message_logs')->where('user_id', $user->id)->update(['recipient' => 'Ancien utilisateur']);
@@ -139,9 +134,6 @@ final class ProcessUserInactivity
                         $user->inactivity_notice_sent_at = null;
                         $user->status = UserStatus::Deleted;
                         $user->save();
-=======
-                        $this->anonymizeUser->execute($user, 'inactivity');
->>>>>>> 7d183d06f03b9ec1a8df4b3b3bd6b9cce26781b9:backend/app/Domain/Users/Actions/ProcessUserInactivity.php
                         $count++;
                     });
                 }
