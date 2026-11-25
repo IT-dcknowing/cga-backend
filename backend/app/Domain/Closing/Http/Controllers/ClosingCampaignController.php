@@ -19,6 +19,7 @@ use App\Domain\Closing\Models\ClosingCampaign;
 use App\Domain\Closing\Models\ClosingCampaignItem;
 use App\Domain\Closing\Support\ClosingProgress;
 use App\Domain\Users\Enums\MembershipStatus;
+use App\Domain\Users\Enums\UserStatus;
 use App\Domain\Users\Models\Membership;
 use App\Domain\Users\Models\User;
 use App\Support\Config\SettingsService;
@@ -62,6 +63,7 @@ class ClosingCampaignController extends BaseApiController
                 ->where('organization_id', $context->organizationId())
                 ->whereNull('member_id')
                 ->where('status', MembershipStatus::Active)
+                ->whereHas('user', static fn (Builder $user) => $user->where('status', UserStatus::Active))
                 ->get()
                 ->map(static fn (Membership $membership): User => $membership->user)
                 ->unique('id')

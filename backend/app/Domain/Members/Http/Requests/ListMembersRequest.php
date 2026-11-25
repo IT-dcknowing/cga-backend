@@ -78,8 +78,10 @@ class ListMembersRequest extends ListRequest
             AllowedFilter::callback('search', static function (Builder $members, mixed $term): void {
                 // Une virgule de la saisie ne fait pas une liste de valeurs (« Kouadio, Fils »).
                 $text = mb_strtolower(trim(is_array($term) ? implode(',', $term) : (string) $term));
+                $pattern = '%'.addcslashes($text, '\\%_').'%';
                 $members->where(static fn (Builder $search) => $search
-                    ->where('search_text', 'like', '%'.addcslashes($text, '\\%_').'%')
+                    // @phpstan-ignore cga.rawSqlWithVariable (la colonne search_text est écrite dans le code ; la saisie est liée en paramètre)
+                    ->whereRaw('unaccent(search_text) ILIKE unaccent(?)', [$pattern])
                     ->orWhere('ncc', Ncc::normalize($text)));
             }),
             AllowedFilter::callback('portfolio', static fn (Builder $members, mixed $portfolio) => $portfolio === self::ALL_PORTFOLIOS ? $members : $members->where('portfolio', $portfolio))
