@@ -1,0 +1,1 @@
+Ce fichier texte n'est pas une image : le serveur le refuse (422).

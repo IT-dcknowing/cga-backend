@@ -1,0 +1,44 @@
+{
+  "version": "2026.1",
+  "obligations": [
+    {
+      "code": "ESSAI-TVA",
+      "label": "Déclaration d'essai mensuelle (RME)",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": { "type": "day_of_next_month", "day": 15 },
+      "applicability": { "regimes": ["RME"], "min_employees": null, "sectors": [] },
+      "tax_nature": "tva"
+    },
+    {
+      "code": "ESSAI-SOC",
+      "label": "Déclaration sociale d'essai (avec salariés)",
+      "category": "cnps",
+      "authority": "CNPS",
+      "platform": "e-CNPS",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": { "type": "day_of_next_month", "day": 15 },
+      "applicability": { "regimes": [], "min_employees": 1, "sectors": [] },
+      "tax_nature": "cnps"
+    },
+    {
+      "code": "ESSAI-TEE",
+      "label": "Paiement annuel d'essai (TEE)",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": null,
+      "kind": "payment",
+      "periodicity": "yearly",
+      "due_rule": { "type": "fixed_date", "month": 1, "day": 30 },
+      "applicability": { "regimes": ["TEE"], "min_employees": null, "sectors": [] },
+      "tax_nature": "tee",
+      "has_abatement": true,
+      "creates_payment_on_done": false,
+      "legal_basis": "Texte d'essai"
+    }
+  ]
+}
