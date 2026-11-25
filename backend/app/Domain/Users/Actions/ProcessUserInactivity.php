@@ -21,7 +21,10 @@ use InvalidArgumentException;
  */
 final class ProcessUserInactivity
 {
-    public function __construct(private readonly SettingsService $settings) {}
+    public function __construct(
+        private readonly SettingsService $settings,
+        private readonly AnonymizeUser $anonymizeUser,
+    ) {}
 
     /**
      * @return array{disabled: int, notified: int, anonymized: int}
@@ -113,24 +116,7 @@ final class ProcessUserInactivity
                             return;
                         }
 
-                        DB::table('sessions')->where('user_id', $user->id)->delete();
-                        DB::table('notifications')->where('notifiable_type', $user->getMorphClass())->where('notifiable_id', $user->id)->delete();
-                        DB::table('message_logs')->where('user_id', $user->id)->update(['recipient' => 'Ancien utilisateur']);
-                        DB::table('notification_preferences')->where('user_id', $user->id)->delete();
-                        DB::table('otp_codes')->where('user_id', $user->id)->delete();
-
-                        $user->first_name = 'Ancien';
-                        $user->last_name = 'utilisateur';
-                        $user->phone = 'D'.substr($user->id, 0, 19);
-                        $user->email = null;
-                        $user->password = null;
-                        $user->phone_verified_at = null;
-                        $user->email_verified_at = null;
-                        $user->last_login_at = null;
-                        $user->last_space_membership_id = null;
-                        $user->inactivity_notice_sent_at = null;
-                        $user->status = UserStatus::Deleted;
-                        $user->save();
+                        $this->anonymizeUser->execute($user, 'inactivity');
                         $count++;
                     });
                 }

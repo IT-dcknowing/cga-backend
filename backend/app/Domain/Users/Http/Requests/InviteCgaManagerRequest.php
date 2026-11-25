@@ -34,6 +34,11 @@ class InviteCgaManagerRequest extends OrganizationRequest
 
     public function channel(): InvitationChannel
     {
-        return InvitationChannel::tryFrom((string) $this->validated('channel')) ?? InvitationChannel::Sms;
+        $explicit = $this->validated('channel');
+        if ($explicit !== null && $explicit !== '') {
+            return InvitationChannel::tryFrom((string) $explicit) ?? InvitationChannel::Sms;
+        }
+
+        return $this->filled('email') ? InvitationChannel::SmsEmail : InvitationChannel::Sms;
     }
 }

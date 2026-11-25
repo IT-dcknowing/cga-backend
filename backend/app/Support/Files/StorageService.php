@@ -8,8 +8,11 @@ use App\Support\Database\Constraints;
 use finfo;
 use Illuminate\Contracts\Config\Repository;
 use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Database\QueryException;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -26,6 +29,9 @@ class StorageService
     public const DOWNLOAD_ROUTE = 'files.download';
 
     private const NETWORK_FOLDER = 'network';
+
+    /** Code SQLSTATE d'une clé étrangère encore utilisée (PostgreSQL). */
+    private const FOREIGN_KEY_VIOLATION = '23503';
 
     public function __construct(
         private readonly Repository $config,
@@ -105,6 +111,47 @@ class StorageService
     {
         $this->disk($file->disk)->delete($file->path);
         $file->delete();
+    }
+
+    /**
+     * Supprime les fichiers que plus rien ne référence (purges du PRD §7, RG-ORG-07). La ligne part d'abord, dans
+     * un point de sauvegarde : si une autre donnée la référence encore (clé étrangère), le fichier est gardé et
+     * signalé au journal. Le contenu n'est effacé du disque qu'après la validation de la transaction englobante,
+     * pour ne jamais perdre un fichier dont la ligne serait restaurée par une annulation.
+     *
+     * @param  iterable<string|null>  $fileIds
+     * @return int nombre de fichiers supprimés
+     */
+    public function deleteUnreferenced(iterable $fileIds): int
+    {
+        $ids = [];
+        foreach ($fileIds as $id) {
+            if (is_string($id) && $id !== '') {
+                $ids[$id] = true;
+            }
+        }
+        if ($ids === []) {
+            return 0;
+        }
+
+        $deleted = 0;
+        foreach (File::query()->whereIn('id', array_keys($ids))->get() as $file) {
+            try {
+                DB::transaction(static fn () => $file->delete());
+            } catch (QueryException $exception) {
+                if ($exception->getCode() !== self::FOREIGN_KEY_VIOLATION) {
+                    throw $exception;
+                }
+                Log::warning('Fichier gardé à la purge : encore référencé.', ['file_id' => $file->id]);
+
+                continue;
+            }
+
+            DB::afterCommit(fn () => $this->disk($file->disk)->delete($file->path));
+            $deleted++;
+        }
+
+        return $deleted;
     }
 
     private function disk(string $name): FilesystemAdapter
