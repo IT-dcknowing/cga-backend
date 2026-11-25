@@ -1,0 +1,228 @@
+{
+  "version": "2026.1",
+  "obligations": [
+    {
+      "code": "PATENTE-ANNUELLE",
+      "label": "Contribution des patentes et licences",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "payment",
+      "periodicity": "yearly",
+      "due_rule": {
+        "type": "fixed_date",
+        "month": 3,
+        "day": 31
+      },
+      "applicability": {
+        "regimes": ["RME", "RSI", "RNI"],
+        "min_employees": null,
+        "sectors": []
+      },
+      "tax_nature": "patente",
+      "has_abatement": true,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code Général des Impôts art. 264"
+    },
+    {
+      "code": "TVA-MENSUELLE",
+      "label": "Déclaration et paiement de la TVA",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": {
+        "type": "day_of_next_month",
+        "day": 15
+      },
+      "applicability": {
+        "regimes": ["RME", "RSI", "RNI"],
+        "min_employees": null,
+        "sectors": []
+      },
+      "tax_nature": "tva",
+      "has_abatement": false,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code Général des Impôts art. 355"
+    },
+    {
+      "code": "TEE-ANNUEL",
+      "label": "Taxe d'Entreprenant (TEE)",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": null,
+      "kind": "payment",
+      "periodicity": "yearly",
+      "due_rule": {
+        "type": "fixed_date",
+        "month": 3,
+        "day": 31
+      },
+      "applicability": {
+        "regimes": ["TEE"],
+        "min_employees": null,
+        "sectors": []
+      },
+      "tax_nature": "tee",
+      "has_abatement": true,
+      "creates_payment_on_done": false,
+      "legal_basis": "Code Général des Impôts - Statut de l'Entreprenant"
+    },
+    {
+      "code": "RME-MENSUEL",
+      "label": "Impôt mensuel du Régime des Microentreprises (RME)",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": {
+        "type": "day_of_next_month",
+        "day": 15
+      },
+      "applicability": {
+        "regimes": ["RME"],
+        "min_employees": null,
+        "sectors": []
+      },
+      "tax_nature": "rme",
+      "has_abatement": true,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code Général des Impôts art. 45"
+    },
+    {
+      "code": "CNPS-MENSUELLE",
+      "label": "Déclaration et cotisations sociales CNPS",
+      "category": "cnps",
+      "authority": "CNPS",
+      "platform": "e-CNPS",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": {
+        "type": "day_of_next_month",
+        "day": 15
+      },
+      "applicability": {
+        "regimes": ["TEE", "RME", "RSI", "RNI"],
+        "min_employees": 1,
+        "sectors": []
+      },
+      "tax_nature": "cnps",
+      "has_abatement": false,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code de Prévoyance Sociale"
+    },
+    {
+      "code": "CMU-MENSUELLE",
+      "label": "Cotisations Couverture Maladie Universelle (CMU)",
+      "category": "cmu",
+      "authority": "CNAM",
+      "platform": "e-CMU",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": {
+        "type": "day_of_next_month",
+        "day": 15
+      },
+      "applicability": {
+        "regimes": ["TEE", "RME", "RSI", "RNI"],
+        "min_employees": 1,
+        "sectors": []
+      },
+      "tax_nature": "cmu",
+      "has_abatement": false,
+      "creates_payment_on_done": true,
+      "legal_basis": "Loi n° 2014-131 CMU"
+    },
+    {
+      "code": "BIC-ANNUEL",
+      "label": "Déclaration annuelle et paiement BIC / SMT",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "declaration_payment",
+      "periodicity": "yearly",
+      "due_rule": {
+        "type": "fixed_date",
+        "month": 4,
+        "day": 30
+      },
+      "applicability": {
+        "regimes": ["RSI", "RNI"],
+        "min_employees": null,
+        "sectors": []
+      },
+      "tax_nature": "bic",
+      "has_abatement": true,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code Général des Impôts art. 1"
+    },
+    {
+      "code": "ITS-MENSUEL",
+      "label": "Impôt sur Traitements et Salaires (ITS) & FDFP",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": {
+        "type": "day_of_next_month",
+        "day": 15
+      },
+      "applicability": {
+        "regimes": ["TEE", "RME", "RSI", "RNI"],
+        "min_employees": 1,
+        "sectors": []
+      },
+      "tax_nature": "its",
+      "has_abatement": false,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code Général des Impôts art. 115"
+    },
+    {
+      "code": "TSE-MENSUELLE",
+      "label": "Taxe Spéciale d'Équipement (TSE)",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "payment",
+      "periodicity": "monthly",
+      "due_rule": {
+        "type": "day_of_next_month",
+        "day": 15
+      },
+      "applicability": {
+        "regimes": ["RME", "RSI", "RNI"],
+        "min_employees": null,
+        "sectors": []
+      },
+      "tax_nature": "tse",
+      "has_abatement": false,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code Général des Impôts"
+    },
+    {
+      "code": "AIRSI-MENSUEL",
+      "label": "Acompte d'Impôt sur le Revenu du Secteur Informel (AIRSI)",
+      "category": "tax",
+      "authority": "DGI",
+      "platform": "e-impôts",
+      "kind": "declaration_payment",
+      "periodicity": "monthly",
+      "due_rule": {
+        "type": "day_of_next_month",
+        "day": 15
+      },
+      "applicability": {
+        "regimes": ["RME", "RSI"],
+        "min_employees": null,
+        "sectors": []
+      },
+      "tax_nature": "airsi",
+      "has_abatement": false,
+      "creates_payment_on_done": true,
+      "legal_basis": "Code Général des Impôts"
+    }
+  ]
+}
