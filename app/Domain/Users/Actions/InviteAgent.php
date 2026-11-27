@@ -59,13 +59,10 @@ class InviteAgent
                 throw new BusinessRuleException('agent_already_member');
             } elseif ($member !== null && $user->memberships()->where('member_id', $member->id)->exists()) {
                 throw new BusinessRuleException('member_access_exists');
-            } elseif ($user->email === null && $identity->email !== null) {
-                if (! User::query()->where('email', $identity->email)->where('id', '!=', $user->id)->exists()) {
-                    $user->email = $identity->email;
-                    $user->save();
-                }
             }
 
+            // Un compte existant est global : il peut appartenir à un autre CGA. Son adresse n'est jamais
+            // modifiée par une invitation (cloisonnement) ; sans adresse, l'envoi par e-mail est refusé.
             if ($channel !== InvitationChannel::Sms && $user->email === null) {
                 throw ValidationException::withMessages(['email' => __('errors.email_required')]);
             }

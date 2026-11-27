@@ -28,14 +28,13 @@ class PurgeRetentionCommand extends Command
         $this->table(
             ['Catégorie', 'Éléments traités'],
             [
-
-                ['Adhérents anonymisés (> 10 ans)', $stats['anonymized_members']],
-                ['Documents purgés (> 10 ans)', $stats['purged_documents']],
-                ['Préoccupations supprimées (> 5 ans)', $stats['purged_concerns']],
-                ['Messages supprimés (> 2 ans)', $stats['purged_messages']],
-                ['Logs d’activité purgés', $stats['purged_activity_logs']],
-                ['Logs d’audit purgés', $stats['purged_audit_logs']],
-                ['Dossiers CGA résiliés purgés (> 6 mois)', $stats['purged_terminated_cga_records']],
+                ['Adhérents radiés anonymisés', $stats['anonymized_members']],
+                ['Contrats, attestations, reçus et factures supprimés', $stats['purged_documents']],
+                ['Préoccupations supprimées', $stats['purged_concerns']],
+                ['Messages supprimés', $stats['purged_messages']],
+                ['Journaux d’activité purgés', $stats['purged_activity_logs']],
+                ['Journaux d’audit purgés', $stats['purged_audit_logs']],
+                ['CGA résiliés purgés (données sans durée légale)', $stats['purged_terminated_organizations']],
             ]
         );
 
@@ -44,4 +43,3 @@ class PurgeRetentionCommand extends Command
         return self::SUCCESS;
     }
 }
-
